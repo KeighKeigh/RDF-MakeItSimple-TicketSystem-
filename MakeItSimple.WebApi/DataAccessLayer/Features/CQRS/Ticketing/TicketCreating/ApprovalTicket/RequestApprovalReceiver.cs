@@ -27,10 +27,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
             public async Task<Result> Handle(RequestApprovalReceiverCommand command, CancellationToken cancellationToken)
             {
-                var dateToday = DateTime.Today;
-
-                var userDetails = await unitOfWork.User
-                    .UserExist(command.UserId);
+                
 
                 var receiverPermissionList = await unitOfWork.UserRole
                     .UserRoleByPermission(TicketingConString.Receiver);
