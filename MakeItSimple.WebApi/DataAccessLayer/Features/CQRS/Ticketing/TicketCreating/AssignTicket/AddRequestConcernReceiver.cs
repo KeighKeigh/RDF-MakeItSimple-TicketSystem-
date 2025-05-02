@@ -13,7 +13,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
     public partial class AddRequestConcernReceiver
     {
 
-        public class Handler : IRequestHandler<AddRequestConcernReceiverCommand, Result>
+        public class Handler : IRequestHandler<AddRequestConcernReceiverCommand, Result<int?>>
         {
 
             private readonly IUnitOfWork unitOfWork;
@@ -23,7 +23,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 this.unitOfWork = unitOfWork;
             }
 
-            public async Task<Result> Handle(AddRequestConcernReceiverCommand command, CancellationToken cancellationToken)
+            public async Task<Result<int?>> Handle(AddRequestConcernReceiverCommand command, CancellationToken cancellationToken)
             {
                 var dateToday = DateTime.Today;
 
@@ -49,13 +49,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 switch (await unitOfWork.User.UserExist(command.UserId))
                 {
                     case null:
-                        return Result.Failure(TicketRequestError.UserNotExist());
+                        return Result.Failure<int?>(TicketRequestError.UserNotExist());
                 }
 
                 switch (await unitOfWork.Channel.ChannelExist(command.ChannelId))
                 {
                     case null:
-                        return Result.Failure(TicketRequestError.ChannelNotExist());
+                        return Result.Failure<int?>(TicketRequestError.ChannelNotExist());
                 }
 
                 foreach (var category in command.RequestorTicketCategories)
@@ -64,7 +64,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                       .CategoryExist(category.CategoryId);
 
                     if (ticketCategoryExist is null)
-                        return Result.Failure(TicketRequestError.CategoryNotExist());
+                        return Result.Failure<int?>(TicketRequestError.CategoryNotExist());
                 }
 
                 foreach (var subCategory in command.RequestorTicketSubCategories)
@@ -73,20 +73,20 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         .SubCategoryExist(subCategory.SubCategoryId);
 
                     if (ticketSubCategoryExist is null)
-                        return Result.Failure(TicketRequestError.SubCategoryNotExist());
+                        return Result.Failure<int?>(TicketRequestError.SubCategoryNotExist());
 
                 }
 
                 if (dateToday > command.Target_Date)
-                    return Result.Failure(TicketRequestError.DateTimeInvalid());
+                    return Result.Failure<int?>(TicketRequestError.DateTimeInvalid());
 
                 var ticketConcernExist = await unitOfWork.RequestTicket
-                          .TicketConcernExist(command.TicketConcernId);
+                           .TicketConcernExist(command.TicketConcernId);
 
                 if (ticketConcernExist is not null)
                 {
                     if (ticketConcernExist.IsActive is false)
-                        return Result.Failure(TicketRequestError.TicketAlreadyCancel());
+                        return Result.Failure<int?>(TicketRequestError.TicketAlreadyCancel());
 
                     var assignTicket = new TicketConcern
                     {
@@ -318,7 +318,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                         if (attachments.Attachment.Length > 10 * 1024 * 1024)
                         {
-                            return Result.Failure(TicketRequestError.InvalidAttachmentSize());
+                            return Result.Failure<int?>(TicketRequestError.InvalidAttachmentSize());
                         }
 
                         var allowedFileTypes = new[] { ".jpeg", ".jpg", ".png", ".docx", ".pdf", ".xlsx" };
@@ -326,7 +326,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                         if (extension == null || !allowedFileTypes.Contains(extension))
                         {
-                            return Result.Failure(TicketRequestError.InvalidAttachmentType());
+                            return Result.Failure<int?>(TicketRequestError.InvalidAttachmentType());
                         }
 
                         var fileName = $"{Guid.NewGuid()}{extension}";
@@ -372,10 +372,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 }
 
                 await unitOfWork.SaveChangesAsync(cancellationToken);
-                return Result.Success();
+                return Result.Success(ticketConcernExist?.Id);
 
             }
-
+            
         }
     }
 }

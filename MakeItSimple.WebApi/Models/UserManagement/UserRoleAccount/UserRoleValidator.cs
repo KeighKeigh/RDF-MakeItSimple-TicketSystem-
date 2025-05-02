@@ -12,7 +12,7 @@ namespace MakeItSimple.WebApi.Models.UserManagement.UserRoleAccount
             public UserRoleValidator()
             {
 
-                RuleFor(x => x.Permissions).NotNull().NotEmpty().WithMessage("Should atleast one permissions!");
+                RuleFor(x => x.Permissions).NotNull().NotEmpty().WithMessage("Should atleast have one permissions!");
                 RuleFor(x => x.User_Role_Name).NotEmpty().WithMessage("User Role is required!")
                .MinimumLength(3).WithMessage("User Role must be at least 3 character long!");
 
@@ -33,7 +33,7 @@ namespace MakeItSimple.WebApi.Models.UserManagement.UserRoleAccount
         {
             public TagAndUntagUserRoleValidator()
             {
-                RuleFor(x => x.Permissions).NotNull().NotEmpty().WithMessage("Should atleast one permissions!");
+                RuleFor(x => x.Permissions).NotNull().NotEmpty().WithMessage("Should atleast have one permissions!");
             }
         }
 

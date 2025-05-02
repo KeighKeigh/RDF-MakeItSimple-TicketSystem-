@@ -175,6 +175,7 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
                     await transaction.RollbackAsync();
                     return BadRequest(result);
                 }
+
                 await transaction.CommitAsync();
                 return Ok(result);
 

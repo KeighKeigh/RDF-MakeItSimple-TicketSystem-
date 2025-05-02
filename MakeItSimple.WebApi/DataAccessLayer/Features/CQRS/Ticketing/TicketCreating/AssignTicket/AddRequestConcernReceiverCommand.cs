@@ -5,7 +5,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 {
     public partial class AddRequestConcernReceiver
     {
-        public class AddRequestConcernReceiverCommand : IRequest<Result>
+        public class AddRequestConcernReceiverCommand : IRequest<Result<int?>>
         {
             public int? TicketConcernId { get; set; }
             public string Concern { get; set; }
