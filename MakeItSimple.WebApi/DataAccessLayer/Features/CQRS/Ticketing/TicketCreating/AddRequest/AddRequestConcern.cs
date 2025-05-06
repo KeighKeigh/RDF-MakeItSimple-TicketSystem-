@@ -91,6 +91,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         DateNeeded = command.DateNeeded,
                         BackJobId = command.BackJobId,
                         ModifiedBy = command.Modified_By,
+                        Severity = command.Severity,
                         
                     };
                     
@@ -120,6 +121,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         ContactNumber = command.Contact_Number,
                         RequestType = command.Request_Type,
                         BackJobId = command.BackJobId,
+                        Severity = command.Severity,
 
                     };
 

@@ -235,7 +235,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
                     };
 
                     await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory,cancellationToken);
-
                 }
 
             }
@@ -247,7 +246,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
 
                 if (ticketSubCategoryExist is not null)
                 {
-                    ticketSubCategoryList.Add(subCategory.TicketSubCategoryId.Value);
+                    ticketSubCategoryList.Add(subCategory.TicketSubCategoryId.Value); 
                 }
                 else
                 {
