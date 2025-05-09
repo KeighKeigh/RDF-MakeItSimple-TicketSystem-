@@ -153,7 +153,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                 
                 public Guid? Transfer_To { get; set; }
 
-                public string? Transfer_To_Name { get; set; }
+                public string Transfer_To_Name { get; set; }
 
                 public string Transfer_Remarks { get; set; }
 

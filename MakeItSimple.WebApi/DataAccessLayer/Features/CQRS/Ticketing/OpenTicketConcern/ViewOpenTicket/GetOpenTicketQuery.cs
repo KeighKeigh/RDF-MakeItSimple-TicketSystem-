@@ -15,6 +15,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
             public string Role { get; set; }
             public DateTime? Date_From { get; set; }
             public DateTime? Date_To { get; set; }
+            public bool? Ascending { get; set; }
         }
     }
 }

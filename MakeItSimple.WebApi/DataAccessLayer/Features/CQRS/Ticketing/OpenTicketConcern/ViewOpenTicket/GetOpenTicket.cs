@@ -73,6 +73,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         ticketConcernQuery = ticketConcernQuery
                             .Where(x => x.IsActive == request.Status);
                     }
+                    if (request.Ascending is not null)
+                    {
+
+                        ticketConcernQuery = request.Ascending.Value is true
+                            ? ticketConcernQuery
+                            .OrderBy(x => x.Id)
+                            : ticketConcernQuery
+                            .OrderByDescending(x => x.Id);
+                    }
 
                     if (!string.IsNullOrEmpty(request.Concern_Status))
                     {
@@ -442,7 +451,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         Aging_Days = x.Closed_At != null ? EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.Closed_At.Value.Date)
                         : EF.Functions.DateDiffDay(x.TargetDate.Value.Date, DateTime.Now.Date)
 
-                    }).OrderBy(x => x.TicketConcernId); 
+                    }).OrderBy(x => x.TicketConcernId);
 
 
                 return await PagedList<GetOpenTicketResult>.CreateAsync(results, request.PageNumber, request.PageSize);

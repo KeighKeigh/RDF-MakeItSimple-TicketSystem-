@@ -24,6 +24,9 @@
             public DateTime? Updated_At { get; set; }
             public string Remarks { get; set; }
             public int Aging_Days { get; set; }
+            public int? Personnel_Unit { get; set; }
+            public Guid? Personnel_Id { get; set; }
+            public string Personnel { get; set; }
         }
     }
 }

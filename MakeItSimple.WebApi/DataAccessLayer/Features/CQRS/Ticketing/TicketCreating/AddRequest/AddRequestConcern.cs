@@ -12,6 +12,7 @@ using MakeItSimple.WebApi.Models.Setup.LocationSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.AddRequest.AddRequestConcern.AddRequestConcernCommand;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.AddRequest
 {
@@ -30,11 +31,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
             public async Task<Result> Handle(AddRequestConcernCommand command, CancellationToken cancellationToken)
             {
 
-                var ticketConcernId= new int();
+                var ticketConcernId = new int(); //????kkkk
                 var requestConcernId = new int();
                 var ticketCategoryList = new List<int>();
                 var ticketSubCategoryList = new List<int>();
-                
 
                 var userDetails = await unitOfWork.User
                     .UserExist(command.Added_By);
@@ -72,6 +72,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 var requestConcernIdExist = await unitOfWork.RequestTicket
                     .RequestConcernExist(command.RequestConcernId);
 
+
                 if (requestConcernIdExist is not null)
                 {
 
@@ -97,7 +98,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                     
                     await unitOfWork.RequestTicket.UpdateRequestConcern(updateRequestConcern, cancellationToken);
 
-                    ticketConcernId = ticketConcernExist.Id;
+                    ticketConcernId = ticketConcernExist.Id; //kk
                     requestConcernId = requestConcernIdExist.Id;
                 }
                 else
@@ -122,12 +123,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         RequestType = command.Request_Type,
                         BackJobId = command.BackJobId,
                         Severity = command.Severity,
+                        //TicketCategories = 
 
                     };
 
                     await unitOfWork.RequestTicket.CreateRequestConcern(addRequestConcern,cancellationToken);
                     await unitOfWork.SaveChangesAsync(cancellationToken);
                     requestConcernId = addRequestConcern.Id;
+
+                    //kk
 
                     var addTicketConcern = new TicketConcern
                     {
@@ -139,7 +143,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         IsAssigned = false,
 
                     };
-            
+
                     await unitOfWork.RequestTicket.CreateTicketConcern(addTicketConcern, cancellationToken);
                     await unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -155,6 +159,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                     };
 
                     await unitOfWork.RequestTicket.CreateTicketHistory(addTicketHistory, cancellationToken);
+
+                    //kk
 
                     var userReceiverByBusinessUnit = await unitOfWork.Receiver
                          .ReceiverExistByBusinessUnitId(userIdExist.BusinessUnitId);
@@ -175,7 +181,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                 }
 
-                foreach(var category in command.AddRequestTicketCategories)
+
+                foreach (var category in command.AddRequestTicketCategories)
                 {
                     var ticketCategoryExist = await unitOfWork.RequestTicket
                         .TicketCategoryExist(category.TicketCategoryId);
@@ -224,7 +231,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                 }
 
-                if(ticketCategoryList.Any())
+
+                if (ticketCategoryList.Any())
                     await unitOfWork.RequestTicket.RemoveTicketCategory(requestConcernId, ticketCategoryList, cancellationToken);
 
                 if (ticketSubCategoryList.Any())
@@ -276,7 +284,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         {
                             var addAttachment = new TicketAttachment
                             {
-                                TicketConcernId = ticketConcernId,
+                                TicketConcernId = ticketConcernId, //kk
                                 Attachment = filePath,
                                 FileName = attachments.Attachment.FileName,
                                 FileSize = attachments.Attachment.Length,
