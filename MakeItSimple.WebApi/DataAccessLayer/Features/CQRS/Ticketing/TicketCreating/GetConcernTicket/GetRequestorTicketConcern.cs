@@ -77,7 +77,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             .Where(x => x.IsActive == request.Status);
                     }
 
-                    if (request.Is_Approve != null)
+                    if (request.Is_Approve != null) // dapat wala pa ticket concerns
                     {
                         var ticketStatusList = await _context.TicketConcerns
                             .AsNoTracking()
