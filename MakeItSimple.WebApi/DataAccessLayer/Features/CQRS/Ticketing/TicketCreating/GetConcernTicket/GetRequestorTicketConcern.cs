@@ -247,7 +247,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         TicketRequestConcerns = g.TicketConcerns
                             .Select(tc => new TicketRequestConcern
                             {
-                                TicketConcernId = tc.Id,
+                                TicketConcernId = g.ConcernStatus == "For Approval" ? null : tc.Id,
                                 UserId = tc.UserId,
                                 Issue_Handler = tc.User.Fullname,
                                 Target_Date = tc.TargetDate,
