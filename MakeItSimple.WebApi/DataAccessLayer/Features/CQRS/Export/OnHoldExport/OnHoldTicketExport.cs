@@ -30,7 +30,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
                     .Include(q => q.TicketConcern)
                     .ThenInclude(q => q.RequestConcern)
                     .Include(q => q.AddedByUser)
-                    .Where(r => r.CreatedAt.Date >= request.Date_From.Value && r.CreatedAt <= request.Date_To.Value)
+                    .Where(r => r.CreatedAt.Date >= request.Date_From.Value.Date && r.CreatedAt.Date <= request.Date_To.Value.Date)
                     .Select(r => new OnHoldTicketExportResult
                     {
                         UserId = r.AddedBy,

@@ -41,6 +41,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
             public DateTime Target_Date { get; set; }
             public string Role { get; set; }
             public string Remarks { get; set; }
+            public string Severity { get; set; }
 
             public List<ConcernAttachment> ConcernAttachments { get; set; }
 

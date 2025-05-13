@@ -28,7 +28,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                 IQueryable<TicketConcern> ticketConcernQuery = _context.TicketConcerns
                    .AsNoTrackingWithIdentityResolution()
                    .Where(x => x.IsActive)
-                    .OrderBy(x => x.Id)
                     .AsSplitQuery();
 
                 if (ticketConcernQuery.Any())
@@ -365,8 +364,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                               ApproverName = x.User.Fullname,
                               Approver_Level = x.ApproverLevel.Value
 
-                          }).OrderByDescending(x => x.Approver_Level)
-                          .ToList(),
+                          }).ToList(),
 
                           GetAttachmentForClosingTickets = x.TicketAttachments.Select(x => new GetAttachmentForClosingTicket
                           {
@@ -451,7 +449,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         Aging_Days = x.Closed_At != null ? EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.Closed_At.Value.Date)
                         : EF.Functions.DateDiffDay(x.TargetDate.Value.Date, DateTime.Now.Date)
 
-                    }).OrderBy(x => x.TicketConcernId);
+                    });
 
 
                 return await PagedList<GetOpenTicketResult>.CreateAsync(results, request.PageNumber, request.PageSize);

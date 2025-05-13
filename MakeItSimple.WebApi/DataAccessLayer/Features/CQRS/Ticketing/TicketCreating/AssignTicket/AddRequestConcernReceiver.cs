@@ -94,6 +94,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         UserId = command.UserId,
                         TargetDate = command.Target_Date,
                         ModifiedBy = command.Modified_By,
+                        
                     };
 
                     await unitOfWork.RequestTicket.UpdateTicketConcern(assignTicket, cancellationToken);
