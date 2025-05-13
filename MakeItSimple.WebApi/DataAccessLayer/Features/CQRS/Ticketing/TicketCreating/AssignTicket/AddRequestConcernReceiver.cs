@@ -95,6 +95,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         TargetDate = command.Target_Date,
                         ModifiedBy = command.Modified_By,
                         
+                        
                     };
 
                     await unitOfWork.RequestTicket.UpdateTicketConcern(assignTicket, cancellationToken);
@@ -108,6 +109,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             ChannelId = command.ChannelId,
                             Concern = command.Concern,
                             ModifiedBy = command.Modified_By,
+                            Severity = command.Severity,
 
                         };
 
@@ -124,6 +126,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         Modules = PathConString.IssueHandlerConcerns,
                         Modules_Parameter = PathConString.OpenTicket,
                         PathId = ticketConcernExist.Id,
+                        
 
                     };
 
@@ -172,6 +175,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         BackJobId = command.BackJobId,
                         Notes = command.Notes,
                         IsDone = false,
+                        Severity = command.Severity,
 
                     };
 
@@ -249,6 +253,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         Modules = PathConString.ConcernTickets,
                         Modules_Parameter = PathConString.Ongoing,
                         PathId = ticketConcernExist.RequestConcernId.Value,
+                        
 
                     };
 
