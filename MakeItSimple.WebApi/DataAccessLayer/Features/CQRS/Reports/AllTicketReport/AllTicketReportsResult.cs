@@ -35,6 +35,7 @@
             public string Ticket_Status { get; set; }
             public string Remarks { get; set; }
             public int Aging_Days {  get; set; }
+            public string ApprovedDate { get; set; }
 
 
 
