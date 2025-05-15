@@ -23,6 +23,8 @@
         public Guid? TicketApprover { get; set; }
 
         public bool IsActive { get; set; } = true;
+        public DateTime? ApprovedAt { get; set; }
+        public string ApprovedBy { get; set; }
 
         public ICollection<TicketAttachment> TicketAttachments { get; set; }
         public ICollection<ApproverTicketing> ApproverTickets { get; set; }

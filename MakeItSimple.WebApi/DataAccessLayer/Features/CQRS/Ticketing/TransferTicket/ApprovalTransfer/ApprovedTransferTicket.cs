@@ -128,6 +128,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                 transferTicketConcern.TransferAt = DateTime.Now;
                 transferTicketConcern.TargetDate = command.Target_Date;
                 transferTicketConcern.TransferTo = command.Transfer_To;
+                transferTicketConcern.ApprovedBy = user.Fullname;
 
                 var ticketConcernExist = await _context.TicketConcerns
                     .Include(x => x.RequestorByUser)

@@ -17,7 +17,7 @@
         public string Remarks { get; set; }
         public int ? Approver_Level { get; set; }
         public bool ? IsApprove { get; set; }
-
+        
     }
 
 }

@@ -1,6 +1,7 @@
 ﻿using MakeItSimple.WebApi.Common;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Authentication;
+using MakeItSimple.WebApi.Hubs;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,11 +21,14 @@ namespace MakeItSimple.WebApi.Controllers.Authentication
         private readonly IMediator _mediator;
         private readonly TokenGenerator _tokenGenerator;
         private readonly MisDbContext _context;
-        public AuthenticationController(IMediator mediator, TokenGenerator tokenGenerator, MisDbContext context)
+        private readonly IHubCaller _hubCaller;
+
+        public AuthenticationController(IMediator mediator, TokenGenerator tokenGenerator, MisDbContext context, IHubCaller hubCaller)
         {
             _mediator = mediator;
             _tokenGenerator = tokenGenerator;
             _context = context;
+            _hubCaller = hubCaller;
         }
 
         [AllowAnonymous]
@@ -33,12 +37,13 @@ namespace MakeItSimple.WebApi.Controllers.Authentication
         {
             try
             {
-
+                Guid eyow = new Guid("D99D6DC5-3197-4F2E-94B7-F409F746A9BB");
                 var result = await _mediator.Send(request);
                 if (result.IsFailure)
                 {
                     return BadRequest(result);
                 }
+                await _hubCaller.SendNotificationAsync(eyow, "LoggedIn", "Maybe");
                 return Ok(result);
             }
             catch (Exception ex)

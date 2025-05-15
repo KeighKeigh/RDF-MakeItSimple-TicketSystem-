@@ -43,6 +43,11 @@ namespace MakeItSimple.WebApi.Hubs
             }
         }
 
+        public async Task BroadcastClientInfo(string clientId, string userId, string message, string notificationType)
+        {
+                await _hubCaller.BroadcastClientInfoAsync(clientId, Guid.Parse(userId), message, notificationType);
+        }
+
 
     }
 }

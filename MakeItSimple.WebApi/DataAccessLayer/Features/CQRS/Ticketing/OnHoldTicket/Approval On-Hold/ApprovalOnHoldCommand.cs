@@ -11,7 +11,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Ap
             public Guid? Users { get; set; }
             public Guid? Transacted_By { get; set; }
             public int OnHoldTicketId { get; set; }
-
+            
         }
 
     }

@@ -1,8 +1,10 @@
 ﻿using MakeItSimple.WebApi.Common;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Errors.Authentication;
+using MakeItSimple.WebApi.Hubs;
 using MakeItSimple.WebApi.Models;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
@@ -68,11 +70,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Authentication
 
             private readonly MisDbContext _context;
             private readonly TokenGenerator _tokenGenerator;
+            private readonly IHubContext<NotificationHub> _hubContext;
 
-            public Handler(MisDbContext context, TokenGenerator tokenGenerator)
+            public Handler(MisDbContext context, TokenGenerator tokenGenerator, IHubContext<NotificationHub> hubContext)
             {
                 _context = context;
                 _tokenGenerator = tokenGenerator;
+                _hubContext = hubContext;
             }
 
             public async Task<Result> Handle(AuthenticateUserQuery command, CancellationToken cancellationToken)
@@ -112,6 +116,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Authentication
                 var token = _tokenGenerator.GenerateJwtToken(user);
 
                 var results = user.ToGetAuthenticatedUserResult(token);
+
+
 
                 return Result.Success(results);
 

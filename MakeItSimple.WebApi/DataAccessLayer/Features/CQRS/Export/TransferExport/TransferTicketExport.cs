@@ -2,6 +2,7 @@
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport.OpenTicketExport;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport
 {
@@ -20,15 +21,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport
             public async Task<Unit> Handle(TransferTicketExportCommand request, CancellationToken cancellationToken)
             {
                 var _transferQuery = await _context.TransferTicketConcerns
-                    .AsNoTracking()
-                    .Include(x => x.AddedByUser)
-                    .Include(x => x.ModifiedByUser)
-                    .Include(x => x.TransferByUser)
-                    .Include(x => x.TicketConcern)
-                    .ThenInclude(x => x.User)
-                    .Include(x => x.TicketConcern)
+                    .AsNoTrackingWithIdentityResolution()
+                    .AsSplitQuery()
                     .Where(x => x.IsTransfer == true && x.TicketConcern.UserId != null)
-                    .Where(x => x.TransferAt >= request.Date_From && x.TransferAt < request.Date_To)
+                    .Where(x => x.TransferAt.Value.Date >= request.Date_From.Value.Date && x.TransferAt.Value.Date <= request.Date_To.Value.Date)
                     .Select(x => new TransferTicketExportResult
                     {
                         Unit = x.TransferByUser.UnitId,
@@ -45,6 +41,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport
                         Remarks = x.TransferRemarks,
                         Modified_By = x.ModifiedByUser.Fullname,
                         Updated_At = x.UpdatedAt,
+                        ApprovedBy = x.ApprovedBy
+                        
 
                     }).ToListAsync(cancellationToken);
 
@@ -69,22 +67,43 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport
                         .ToList();
                 }
 
+                var finalTransferQuery = _transferQuery
+                    .OrderBy(x => x.Target_Date.Value.Date)
+                    .ThenBy(x => x.TicketConcernId)
+                    .Select(r => new TransferTicketExportResult
+                    {
+                        Unit = r.Unit,
+                        UserId = r.UserId,
+                        TicketConcernId = r.TicketConcernId,
+                        TransferTicketId = r.TransferTicketId,
+                        Concern_Details = r.Concern_Details,
+                        Transfered_By = r.Transfered_By,
+                        Transfered_To = r.Transfered_To,
+                        Current_Target_Date = r.Current_Target_Date,
+                        Target_Date = r.Target_Date,
+                        Transfer_At = r.Transfer_At,
+                        Transfer_Remarks = r.Transfer_Remarks,
+                        Modified_By = r.Modified_By,
+                        Updated_At = r.Updated_At,
+                        ApprovedBy = r.ApprovedBy
+                    });
                 using (var workbook = new XLWorkbook())
                 {
                     var worksheet = workbook.Worksheets.Add($"Transfer Ticket Report");
                     var headers = new List<string>
                     {
-                        "TicketConcernId",
-                        "Concern Details",
-                        "Transfer By",
-                        "Transfer To",
-                        "Current Target Date",
+                        "Transferred By",
+                        "Ticket No.",
+                        "Ticket Description",
                         "Target Date",
-                        "Transfer At",
+                        "Approved Date",
+                        "Transferred To",
+                        "Transferred No.",
                         "Transfer Remarks",
-                        "Remarks",
+                        "Current Target Date",
                         "Modified By",
-                        "Updated At"
+                        "Updated At",
+                        "Approved By"
 
                     };
 
@@ -103,18 +122,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport
                     {
                         var row = worksheet.Row(index + 1);
 
-                        row.Cell(1).Value = _transferQuery[index - 1].TicketConcernId;
-                        row.Cell(2).Value = _transferQuery[index - 1].Concern_Details;
-                        row.Cell(3).Value = _transferQuery[index - 1].Transfered_By;
-                        row.Cell(4).Value = _transferQuery[index - 1].Transfered_To;
-                        row.Cell(5).Value = _transferQuery[index - 1].Current_Target_Date;
-                        row.Cell(6).Value = _transferQuery[index - 1].Target_Date;
-                        row.Cell(7).Value = _transferQuery[index - 1].Transfer_At;
+                        row.Cell(1).Value = _transferQuery[index - 1].Transfered_By;
+                        row.Cell(2).Value = _transferQuery[index - 1].TicketConcernId;
+                        row.Cell(3).Value = _transferQuery[index - 1].Concern_Details;
+                        row.Cell(4).Value = _transferQuery[index - 1].Target_Date;
+                        row.Cell(5).Value = _transferQuery[index - 1].Transfer_At;
+                        row.Cell(6).Value = _transferQuery[index - 1].Transfered_To;
+                        row.Cell(7).Value = _transferQuery[index - 1].TransferTicketId;
                         row.Cell(8).Value = _transferQuery[index - 1].Transfer_Remarks;
-                        row.Cell(9).Value = _transferQuery[index - 1].Remarks;
+                        row.Cell(9).Value = _transferQuery[index - 1].Current_Target_Date;
                         row.Cell(10).Value = _transferQuery[index - 1].Modified_By;
                         row.Cell(11).Value = _transferQuery[index - 1].Updated_At;
-
+                        row.Cell(12).Value = _transferQuery[index - 1].ApprovedBy;
                     }
 
                     worksheet.Columns().AdjustToContents();

@@ -20,8 +20,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
             public async Task<Unit> Handle(OpenTicketExportCommand request, CancellationToken cancellationToken)
             {
                 var openTicket = await _context.TicketConcerns
-                    .Include(x => x.RequestConcern)
-                    .ThenInclude(x => x.Category)
+                    .AsNoTrackingWithIdentityResolution()
+                    .AsSplitQuery()
                     .Where(x => x.IsApprove == true && x.IsClosedApprove != true && x.OnHold != true && x.IsTransfer != true)
                     .Where(x => x.TargetDate.Value.Date >= request.Date_From.Value.Date && x.TargetDate.Value.Date <= request.Date_To.Value.Date)
                     .Select(t => new OpenTicketExportResult
@@ -37,8 +37,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         Unit_Name = t.RequestConcern.Unit.UnitName,
                         SubUnit_Name = t.RequestConcern.SubUnit.SubUnitName,
                         Location_Name = t.RequestConcern.Location.LocationName,
-                        Category_Description = t.RequestConcern.Category.CategoryDescription,
-                        SubCategory_Description = t.RequestConcern.SubCategory.SubCategoryDescription,
+                        Category_Description = string.Join(", ", t.RequestConcern.TicketCategories.Select(rc => rc.Category.CategoryDescription)),
+                        SubCategory_Description = string.Join(", ", t.RequestConcern.TicketSubCategories.Select(rc => rc.SubCategory.SubCategoryDescription)),
                         Issue_Handler = t.User.Fullname,
                         Channel_Name = t.RequestConcern.Channel.ChannelName,
                         Target_Date = t.TargetDate.Value.Date,
@@ -46,7 +46,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         Modified_By = t.ModifiedByUser.Fullname,
                         Updated_At = t.UpdatedAt,
                         Remarks = t.Remarks,
-                        Aging_Days = EF.Functions.DateDiffDay(t.TargetDate.Value.Date, DateTime.Now.Date)
+                        Aging_Days = EF.Functions.DateDiffDay(t.TargetDate.Value.Date, DateTime.Now.Date),
+                        
 
                     }).ToListAsync(cancellationToken);
 
@@ -72,6 +73,35 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         .ToList();
                 }
 
+                var resultOpenTicket = openTicket
+                    .OrderBy(x => x.Target_Date.Value.Date)
+                    .ThenBy(x => x.TicketConcernId)
+                    .Select(r => new OpenTicketExportResult
+                    {
+                        UserId = r.UserId,
+                        UnitId = r.UnitId,
+                        TicketConcernId = r.TicketConcernId,
+                        Concern_Description = r.Concern_Description,
+                        Requestor_Name = r.Requestor_Name,
+                        CompanyName = r.CompanyName,
+                        Business_Unit_Name = r.Business_Unit_Name,
+                        Department_Name = r.Department_Name,
+                        Unit_Name = r.Unit_Name,
+                        SubUnit_Name = r.SubUnit_Name,
+                        Location_Name = r.Location_Name,
+                        Category_Description = r.Category_Description,
+                        SubCategory_Description = r.SubCategory_Description,
+                        Issue_Handler  = r.Issue_Handler,
+                        Channel_Name = r.Channel_Name,
+                        Target_Date = r.Target_Date,
+                        Created_At = r.Created_At,
+                        Modified_By = r.Modified_By,
+                        Updated_At = r.Updated_At,
+                        Remarks = r.Remarks,
+                        Aging_Days = r.Aging_Days,
+                        
+                    }).ToList();
+
                 using (var workbook = new XLWorkbook())
                 {
                     var worksheet = workbook.Worksheets.Add($"Open Ticket Report");
@@ -95,7 +125,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         "Modified By",
                         "Updated At",
                         "Remarks",
-                        "Aging Days"
+                        "Aging Days",
+                        
                     };
 
                     var range = worksheet.Range(worksheet.Cell(1, 1), worksheet.Cell(1, headers.Count));
@@ -109,29 +140,30 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                     {
                         worksheet.Cell(1, index).Value = headers[index - 1];
                     }
-                    for (var index = 1; index <= openTicket.Count; index++)
+                    for (var index = 1; index <= resultOpenTicket.Count; index++)
                     {
                         var row = worksheet.Row(index + 1);
 
-                        row.Cell(1).Value = openTicket[index - 1].TicketConcernId;
-                        row.Cell(2).Value = openTicket[index - 1].Concern_Description;
-                        row.Cell(3).Value = openTicket[index - 1].Requestor_Name;
-                        row.Cell(4).Value = openTicket[index - 1].CompanyName;
-                        row.Cell(5).Value = openTicket[index - 1].Business_Unit_Name;
-                        row.Cell(6).Value = openTicket[index - 1].Department_Name;
-                        row.Cell(7).Value = openTicket[index - 1].Unit_Name;
-                        row.Cell(8).Value = openTicket[index - 1].SubUnit_Name;
-                        row.Cell(9).Value = openTicket[index - 1].Location_Name;
-                        row.Cell(10).Value = openTicket[index - 1].Channel_Name;
-                        row.Cell(11).Value = openTicket[index - 1].Category_Description;
-                        row.Cell(12).Value = openTicket[index - 1].SubCategory_Description;
-                        row.Cell(13).Value = openTicket[index - 1].Issue_Handler;
-                        row.Cell(14).Value = openTicket[index - 1].Target_Date;
-                        row.Cell(15).Value = openTicket[index - 1].Created_At;
-                        row.Cell(16).Value = openTicket[index - 1].Modified_By;
-                        row.Cell(17).Value = openTicket[index - 1].Updated_At;
-                        row.Cell(18).Value = openTicket[index - 1].Remarks;
-                        row.Cell(19).Value = openTicket[index - 1].Aging_Days;
+                        row.Cell(1).Value = resultOpenTicket[index - 1].TicketConcernId;
+                        row.Cell(2).Value = resultOpenTicket[index - 1].Concern_Description;
+                        row.Cell(3).Value = resultOpenTicket[index - 1].Requestor_Name;
+                        row.Cell(4).Value = resultOpenTicket[index - 1].CompanyName;
+                        row.Cell(5).Value = resultOpenTicket[index - 1].Business_Unit_Name;
+                        row.Cell(6).Value = resultOpenTicket[index - 1].Department_Name;
+                        row.Cell(7).Value = resultOpenTicket[index - 1].Unit_Name;
+                        row.Cell(8).Value = resultOpenTicket[index - 1].SubUnit_Name;
+                        row.Cell(9).Value = resultOpenTicket[index - 1].Location_Name;
+                        row.Cell(10).Value = resultOpenTicket[index - 1].Channel_Name;
+                        row.Cell(11).Value = resultOpenTicket[index - 1].Category_Description;
+                        row.Cell(12).Value = resultOpenTicket[index - 1].SubCategory_Description;
+                        row.Cell(13).Value = resultOpenTicket[index - 1].Issue_Handler;
+                        row.Cell(14).Value = resultOpenTicket[index - 1].Target_Date;
+                        row.Cell(15).Value = resultOpenTicket[index - 1].Created_At;
+                        row.Cell(16).Value = resultOpenTicket[index - 1].Modified_By;
+                        row.Cell(17).Value = resultOpenTicket[index - 1].Updated_At;
+                        row.Cell(18).Value = resultOpenTicket[index - 1].Remarks;
+                        row.Cell(19).Value = resultOpenTicket[index - 1].Aging_Days;
+                        
 
                     }
 

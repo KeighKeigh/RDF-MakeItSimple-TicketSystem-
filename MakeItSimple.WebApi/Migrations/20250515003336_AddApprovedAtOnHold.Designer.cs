@@ -4,6 +4,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MakeItSimple.WebApi.Migrations
 {
     [DbContext(typeof(MisDbContext))]
-    partial class MisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250515003336_AddApprovedAtOnHold")]
+    partial class AddApprovedAtOnHold
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2545,10 +2548,6 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("approved_at");
 
-                    b.Property<string>("ApprovedBy")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("approved_by");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
@@ -2739,10 +2738,6 @@ namespace MakeItSimple.WebApi.Migrations
                     b.Property<Guid?>("AddedBy")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("added_by");
-
-                    b.Property<string>("ApprovedBy")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("approved_by");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")

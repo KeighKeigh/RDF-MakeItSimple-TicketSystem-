@@ -18,6 +18,7 @@
             public string Remarks { get; set; }
             public string Modified_By { get; set; }
             public DateTime? Updated_At { get; set; }
+            public string ApprovedBy { get; set; }
         }
     }
 }

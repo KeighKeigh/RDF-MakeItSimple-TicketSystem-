@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Plugins;
 using System.Runtime.InteropServices;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport.OpenTicketExport;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OnHoldReport.OnHoldTicketReport;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
@@ -27,9 +28,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
             {
 
                 var query = await _context.TicketOnHolds
-                    .Include(q => q.TicketConcern)
-                    .ThenInclude(q => q.RequestConcern)
-                    .Include(q => q.AddedByUser)
+                    .AsNoTrackingWithIdentityResolution()
+                    .AsSplitQuery()
                     .Where(r => r.CreatedAt.Date >= request.Date_From.Value.Date && r.CreatedAt.Date <= request.Date_To.Value.Date)
                     .Select(r => new OnHoldTicketExportResult
                     {
@@ -42,6 +42,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
                         Created_At = r.CreatedAt,
                         IsHold = r.IsHold,
                         Resume_At = r.ResumeAt,
+                        ApprovedAt = r.ApprovedAt,
+                        ApprovedBy = r.ApprovedBy,
+                        
                     }).ToListAsync();
 
 
@@ -62,7 +65,23 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
                         .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
                         || x.Added_By.Contains(request.Search)).ToList();
                 }
-
+                var finalQuery = query
+                    .OrderBy(x => x.Created_At.Date)
+                    .ThenBy(x => x.TicketConcernId)
+                    .Select(r => new OnHoldTicketExportResult
+                    {
+                        UserId = r.UserId,
+                        Unit = r.Unit,
+                        TicketConcernId = r.TicketConcernId,
+                        Concerns = r.Concerns,
+                        Reason = r.Reason,
+                        Added_By = r.Added_By,
+                        Created_At = r.Created_At,
+                        IsHold = r.IsHold,
+                        Resume_At = r.Resume_At,
+                        ApprovedAt = r.ApprovedAt,
+                        ApprovedBy = r.ApprovedBy,
+                    }).ToList();
 
                 using (var workbook = new XLWorkbook())
                 {
@@ -72,9 +91,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
                         "Ticket Number",
                         "Description",
                         "Reason",
-                        "OnHold By",
-                        "OnHold At",
-                        "Resume At",
+                        "Hold By",
+                        "Hold Date",
+                        "Resume Date",
+                        "Approved Date",
+                        "Approved By"
                     };
 
                     var range = worksheet.Range(worksheet.Cell(1, 1), worksheet.Cell(1, headers.Count));
@@ -89,16 +110,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
                         worksheet.Cell(1, index).Value = headers[index - 1];
                     }
 
-                    for (var index = 1; index <= query.Count; index++)
+                    for (var index = 1; index <= finalQuery.Count; index++)
                     {
                         var row = worksheet.Row(index + 1);
 
-                        row.Cell(1).Value = query[index - 1].TicketConcernId;
-                        row.Cell(2).Value = query[index - 1].Concerns;
-                        row.Cell(3).Value = query[index - 1].Reason;
-                        row.Cell(4).Value = query[index - 1].Added_By;
-                        row.Cell(5).Value = query[index - 1].Created_At;
-                        row.Cell(6).Value = query[index - 1].Resume_At;
+                        row.Cell(1).Value = finalQuery[index - 1].TicketConcernId;
+                        row.Cell(2).Value = finalQuery[index - 1].Concerns;
+                        row.Cell(3).Value = finalQuery[index - 1].Reason;
+                        row.Cell(4).Value = finalQuery[index - 1].Added_By;
+                        row.Cell(5).Value = finalQuery[index - 1].Created_At;
+                        row.Cell(6).Value = finalQuery[index - 1].Resume_At;
+                        row.Cell(7).Value = finalQuery[index - 1].ApprovedAt;
+                        row.Cell(8).Value = finalQuery[index - 1].ApprovedBy;
                     }
 
 

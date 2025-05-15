@@ -116,7 +116,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Ap
                 ticketHistoryApproval.Request = TicketingConString.Approve;
                 ticketHistoryApproval.Status = $"{TicketingConString.OnHoldApproved} {user.Fullname}";
                 ticketHistoryApproval.IsApprove = true;
-
+                
             }
 
             private async Task ApprovalTransferNotification(TicketOnHold ticketOnHold, User user, ApproverTicketing approverTicketing, ApprovalOnHoldCommand command, CancellationToken cancellationToken)
@@ -159,6 +159,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Ap
             {
                 ticketOnHold.TicketApprover = null;
                 ticketOnHold.IsHold = true;
+                ticketOnHold.ApprovedAt = DateTime.Now;
+                ticketOnHold.ApprovedBy = user.Fullname;
+                
 
                 var ticketConcernExist = await _context.TicketConcerns
                  .Include(x => x.RequestorByUser)

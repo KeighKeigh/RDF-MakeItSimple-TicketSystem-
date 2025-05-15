@@ -53,7 +53,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.TransferReport
 
                 var results = _transferQuery
                     .Where(x => x.IsTransfer == true && x.TicketConcern.UserId != null)
-                     .Where(x => x.TransferAt >= request.Date_From.Value.Date && x.TransferAt.Value.Date <= request.Date_To.Value.Date)
+                     .Where(x => x.TransferAt.Value.Date >= request.Date_From.Value.Date && x.TransferAt.Value.Date <= request.Date_To.Value.Date)
                     .Select(x => new TransferTicketReportsResult
                     {
                         TicketConcernId = x.TicketConcernId,
@@ -68,6 +68,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.TransferReport
                         Remarks = x.TransferRemarks,
                         Modified_By = x.ModifiedByUser.Fullname,
                         Updated_At = x.UpdatedAt,
+                        ApprovedBy = x.ApprovedBy
+
 
                     });
 

@@ -11,6 +11,8 @@
             public DateTime Created_At { get; set; }
             public bool? IsHold { get; set; }
             public DateTime? Resume_At { get; set; }
+            public DateTime? ApprovedDate { get; set; }
+            public string ApprovedBy { get; set; }
             
 
         }
