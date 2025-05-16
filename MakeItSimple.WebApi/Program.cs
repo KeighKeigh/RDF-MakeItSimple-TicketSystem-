@@ -144,6 +144,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddLazyCache();
 builder.Services.AddSignalR();
 
+
+
 builder.Services.Configure<CloudinaryOption>(config.GetSection("Cloudinary"));
 
 const string clientPermission = "_clientPermission";
@@ -182,7 +184,7 @@ app.UseSwaggerUI();
 app.UseRouting();
 app.UseHttpsRedirection();
 app.UseCors(clientPermission);
-
+app.MapHub<CacheNotificationHub>("/cacheHub");
 
 app.UseAuthentication();
 app.UseAuthorization();

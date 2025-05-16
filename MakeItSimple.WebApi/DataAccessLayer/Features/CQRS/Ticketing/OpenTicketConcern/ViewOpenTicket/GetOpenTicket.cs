@@ -15,7 +15,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
         {
 
             private readonly MisDbContext _context;
-
+             
             public Handler(MisDbContext context)
             {
                 _context = context;
@@ -80,6 +80,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                             .OrderBy(x => x.Id)
                             : ticketConcernQuery
                             .OrderByDescending(x => x.Id);
+                    }
+                    else
+                    {
+                        ticketConcernQuery = ticketConcernQuery.OrderBy(x => x.Id);
                     }
 
                     if (!string.IsNullOrEmpty(request.Concern_Status))
