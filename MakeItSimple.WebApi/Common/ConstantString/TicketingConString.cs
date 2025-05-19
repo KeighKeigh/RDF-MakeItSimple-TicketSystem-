@@ -69,6 +69,7 @@ namespace MakeItSimple.WebApi.Common.ConstantString
         public const string Disapprove = "Disapprove";
 
         public const string ForApprovalTicket = "For Approval";
+        public const string PendingTicket = "Pending";
         public const string CurrentlyFixing = "Ongoing";
         public const string ConcernStatus = "ConcernStatus";
 

@@ -106,7 +106,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         {
                             case TicketingConString.Approval:
                                 requestConcernsQuery = requestConcernsQuery
-                                    .Where(x => x.ConcernStatus == TicketingConString.ForApprovalTicket);
+                                    .Where(x => x.ConcernStatus == TicketingConString.PendingTicket);
                                 break;
                             case TicketingConString.OnGoing:
                                 requestConcernsQuery = requestConcernsQuery

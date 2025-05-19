@@ -123,6 +123,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         RequestType = command.Request_Type,
                         BackJobId = command.BackJobId,
                         Severity = command.Severity,
+                        
                         //TicketCategories = 
 
                     };
@@ -139,8 +140,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         RequestorBy = command.UserId,
                         IsApprove = false,
                         AddedBy = command.Added_By,
-                        ConcernStatus = TicketingConString.ForApprovalTicket,
+                        ConcernStatus = TicketingConString.PendingTicket,
                         IsAssigned = false,
+                        
 
                     };
 

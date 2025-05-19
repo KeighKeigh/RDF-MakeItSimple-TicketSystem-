@@ -184,7 +184,7 @@ app.UseSwaggerUI();
 app.UseRouting();
 app.UseHttpsRedirection();
 app.UseCors(clientPermission);
-app.MapHub<CacheNotificationHub>("/cacheHub");
+//app.MapHub<CacheHub>("/cacheNotificationHub");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -212,5 +212,16 @@ catch (Exception ex)
 {
     Console.WriteLine(ex);
 }
+
+using (var scope = app.Services.CreateScope())
+{
+    var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+    await cacheService.GetTicketOnHolds();
+    await cacheService.GetClosingTickets();
+    await cacheService.GetOpenTickets();
+    await cacheService.GetTransferTicketConcerns();
+  
+}
+
 
 app.Run();
