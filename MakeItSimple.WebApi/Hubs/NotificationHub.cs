@@ -1,5 +1,7 @@
 ﻿using MakeItSimple.WebApi.Common.Caching;
+using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace MakeItSimple.WebApi.Hubs
@@ -8,11 +10,13 @@ namespace MakeItSimple.WebApi.Hubs
     {
         private readonly IHubCaller _hubCaller;
         private readonly ICacheService _cacheService;
+        private readonly MisDbContext _context;
 
-        public NotificationHub(IHubCaller hubCaller, ICacheService cacheService)
+        public NotificationHub(IHubCaller hubCaller, ICacheService cacheService, MisDbContext context)
         {
             _hubCaller = hubCaller;
             _cacheService = cacheService;
+            _context = context;
         }
 
         public override async Task OnConnectedAsync()
@@ -21,22 +25,36 @@ namespace MakeItSimple.WebApi.Hubs
             if (Context.User.Identity is ClaimsIdentity identity &&
                 Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
             {
+                var user = await _context.Users.FindAsync(userId);
+
+                var channels = await _context.ChannelUsers.Where(x => x.UserId == userId).Select(x => x.ChannelId).ToListAsync();
+                //if (user == null || user.Channels == Guid.Empty)
+                //{
+                //    await base.OnConnectedAsync();
+                //    return;
+                //}
+
+                //var groupId = user.GroupId;
+                //var groupName = $"Group_{groupId}";
+
+                // Add connection to group
+                //await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
                 await _hubCaller.AddUserToGroupAsync(Context.ConnectionId, userId);
 
                 var opentickets = await _cacheService.GetOpenTickets();
-                var closedtickets = await _cacheService.GetClosingTickets();
-                var transfertickets = await _cacheService.GetTransferTicketConcerns();
-                var onholdticket = await _cacheService.GetTicketOnHolds();
+                //var closedtickets = await _cacheService.GetClosingTickets();
+                //var transfertickets = await _cacheService.GetTransferTicketConcerns();
+                //var onholdticket = await _cacheService.GetTicketOnHolds();
 
-                var useropentickets = opentickets.Where(t => t.UserId == userId).ToList();
-                var userclosedtickets = closedtickets.Where(t => t.AddedBy == userId).ToList();
-                var usertransfertickets = transfertickets.Where(t => t.TransferTo == userId).ToList();
-                var useronholdtickets = onholdticket.Where(t => t.AddedBy == userId).ToList();
+                var useropentickets = opentickets.Where(t => t.UserId == userId && t.RequestConcern != null && channels.Contains(t.RequestConcern.ChannelId.Value)).ToList();
+                //var userclosedtickets = closedtickets.Where(t => t.AddedBy == userId).ToList();
+                //var usertransfertickets = transfertickets.Where(t => t.TransferTo == userId).ToList();
+                //var useronholdtickets = onholdticket.Where(t => t.AddedBy == userId).ToList();
 
                 await _hubCaller.SendNotificationAsync(userId, "OpenTickets", useropentickets);
-                await _hubCaller.SendNotificationAsync(userId, "ClosedTickets", userclosedtickets);
-                await _hubCaller.SendNotificationAsync(userId, "TransferTickets", usertransfertickets);
-                await _hubCaller.SendNotificationAsync(userId, "OnHoldTickets", useronholdtickets);
+                //await _hubCaller.SendNotificationAsync(userId, "ClosedTickets", userclosedtickets);
+                //await _hubCaller.SendNotificationAsync(userId, "TransferTickets", usertransfertickets);
+                //await _hubCaller.SendNotificationAsync(userId, "OnHoldTickets", useronholdtickets);
 
             }
             await base.OnConnectedAsync();
@@ -60,9 +78,6 @@ namespace MakeItSimple.WebApi.Hubs
                 await _hubCaller.SendNotificationAsync(Guid.Parse(userId), notificationType, message);
             }
         }
-
-        
-
 
     }
 }

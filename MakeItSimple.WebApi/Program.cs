@@ -216,10 +216,10 @@ catch (Exception ex)
 using (var scope = app.Services.CreateScope())
 {
     var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
-    await cacheService.GetTicketOnHolds();
-    await cacheService.GetClosingTickets();
+    //await cacheService.GetTicketOnHolds();
+    //await cacheService.GetClosingTickets();
     await cacheService.GetOpenTickets();
-    await cacheService.GetTransferTicketConcerns();
+    //await cacheService.GetTransferTicketConcerns();
   
 }
 

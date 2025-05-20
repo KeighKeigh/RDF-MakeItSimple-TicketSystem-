@@ -85,7 +85,7 @@ namespace MakeItSimple.WebApi.Common.Caching
 
             if (!_cache.TryGetValue(cacheKey, out List<TicketConcern> data))
             {
-                data = await _context.TicketConcerns.Where(x => x.OnHold == null && x.IsActive == true
+                data = await _context.TicketConcerns.Include(tc => tc.RequestConcern).Where(x => x.OnHold == null && x.IsActive == true
                        && x.IsApprove == true && x.IsTransfer != true && x.IsClosedApprove != true).ToListAsync();
 
                 _cache.Set(cacheKey, data);
