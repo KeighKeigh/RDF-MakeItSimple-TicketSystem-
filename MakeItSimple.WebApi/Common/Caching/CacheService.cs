@@ -1,4 +1,5 @@
-﻿using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
+﻿using MakeItSimple.WebApi.Common.Caching.CacheDto;
+using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.Hubs;
 using MakeItSimple.WebApi.Models.Ticketing;
 using Microsoft.AspNetCore.SignalR;
@@ -79,21 +80,58 @@ namespace MakeItSimple.WebApi.Common.Caching
             return data;
         }
 
+
+        //OpenTickets
         public async Task<List<TicketConcern>> GetOpenTickets()
         {
             string cacheKey = "OpenTicketCache";
 
             if (!_cache.TryGetValue(cacheKey, out List<TicketConcern> data))
             {
-                data = await _context.TicketConcerns.Include(tc => tc.RequestConcern).Where(x => x.OnHold == null && x.IsActive == true
+                 data = await _context.TicketConcerns.Where(x => x.OnHold == null && x.IsActive == true
                        && x.IsApprove == true && x.IsTransfer != true && x.IsClosedApprove != true).ToListAsync();
 
-                _cache.Set(cacheKey, data);
 
-                
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+
+                _cache.Set(cacheKey, data, cacheEntryOptions);
+
+
             }
             return data;
         }
+
+        //public async Task<List<TicketConcern>> GetOpenTicketsChannel()
+        //{
+        //    string cacheKey = "OpenTicketChannelCache";
+
+        //    if (!_cache.TryGetValue(cacheKey, out List<TicketConcern> data))
+        //    {
+        //        data = await _context.TicketConcerns.Include(tc => tc.RequestConcern).Where(x => x.OnHold == null && x.IsActive == true
+        //                && x.IsApprove == true && x.IsTransfer != true && x.IsClosedApprove != true).ToListAsync();
+
+        //        _cache.Set(cacheKey, data);
+
+        //    }
+        //    return data;
+        //}
+
+        //public async Task UpdateOpenTicketCacheAsync()
+        //{
+        //    string cacheKey = "UpdateOpenTicketChannelCache";
+        //    var openTickets = await _context.TicketConcerns.Where(x => x.OnHold == null && x.IsActive == true
+        //               && x.IsApprove == true && x.IsTransfer != true && x.IsClosedApprove != true).ToListAsync();
+
+        //    _cache.Set(cacheKey, openTickets);
+        //}
+
+
+
 
         public async Task<List<TransferTicketConcern>> GetTransferTicketConcerns()
         {

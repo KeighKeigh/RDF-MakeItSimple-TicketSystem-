@@ -219,8 +219,9 @@ using (var scope = app.Services.CreateScope())
     //await cacheService.GetTicketOnHolds();
     //await cacheService.GetClosingTickets();
     await cacheService.GetOpenTickets();
+    //await cacheService.GetOpenTicketsChannel();
     //await cacheService.GetTransferTicketConcerns();
-  
+
 }
 
 

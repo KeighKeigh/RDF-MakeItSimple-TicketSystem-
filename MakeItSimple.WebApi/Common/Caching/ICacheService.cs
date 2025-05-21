@@ -1,4 +1,5 @@
-﻿using MakeItSimple.WebApi.Models.Ticketing;
+﻿using MakeItSimple.WebApi.Common.Caching.CacheDto;
+using MakeItSimple.WebApi.Models.Ticketing;
 
 namespace MakeItSimple.WebApi.Common.Caching
 {
@@ -11,7 +12,11 @@ namespace MakeItSimple.WebApi.Common.Caching
         //Task CacheAllAsync();
         Task<List<TicketOnHold>> GetTicketOnHolds();
         Task<List<ClosingTicket>> GetClosingTickets();
+
         Task<List<TicketConcern>> GetOpenTickets();
+        //Task<List<TicketConcern>> GetOpenTicketsChannel();
+        //Task UpdateOpenTicketCacheAsync();
+
         Task<List<TransferTicketConcern>> GetTransferTicketConcerns();
         Task<List<RequestConcern>> GetRequestConcerns();
     }

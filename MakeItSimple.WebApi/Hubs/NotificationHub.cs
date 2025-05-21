@@ -25,9 +25,18 @@ namespace MakeItSimple.WebApi.Hubs
             if (Context.User.Identity is ClaimsIdentity identity &&
                 Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
             {
-                var user = await _context.Users.FindAsync(userId);
+                //var user = await _context.Users.FindAsync(userId);
 
-                var channels = await _context.ChannelUsers.Where(x => x.UserId == userId).Select(x => x.ChannelId).ToListAsync();
+                //var userChannelIds = await _context.ChannelUsers
+                //                    .Where(x => x.UserId == userId)
+                //                    .Select(x => x.ChannelId)
+                //                    .ToListAsync();
+
+                //foreach (var channelId in userChannelIds)
+                //{
+                //    await Groups.AddToGroupAsync(Context.ConnectionId, $"Channel_{channelId}");
+                //}
+                //var channels = await _context.ChannelUsers.Where(x => x.UserId == userId).Select(x => x.ChannelId).ToListAsync();
                 //if (user == null || user.Channels == Guid.Empty)
                 //{
                 //    await base.OnConnectedAsync();
@@ -42,16 +51,19 @@ namespace MakeItSimple.WebApi.Hubs
                 await _hubCaller.AddUserToGroupAsync(Context.ConnectionId, userId);
 
                 var opentickets = await _cacheService.GetOpenTickets();
+                //var openticketchannel = await _cacheService.GetOpenTicketsChannel();
                 //var closedtickets = await _cacheService.GetClosingTickets();
                 //var transfertickets = await _cacheService.GetTransferTicketConcerns();
                 //var onholdticket = await _cacheService.GetTicketOnHolds();
 
-                var useropentickets = opentickets.Where(t => t.UserId == userId && t.RequestConcern != null && channels.Contains(t.RequestConcern.ChannelId.Value)).ToList();
+                var useropentickets = opentickets.Where(t => t.UserId == userId).ToList();
+                //var channelopenticket = openticketchannel.Where(t => userChannelIds.Contains(t.RequestConcern.ChannelId.Value));
                 //var userclosedtickets = closedtickets.Where(t => t.AddedBy == userId).ToList();
                 //var usertransfertickets = transfertickets.Where(t => t.TransferTo == userId).ToList();
                 //var useronholdtickets = onholdticket.Where(t => t.AddedBy == userId).ToList();
 
                 await _hubCaller.SendNotificationAsync(userId, "OpenTickets", useropentickets);
+                //await _hubCaller.SendNotificationAsync(userId, "ChannelOpenTickets", channelopenticket);
                 //await _hubCaller.SendNotificationAsync(userId, "ClosedTickets", userclosedtickets);
                 //await _hubCaller.SendNotificationAsync(userId, "TransferTickets", usertransfertickets);
                 //await _hubCaller.SendNotificationAsync(userId, "OnHoldTickets", useronholdtickets);

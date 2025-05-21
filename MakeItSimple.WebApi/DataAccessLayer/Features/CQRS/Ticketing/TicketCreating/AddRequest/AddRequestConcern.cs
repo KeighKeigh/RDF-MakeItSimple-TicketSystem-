@@ -1,17 +1,22 @@
 ﻿using CloudinaryDotNet;
 using DocumentFormat.OpenXml.ExtendedProperties;
+using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using MakeItSimple.WebApi.Common;
+using MakeItSimple.WebApi.Common.Caching;
 using MakeItSimple.WebApi.Common.ConstantString;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Errors.Ticketing;
 using MakeItSimple.WebApi.DataAccessLayer.Errors.UserManagement.UserAccount;
 using MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work;
+using MakeItSimple.WebApi.Hubs;
 using MakeItSimple.WebApi.Models;
 using MakeItSimple.WebApi.Models.Setup.LocationSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.AddRequest.AddRequestConcern.AddRequestConcernCommand;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.AddRequest
@@ -22,10 +27,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
         public class Handler : IRequestHandler<AddRequestConcernCommand, Result>
         {
             private readonly IUnitOfWork unitOfWork;
+            private readonly ICacheService cacheService;
+            private readonly IHubCaller hubCaller;
+            private readonly MisDbContext context;
 
-            public Handler(IUnitOfWork unitOfWork)
+            public Handler(IUnitOfWork unitOfWork, ICacheService cacheService, IHubCaller hubCaller, MisDbContext context)
             {
                 this.unitOfWork = unitOfWork;
+                this.cacheService = cacheService;
+                this.hubCaller = hubCaller;
+                this.context = context;
+
             }
 
             public async Task<Result> Handle(AddRequestConcernCommand command, CancellationToken cancellationToken)
@@ -143,11 +155,34 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         ConcernStatus = TicketingConString.PendingTicket,
                         IsAssigned = false,
                         
+                        
 
                     };
 
                     await unitOfWork.RequestTicket.CreateTicketConcern(addTicketConcern, cancellationToken);
                     await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                    var cache = await cacheService.GetOpenTickets();
+
+                    var chechcache = cache.Where(x => x.Id == ticketConcernId);
+
+                    if (!chechcache.Any())
+                    {
+                        cache.Add(addTicketConcern);
+                    }
+
+
+
+                    await hubCaller.SendToChannelAsync(command.ChannelId.Value, "NewTicketSubmitted", addTicketConcern);
+                    await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", addTicketConcern);
+
+                    await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", new
+                    {
+                        TicketId = ticketConcernId,
+                        RequestConcernId = requestConcernId,
+                        Message = "A new Ticket has been submitted.",
+                        ChannelId = command.ChannelId
+                    });
 
                     ticketConcernId = addTicketConcern.Id;
 
@@ -306,6 +341,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 }
 
                 await unitOfWork.SaveChangesAsync(cancellationToken);
+                //await cacheService.UpdateOpenTicketCacheAsync();
+
                 return Result.Success();
 
             }

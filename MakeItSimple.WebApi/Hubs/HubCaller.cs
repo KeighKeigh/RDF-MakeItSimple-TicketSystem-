@@ -9,6 +9,7 @@ namespace MakeItSimple.WebApi.Hubs
         Task AddUserToGroupAsync(string connectionId, Guid userId);
         Task RemoveUserFromGroupAsync(string connectionId, Guid userId);
         Task BroadcastClientInfoAsync(string clientId, Guid userId, string message, string notificationType);
+        Task SendToChannelAsync(int channel, string method, object data);
     }
 
 
@@ -44,6 +45,17 @@ namespace MakeItSimple.WebApi.Hubs
                 UserId = userId,
                 Message = message
             });
+        }
+
+        public async Task SendToChannelAsync(int channel, string method, object data)
+        {
+            var channelName = GetGroupName(channel);
+            await _hubContext.Clients.Group(channelName).SendAsync(method, data);
+        }
+
+        private string GetGroupName(int channel)
+        {
+            return $"Channel_{channel}";
         }
 
     }
