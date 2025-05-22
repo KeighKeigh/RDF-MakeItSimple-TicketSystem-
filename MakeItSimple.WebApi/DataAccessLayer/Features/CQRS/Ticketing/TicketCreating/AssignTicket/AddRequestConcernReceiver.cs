@@ -1,8 +1,10 @@
 ﻿using MakeItSimple.WebApi.Common;
+using MakeItSimple.WebApi.Common.Caching;
 using MakeItSimple.WebApi.Common.ConstantString;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Errors.Ticketing;
 using MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work;
+using MakeItSimple.WebApi.Hubs;
 using MakeItSimple.WebApi.Models;
 using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
@@ -17,10 +19,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
         {
 
             private readonly IUnitOfWork unitOfWork;
+            private readonly ICacheService cacheService;
+            private readonly IHubCaller hubCaller;
+            private readonly MisDbContext context;
 
-            public Handler(IUnitOfWork unitOfWork)
+            public Handler(IUnitOfWork unitOfWork, ICacheService cacheService, IHubCaller hubCaller, MisDbContext context)
             {
                 this.unitOfWork = unitOfWork;
+                this.cacheService = cacheService;
+                this.hubCaller = hubCaller;
+                this.context = context;
+
             }
 
             public async Task<Result<int?>> Handle(AddRequestConcernReceiverCommand command, CancellationToken cancellationToken)
@@ -202,6 +211,20 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                     await unitOfWork.RequestTicket.CreateTicketConcern(addTicketConcern, cancellationToken);
                     await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                    //var cache = await cacheService.GetOpenTickets();
+
+                    //var chechcache = cache.Where(x => x.UserId == addTicketConcern.UserId).ToList();
+
+                    //if (!chechcache.Any())
+                    //{
+                    //    cache.Add(addTicketConcern);
+                    //}
+
+                    ////var filterCache = cache.Select(x => x.UserId == command.UserId.Value);
+
+                    //await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", chechcache);
+                   
 
                     ticketConcernExist = addTicketConcern;
 

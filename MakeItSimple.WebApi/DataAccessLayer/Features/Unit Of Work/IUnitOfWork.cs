@@ -22,6 +22,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work
 
 
         IRequestTicketRepository RequestTicket { get; }
+
         IClosingRepository ClosingTicket { get; }
 
         IPmsFormRepository PmsForm { get; }

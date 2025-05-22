@@ -1,6 +1,7 @@
 ﻿using MakeItSimple.WebApi.Common.Caching.CacheDto;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.Hubs;
+using MakeItSimple.WebApi.Models.Setup.ChannelUserSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -16,18 +17,20 @@ namespace MakeItSimple.WebApi.Common.Caching
         private readonly IMemoryCache _cache;
         private readonly MisDbContext _context;
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly IHubCaller _hubCaller;
 
         public CacheService(IDistributedCache distributedCache,
             IMemoryCache cache,
             MisDbContext context,
-            IHubContext<NotificationHub> hubContext
+            IHubContext<NotificationHub> hubContext,
+            IHubCaller hubCaller
             )
         {
             _distributedCache = distributedCache;
             _cache = cache;
             _context = context;
             _hubContext = hubContext;
-
+            _hubCaller = hubCaller;
         }
 
         public async Task SetCacheAsync(string key, object value, TimeSpan expiration)
@@ -61,6 +64,7 @@ namespace MakeItSimple.WebApi.Common.Caching
 
                 _cache.Set(cacheKey, data);
 
+                
             }
             return data;
         }
@@ -95,40 +99,27 @@ namespace MakeItSimple.WebApi.Common.Caching
 
                 var cacheEntryOptions = new MemoryCacheEntryOptions
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
                     SlidingExpiration = TimeSpan.FromMinutes(2)
                 };
 
                 _cache.Set(cacheKey, data, cacheEntryOptions);
 
-
             }
             return data;
         }
 
-        //public async Task<List<TicketConcern>> GetOpenTicketsChannel()
-        //{
-        //    string cacheKey = "OpenTicketChannelCache";
 
-        //    if (!_cache.TryGetValue(cacheKey, out List<TicketConcern> data))
-        //    {
-        //        data = await _context.TicketConcerns.Include(tc => tc.RequestConcern).Where(x => x.OnHold == null && x.IsActive == true
-        //                && x.IsApprove == true && x.IsTransfer != true && x.IsClosedApprove != true).ToListAsync();
+        public void UpdateOpenTicketCacheAsync(List<TicketConcern> updateTickets)
+        {
 
-        //        _cache.Set(cacheKey, data);
-
-        //    }
-        //    return data;
-        //}
-
-        //public async Task UpdateOpenTicketCacheAsync()
-        //{
-        //    string cacheKey = "UpdateOpenTicketChannelCache";
-        //    var openTickets = await _context.TicketConcerns.Where(x => x.OnHold == null && x.IsActive == true
-        //               && x.IsApprove == true && x.IsTransfer != true && x.IsClosedApprove != true).ToListAsync();
-
-        //    _cache.Set(cacheKey, openTickets);
-        //}
+            var cacheEntryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
+                SlidingExpiration = TimeSpan.FromMinutes(2)
+            };
+            _cache.Set("UpdateTicketCache", updateTickets, cacheEntryOptions);
+        }
 
 
 

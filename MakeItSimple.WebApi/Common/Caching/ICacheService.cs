@@ -1,4 +1,5 @@
 ﻿using MakeItSimple.WebApi.Common.Caching.CacheDto;
+using MakeItSimple.WebApi.Models.Setup.ChannelUserSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
 
 namespace MakeItSimple.WebApi.Common.Caching
@@ -14,8 +15,9 @@ namespace MakeItSimple.WebApi.Common.Caching
         Task<List<ClosingTicket>> GetClosingTickets();
 
         Task<List<TicketConcern>> GetOpenTickets();
+
         //Task<List<TicketConcern>> GetOpenTicketsChannel();
-        //Task UpdateOpenTicketCacheAsync();
+        
 
         Task<List<TransferTicketConcern>> GetTransferTicketConcerns();
         Task<List<RequestConcern>> GetRequestConcerns();

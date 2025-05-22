@@ -49,8 +49,9 @@ namespace MakeItSimple.WebApi.Hubs
 
         public async Task SendToChannelAsync(int channel, string method, object data)
         {
-            var channelName = GetGroupName(channel);
-            await _hubContext.Clients.Group(channelName).SendAsync(method, data);
+            
+            await _hubContext.Clients.Group(channel.ToString()).SendAsync(method, data);
+            
         }
 
         private string GetGroupName(int channel)

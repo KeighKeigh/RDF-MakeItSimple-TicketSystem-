@@ -15,11 +15,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         Task CreateTicketSubCategory(TicketSubCategory ticketSubCategory, CancellationToken cancellationToken);
         Task CreateTicketAttachment(TicketAttachment ticketAttachment, CancellationToken cancellationToken);
 
+
         Task<int>PossibleRequestId();
         Task<int> PossibleTicketId();
 
 
         Task UpdateRequestConcern(RequestConcern requestConcern, CancellationToken cancellationToken);
+
         Task UpdateTicketConcern(TicketConcern ticketConcern, CancellationToken cancellationToken);
         Task UpdateTicketAttachment(TicketAttachment ticketAttachment, CancellationToken cancellationToken);
 
@@ -38,6 +40,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
 
 
         Task<RequestConcern> RequestConcernExist(int? id);
+
         Task<TicketConcern> TicketConcernExistByRequestConcernId(int? id);
         Task<TicketConcern> TicketConcernExist(int? id);
         Task<TicketConcern> TicketConcernByRequest(int? id);

@@ -120,7 +120,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         UserId = command.UserId,
                         Concern = command.Concern,
                         AddedBy = command.Added_By,
-                        ConcernStatus = TicketingConString.ForApprovalTicket,
+                        ConcernStatus = TicketingConString.PendingTicket,
                         CompanyId = userIdExist.CompanyId,
                         BusinessUnitId = userIdExist.BusinessUnitId,
                         DepartmentId = userIdExist.DepartmentId,
@@ -171,18 +171,22 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         cache.Add(addTicketConcern);
                     }
 
+                    //var filterCache = cache.Select(x => x.UserId == command.UserId.Value);
+
+                    //await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", filterCache);
+                    await hubCaller.SendToChannelAsync(command.ChannelId.Value, "NewPendingTicket", chechcache);
 
 
-                    await hubCaller.SendToChannelAsync(command.ChannelId.Value, "NewTicketSubmitted", addTicketConcern);
-                    await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", addTicketConcern);
+                    //await hubCaller.SendToChannelAsync(command.ChannelId.Value, "NewTicketSubmitted", addTicketConcern);
 
-                    await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", new
-                    {
-                        TicketId = ticketConcernId,
-                        RequestConcernId = requestConcernId,
-                        Message = "A new Ticket has been submitted.",
-                        ChannelId = command.ChannelId
-                    });
+
+                    //await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", new
+                    //{
+                    //    TicketId = ticketConcernId,
+                    //    RequestConcernId = requestConcernId,
+                    //    Message = "A new Ticket has been submitted.",
+                    //    ChannelId = command.ChannelId
+                    //});
 
                     ticketConcernId = addTicketConcern.Id;
 
@@ -341,7 +345,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 }
 
                 await unitOfWork.SaveChangesAsync(cancellationToken);
-                //await cacheService.UpdateOpenTicketCacheAsync();
+                
 
                 return Result.Success();
 
