@@ -120,7 +120,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         UserId = command.UserId,
                         Concern = command.Concern,
                         AddedBy = command.Added_By,
-                        ConcernStatus = TicketingConString.PendingTicket,
+                        ConcernStatus = TicketingConString.ForApprovalTicket,
                         CompanyId = userIdExist.CompanyId,
                         BusinessUnitId = userIdExist.BusinessUnitId,
                         DepartmentId = userIdExist.DepartmentId,
@@ -152,7 +152,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         RequestorBy = command.UserId,
                         IsApprove = false,
                         AddedBy = command.Added_By,
-                        ConcernStatus = TicketingConString.PendingTicket,
+                        ConcernStatus = TicketingConString.ForApprovalTicket,
                         IsAssigned = false,
                         
                         
@@ -164,7 +164,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                     var cache = await cacheService.GetOpenTickets();
 
-                    var chechcache = cache.Where(x => x.Id == ticketConcernId);
+                    var chechcache = cache.Where(x => x.UserId == addTicketConcern.UserId);
 
                     if (!chechcache.Any())
                     {
@@ -173,8 +173,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                     //var filterCache = cache.Select(x => x.UserId == command.UserId.Value);
 
-                    //await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", filterCache);
-                    await hubCaller.SendToChannelAsync(command.ChannelId.Value, "NewPendingTicket", chechcache);
+                    await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", chechcache);
+                    //await hubCaller.SendToChannelAsync(command.ChannelId.Value, "NewPendingTicket", chechcache);
 
 
                     //await hubCaller.SendToChannelAsync(command.ChannelId.Value, "NewTicketSubmitted", addTicketConcern);

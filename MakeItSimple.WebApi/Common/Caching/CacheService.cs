@@ -1,6 +1,6 @@
 ﻿using MakeItSimple.WebApi.Common.Caching.CacheDto;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
-using MakeItSimple.WebApi.Hubs;
+
 using MakeItSimple.WebApi.Models.Setup.ChannelUserSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
 using Microsoft.AspNetCore.SignalR;
@@ -16,21 +16,21 @@ namespace MakeItSimple.WebApi.Common.Caching
         private readonly IDistributedCache _distributedCache;
         private readonly IMemoryCache _cache;
         private readonly MisDbContext _context;
-        private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly IHubCaller _hubCaller;
+        //private readonly IHubContext<NotificationHub> _hubContext;
+        //private readonly IHubCaller _hubCaller;
 
         public CacheService(IDistributedCache distributedCache,
             IMemoryCache cache,
-            MisDbContext context,
-            IHubContext<NotificationHub> hubContext,
-            IHubCaller hubCaller
+            MisDbContext context
+            //IHubContext<NotificationHub> hubContext,
+            //IHubCaller hubCaller
             )
         {
             _distributedCache = distributedCache;
             _cache = cache;
             _context = context;
-            _hubContext = hubContext;
-            _hubCaller = hubCaller;
+            //_hubContext = hubContext;
+            //_hubCaller = hubCaller;
         }
 
         public async Task SetCacheAsync(string key, object value, TimeSpan expiration)
@@ -64,7 +64,7 @@ namespace MakeItSimple.WebApi.Common.Caching
 
                 _cache.Set(cacheKey, data);
 
-                
+
             }
             return data;
         }
@@ -79,7 +79,7 @@ namespace MakeItSimple.WebApi.Common.Caching
 
                 _cache.Set(cacheKey, data);
 
-                
+
             }
             return data;
         }
@@ -92,8 +92,7 @@ namespace MakeItSimple.WebApi.Common.Caching
 
             if (!_cache.TryGetValue(cacheKey, out List<TicketConcern> data))
             {
-                 data = await _context.TicketConcerns.Where(x => x.OnHold == null && x.IsActive == true
-                       && x.IsApprove == true && x.IsTransfer != true && x.IsClosedApprove != true).ToListAsync();
+                data = await _context.TicketConcerns.Where(x => x.ConcernStatus == "Pending").ToListAsync();
 
 
 

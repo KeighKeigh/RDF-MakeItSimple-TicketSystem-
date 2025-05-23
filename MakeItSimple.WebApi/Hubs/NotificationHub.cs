@@ -25,23 +25,22 @@ namespace MakeItSimple.WebApi.Hubs
             if (Context.User.Identity is ClaimsIdentity identity &&
                 Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
             {
-                //var user = await _context.Users.FindAsync(userId);
+                var user = await _context.Users.FindAsync(userId);
 
-                //var userChannelIds = await _context.ChannelUsers
-                //                    .Where(x => x.UserId == userId)
-                //                    .Select(x => x.ChannelId)
-                //                    .ToListAsync();
+                var userChannelIds = await _context.ChannelUsers
+                                    .Where(x => x.UserId == userId)
+                                    .Select(x => x.ChannelId)
+                                    .ToListAsync();
 
-                //foreach (var channelId in userChannelIds)
-                //{
-                //    await Groups.AddToGroupAsync(Context.ConnectionId, $"Channel_{channelId}");
-                //}
-                //var channels = await _context.ChannelUsers.Where(x => x.UserId == userId).Select(x => x.ChannelId).ToListAsync();
-                //if (user == null || user.Channels == Guid.Empty)
-                //{
-                //    await base.OnConnectedAsync();
-                //    return;
-                //}
+                foreach (var channelId in userChannelIds)
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, $"Channel_{channelId}");
+                }
+                if (user == null || userChannelIds == null)
+                {
+                    await base.OnConnectedAsync();
+                    return;
+                }
 
                 //var groupId = user.GroupId;
                 //var groupName = $"Group_{groupId}";

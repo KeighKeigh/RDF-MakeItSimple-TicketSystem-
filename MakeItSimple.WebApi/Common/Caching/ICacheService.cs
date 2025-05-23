@@ -17,7 +17,7 @@ namespace MakeItSimple.WebApi.Common.Caching
         Task<List<TicketConcern>> GetOpenTickets();
 
         //Task<List<TicketConcern>> GetOpenTicketsChannel();
-        
+
 
         Task<List<TransferTicketConcern>> GetTransferTicketConcerns();
         Task<List<RequestConcern>> GetRequestConcerns();

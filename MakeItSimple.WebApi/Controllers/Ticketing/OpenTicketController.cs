@@ -20,13 +20,11 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
 
         private readonly IMediator _mediator;
         private readonly TimerControl _timerControl;
-        private readonly ICacheService _cacheService;
 
-        public OpenTicketController(IMediator mediator, TimerControl timerControl, ICacheService cacheService)
+        public OpenTicketController(IMediator mediator, TimerControl timerControl)
         {
             _mediator = mediator;
             _timerControl = timerControl;
-            _cacheService = cacheService;
         }
 
         [HttpGet("page")]

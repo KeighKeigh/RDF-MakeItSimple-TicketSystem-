@@ -27,14 +27,12 @@ namespace MakeItSimple.WebApi.Controllers.UserManagement.UserAccount
 
         private readonly IMediator _mediator;
         private readonly ValidatorHandler _validatorHandler;
-        private readonly ICacheService _cacheService;
 
 
-        public UserController(IMediator mediator, ValidatorHandler validatorHandler, ICacheService cacheService)
+        public UserController(IMediator mediator, ValidatorHandler validatorHandler)
         {
             _mediator = mediator;
             _validatorHandler = validatorHandler;
-            _cacheService = cacheService;
         }
 
 

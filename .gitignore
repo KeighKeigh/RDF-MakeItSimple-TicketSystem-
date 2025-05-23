@@ -476,6 +476,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-appsettings.json
-**/appsettings.json
-/MakeItSimple.WebApi/appsettings.Development.json
+
