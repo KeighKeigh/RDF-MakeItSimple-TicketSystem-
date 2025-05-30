@@ -4,6 +4,7 @@ using MakeItSimple.WebApi.Models.Setup.ChannelSetup;
 using MakeItSimple.WebApi.Models.Setup.CompanySetup;
 using MakeItSimple.WebApi.Models.Setup.DepartmentSetup;
 using MakeItSimple.WebApi.Models.Setup.LocationSetup;
+using MakeItSimple.WebApi.Models.Setup.Phase_One.ServiceProviderSetup;
 using MakeItSimple.WebApi.Models.Setup.ReceiverSetup;
 using MakeItSimple.WebApi.Models.Setup.SubUnitSetup;
 
@@ -69,7 +70,7 @@ namespace MakeItSimple.WebApi.Models
         public ICollection<Approver> Approvers { get; set; }
         public ICollection<ApproverTicketing> ApproversTickets { get; set; }
         public ICollection<RequestConcern> RequestConcerns { get; set;}
-
+        public ICollection<ServiceProviders> SeviceProviders { get; set; }
         public ICollection<Receiver> Receivers { get; set; } 
 
 

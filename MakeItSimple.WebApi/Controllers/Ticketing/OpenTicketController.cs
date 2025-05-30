@@ -41,7 +41,7 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
                     }
 
                     if (Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
-                    {
+                    { 
                         query.UserId = userId;
                     }
 

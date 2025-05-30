@@ -10,7 +10,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Errors.Ticketing;
 using MakeItSimple.WebApi.DataAccessLayer.Errors.UserManagement.UserAccount;
 using MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work;
-using MakeItSimple.WebApi.Hubs;
+//using MakeItSimple.WebApi.Hubs;
 using MakeItSimple.WebApi.Models;
 using MakeItSimple.WebApi.Models.Setup.LocationSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
@@ -28,14 +28,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
         {
             private readonly IUnitOfWork unitOfWork;
             private readonly ICacheService cacheService;
-            private readonly IHubCaller hubCaller;
+            //private readonly IHubCaller hubCaller;
             private readonly MisDbContext context;
 
-            public Handler(IUnitOfWork unitOfWork, ICacheService cacheService, IHubCaller hubCaller, MisDbContext context)
+            public Handler(IUnitOfWork unitOfWork, ICacheService cacheService, MisDbContext context)
             {
                 this.unitOfWork = unitOfWork;
                 this.cacheService = cacheService;
-                this.hubCaller = hubCaller;
+                //this.hubCaller = hubCaller;
                 this.context = context;
 
             }
@@ -162,18 +162,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                     await unitOfWork.RequestTicket.CreateTicketConcern(addTicketConcern, cancellationToken);
                     await unitOfWork.SaveChangesAsync(cancellationToken);
 
-                    var cache = await cacheService.GetOpenTickets();
+                    //var cache = await cacheService.GetOpenTickets();
 
-                    var chechcache = cache.Where(x => x.UserId == addTicketConcern.UserId);
+                    //var chechcache = cache.Where(x => x.UserId == addTicketConcern.UserId);
 
-                    if (!chechcache.Any())
-                    {
-                        cache.Add(addTicketConcern);
-                    }
+                    //if (!chechcache.Any())
+                    //{
+                    //    cache.Add(addTicketConcern);
+                    //}
 
-                    //var filterCache = cache.Select(x => x.UserId == command.UserId.Value);
+                    ////var filterCache = cache.Select(x => x.UserId == command.UserId.Value);
 
-                    await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", chechcache);
+                    //await hubCaller.SendNotificationAsync(command.UserId.Value, "NewPendingTicket", chechcache);
                     //await hubCaller.SendToChannelAsync(command.ChannelId.Value, "NewPendingTicket", chechcache);
 
 

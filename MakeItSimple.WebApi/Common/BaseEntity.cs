@@ -20,4 +20,22 @@ namespace MakeItSimple.WebApi.Common
         public User ModifiedByUser { get; set; }
 
     }
+
+    public abstract class BaseEntities
+    {
+        public int Id { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+
+        [ForeignKey("AddedByUser")]
+        public Guid? AddedBy { get; set; }
+        public User AddedByUser { get; set; }
+
+
+        [ForeignKey("ModifiedByUser")]
+        public Guid? ModifiedBy { get; set; }
+        public User ModifiedByUser { get; set; }
+
+    }
 }

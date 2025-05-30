@@ -11,6 +11,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.FormDropdownSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.FormQuestionSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.FormSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.LocationSetup;
+using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.Phase_One.ServiceProviderSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.Phase_Two;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.Phase_Two.Pms_Form_Setup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.Pivot;
@@ -35,6 +36,7 @@ using MakeItSimple.WebApi.Models.Setup.FormDropdownSetup;
 using MakeItSimple.WebApi.Models.Setup.FormSetup;
 using MakeItSimple.WebApi.Models.Setup.FormsQuestionSetup;
 using MakeItSimple.WebApi.Models.Setup.LocationSetup;
+using MakeItSimple.WebApi.Models.Setup.Phase_One.ServiceProviderSetup;
 using MakeItSimple.WebApi.Models.Setup.Phase_Two;
 using MakeItSimple.WebApi.Models.Setup.Phase_Two.Pms_Form_Setup;
 using MakeItSimple.WebApi.Models.Setup.Pivot;
@@ -73,6 +75,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Data.DataContext
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<SubCategory> SubCategories { get; set; }
         public virtual DbSet<Approver> Approvers { get; set; }
+        public virtual DbSet<ServiceProviders> ServiceProviders { get; set; }
+        public virtual DbSet<ServiceProviderChannel> ServiceProviderChannels { get; set; }
 
         //Ticketing
 
@@ -153,6 +157,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Data.DataContext
             modelBuilder.ApplyConfiguration(new TicketTransactionNotificationConfiguration());
             modelBuilder.ApplyConfiguration(new TicketOnHoldConfiguration());
             modelBuilder.ApplyConfiguration(new TicketTechnicianConfiguration());
+            modelBuilder.ApplyConfiguration(new ServiceProviderConfiguration());
            
             //Phase 2
 

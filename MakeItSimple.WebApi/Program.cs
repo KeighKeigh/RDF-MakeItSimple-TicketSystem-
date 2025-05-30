@@ -18,7 +18,7 @@ using Microsoft.Data.SqlClient;
 using MakeItSimple.WebApi.Common.Caching;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work;
-using MakeItSimple.WebApi.Hubs;
+//using MakeItSimple.WebApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -66,7 +66,7 @@ builder.Services.AddScoped<TokenGenerator>();
 builder.Services.AddScoped<TransformUrl>();
 builder.Services.AddScoped<ContentType>();
 builder.Services.AddScoped<TimerControl>();
-builder.Services.AddScoped<IHubCaller, HubCaller>();
+//builder.Services.AddScoped<IHubCaller, HubCaller>();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -142,7 +142,7 @@ builder.Services.AddAuthentication(authOptions =>
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddLazyCache();
-builder.Services.AddSignalR();
+//builder.Services.AddSignalR();
 
 
 
@@ -193,11 +193,11 @@ app.UseWebSockets();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHub<NotificationHub>("/notification-hub", options =>
-    {
-        options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
-        options.CloseOnAuthenticationExpiration = true;
-    });
+    //endpoints.MapHub<NotificationHub>("/notification-hub", options =>
+    //{
+    //    options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
+    //    options.CloseOnAuthenticationExpiration = true;
+    //});
 
 });
 
@@ -213,16 +213,16 @@ catch (Exception ex)
     Console.WriteLine(ex);
 }
 
-using (var scope = app.Services.CreateScope())
-{
-    var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
-    //await cacheService.GetTicketOnHolds();
-    //await cacheService.GetClosingTickets();
-    await cacheService.GetOpenTickets();
-    //await cacheService.GetOpenTicketsChannel();
-    //await cacheService.GetTransferTicketConcerns();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+//    //await cacheService.GetTicketOnHolds();
+//    //await cacheService.GetClosingTickets();
+//    await cacheService.GetOpenTickets();
+//    //await cacheService.GetOpenTicketsChannel();
+//    //await cacheService.GetTransferTicketConcerns();
 
-}
+//}
 
 
 app.Run();

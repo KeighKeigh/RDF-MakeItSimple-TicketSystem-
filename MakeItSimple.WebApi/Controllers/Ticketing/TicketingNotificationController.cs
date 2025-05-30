@@ -12,22 +12,22 @@ using System.Security.Cryptography;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotification.TransactionNotification.GetTicketTransactionNotification;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotification.ClickedTicketTransaction.ClickedTransaction;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotification.AllTransactionNotification.GetAllTransactionNotification;
-using MakeItSimple.WebApi.Hubs;
+//using MakeItSimple.WebApi.Hubs;
 
 [ApiController]
 [Route("api/ticketing-notification")]
 public class TicketingNotificationController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IHubCaller _hubCaller;
+    //private readonly IHubCaller _hubCaller;
     private readonly TimerControl _timerControl;
 
     private ICacheProvider _cacheProvider;
 
-    public TicketingNotificationController(IMediator mediator, IHubCaller hubCaller, TimerControl timerControl , ICacheProvider cacheProvider)
+    public TicketingNotificationController(IMediator mediator, TimerControl timerControl , ICacheProvider cacheProvider)
     {
         _mediator = mediator;
-        _hubCaller = hubCaller;
+        //_hubCaller = hubCaller;
         _timerControl = timerControl;
         _cacheProvider = cacheProvider;
     }
@@ -92,13 +92,13 @@ public class TicketingNotificationController : ControllerBase
                     {
 
                         _cacheProvider.Set(cacheKey, requestData, cacheEntryOptions);
-                        await _hubCaller.SendNotificationAsync(userId,notificationType,requestData);
+                        //await _hubCaller.SendNotificationAsync(userId,notificationType,requestData);
                     }
 
                 }, 5000, 5000);
 
 
-                await _hubCaller.SendNotificationAsync(userId,notificationType,newData);
+                //await _hubCaller.SendNotificationAsync(userId,notificationType,newData);
 
                 return Ok(newData);
             }

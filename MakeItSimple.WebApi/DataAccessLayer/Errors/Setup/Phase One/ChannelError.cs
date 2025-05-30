@@ -36,4 +36,35 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Errors.Setup
       
 
     }
+
+    public class ServiceError
+    {
+        public static Error ServiceProviderNameAlreadyExist(string ServiceProvider) =>
+      new Error("ServiceProvider.ChannelNameAlreadyExist", $"Service Provider name {ServiceProvider} already exist!");
+
+        public static Error ProjectNameAlreadyExist(string ServiceProvider) =>
+        new Error("ServiceProvider.ProjectNameAlreadyExist", $"Project name {ServiceProvider} already exist!");
+        public static Error ProjectNotExist() =>
+        new Error("ServiceProvider.ProjectNotExist", $"Project not exist!");
+        public static Error SubUnitNotExist() =>
+        new Error("ServiceProvider.SubUnitNotExist", "SubUnit doesn't exist!");
+
+        public static Error ChannelNotExist() =>
+        new Error("ServiceProvider.ChannelNotExist", "Channel doesn't exist!");
+
+        public static Error ServiceProviderNotExist() =>
+        new Error("ServiceProvider.ServiceProviderNotExist", "ServiceProvider doesn't exist!");
+
+        public static Error ServiceProviderUserNotExist() =>
+        new Error("ServiceProvider.ServiceProviderUserNotExist", "Member doesn't exist!");
+
+        public static Error UserAlreadyAdd() =>
+        new Error("ServiceProvider.UserAlreadyAdd", "Member already been add!");
+
+        public static Error ServiceProviderInUse(string service) =>
+        new Error("ServiceProvider.ServiceProviderInUse", $"Channel {service} is use!");
+
+        public static Error ServiceProviderNoChanges() =>
+        new Error("ServiceProvider.ChannelNoChanges", "No changes has made!");
+    }
 }
