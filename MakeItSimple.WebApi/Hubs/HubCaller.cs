@@ -49,9 +49,9 @@
 
 //        public async Task SendToChannelAsync(int channel, string method, object data)
 //        {
-            
+
 //            await _hubContext.Clients.Group(channel.ToString()).SendAsync(method, data);
-            
+
 //        }
 
 //        private string GetGroupName(int channel)
