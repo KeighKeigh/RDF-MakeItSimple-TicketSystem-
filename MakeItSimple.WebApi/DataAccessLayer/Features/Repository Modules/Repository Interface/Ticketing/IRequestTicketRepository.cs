@@ -1,4 +1,5 @@
-﻿using MakeItSimple.WebApi.Models.Ticketing;
+﻿using MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating;
+using MakeItSimple.WebApi.Models.Ticketing;
 using NuGet.Packaging.Signing;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Repository_Interface.Ticketing

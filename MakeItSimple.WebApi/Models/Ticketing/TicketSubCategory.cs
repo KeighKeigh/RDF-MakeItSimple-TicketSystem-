@@ -7,9 +7,9 @@ namespace MakeItSimple.WebApi.Models.Ticketing
     {
 
         public int Id { get; set; }
-        public int RequestConcernId { get; set; }
+        public int? RequestConcernId { get; set; }
         public virtual RequestConcern RequestConcern { get; set; }
-        public int SubCategoryId { get; set; }
+        public int? SubCategoryId { get; set; }
         public virtual SubCategory SubCategory { get; set; }
         public bool? IsRemoved { get; set; }
     }

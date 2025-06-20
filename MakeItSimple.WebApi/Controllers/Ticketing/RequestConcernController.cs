@@ -23,6 +23,9 @@ using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketC
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using Microsoft.AspNetCore.Authorization;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AssignAndApprovalTicket.AssignAndApprovalConcern;
+using MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddRequest;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddRequest.UpdateRequestConcern;
+using DocumentFormat.OpenXml.Bibliography;
 
 
 
@@ -72,7 +75,7 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
                 await transaction.RollbackAsync();
                 return Conflict(ex.Message);
             }
-        } 
+        }
 
 
         [HttpGet("backjob")]
@@ -491,6 +494,36 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPost("update-request-concern")]
+        public async Task<IActionResult> UpdateRequestConcern( [FromForm] UpdateRequestConcernCommand command)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+
+                if (User.Identity is ClaimsIdentity identity && Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
+                {
+                    command.Modified_By = userId;
+                    command.Added_By = userId;
+                    //command.UserId = userId;
+
+                }
+                var result = await _mediator.Send(command);
+                if (result.IsFailure)
+                {
+                    await transaction.RollbackAsync();
+                    return BadRequest(result);
+                }
+                await transaction.CommitAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return Conflict(ex.Message);
             }
         }
 

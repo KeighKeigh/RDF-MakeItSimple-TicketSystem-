@@ -83,6 +83,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.Phase_One.Serv
                     {
                         ServiceProviderName = command.serviceProviderName,
                         AddedBy = command.addedBy,
+                        
+                        
                     };
 
                     await _context.ServiceProviders.AddAsync(services, cancellationToken);

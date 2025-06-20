@@ -37,6 +37,11 @@
             public string FullName { get; set; }
             public int? ChannelId { get; set; }
             public string Channel_Name { get; set; }
+            public DateTime? TargetDate { get; set; }
+            public Guid? AssignTo { get; set; }
+            public string AssignToName { get; set; }
+            public int? ServiceProviderId { get; set; }
+            public string ServiceProviderName { get; set; }
 
             public List<GetRequestTicketCategory> GetRequestTicketCategories {  get; set; }
 

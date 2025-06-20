@@ -18,6 +18,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
             public bool? Is_Reject { get; set; }
             public bool? Is_Approve { get; set; }
             public bool? Ascending { get; set; }
+            public string ServiceProviderName { get; set; }
+            public string ChannelName { get; set; }
         }
     }
 }

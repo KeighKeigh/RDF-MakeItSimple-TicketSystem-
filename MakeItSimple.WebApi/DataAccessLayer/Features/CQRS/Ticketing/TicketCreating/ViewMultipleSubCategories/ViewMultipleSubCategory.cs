@@ -6,6 +6,7 @@ using MakeItSimple.WebApi.Models.Setup.SubCategorySetup;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.CategorySetup.GetCategory.GetCategoryResult;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.ViewMultipleSubCategories
 {
@@ -14,16 +15,16 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
         public record ViewMultipleCategoryResult
         {
-            public int CategoryId { get; set; }
+            public int? CategoryId { get; set; }
             public string Category_Description { get; set; }
-            public int SubCategoryId { get; set; }
+            public int? SubCategoryId { get; set; }
             public string Sub_Category_Description { get; set; }
 
         }
 
         public class ViewMultipleSubCategoryQuery : IRequest<Result>
         {
-            public List<int> CategoryId { get; set; }
+            public List<int?> CategoryId { get; set; }
         }
 
         public class Handler : IRequestHandler<ViewMultipleSubCategoryQuery, Result>
@@ -58,18 +59,25 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
                 //}
 
+                //kk
+                if (request.CategoryId == null)
+                {
+                    return Result.Success();
+                }
+
+
                 var result = await _context.SubCategories
-                    .Include(s => s.Category)
-                    .Where(s => request.CategoryId.Contains(s.CategoryId))
-                    .Select(x => new ViewMultipleCategoryResult
-                    {
-                        CategoryId = x.CategoryId,
-                        Category_Description = x.Category.CategoryDescription,
-                        SubCategoryId = x.Id,
-                        Sub_Category_Description = x.SubCategoryDescription
+                        .Include(s => s.Category)
+                        .Where(s => request.CategoryId.Contains(s.CategoryId))
+                        .Select(x => new ViewMultipleCategoryResult
+                        {
+                            CategoryId = x.CategoryId,
+                            Category_Description = x.Category.CategoryDescription,
+                            SubCategoryId = x.Id,
+                            Sub_Category_Description = x.SubCategoryDescription
 
-                    }).ToListAsync();
-
+                        }).ToListAsync();
+                
 
                 return Result.Success(result);
             }
