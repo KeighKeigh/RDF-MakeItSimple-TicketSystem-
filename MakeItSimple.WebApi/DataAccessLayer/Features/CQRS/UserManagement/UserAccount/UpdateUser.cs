@@ -159,7 +159,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                 user.SubUnitId = command.SubUnitId;
                 user.CompanyId = command.CompanyId;
                 user.LocationId = LocationNotExist.Id;
-                user.BusinessUnitId = command.BusinessUnitId;
+                user.BusinessUnitId = command.BusinessUnitId.Value;
                 user.UnitId = command.UnitId;
                 //user.EmpId = command.EmpId;
                 //user.Fullname = command.Fullname;

@@ -28,56 +28,59 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
                 var userDetails = await unitOfWork.User
                     .UserExist(command.Transacted_By);
 
-                var closedTicketExist = await unitOfWork.ClosingTicket
-                    .ClosingTicketExist(command.ClosingTicketId);
 
-                if (closedTicketExist is null)          
-                    return Result.Failure(ClosingTicketError.ClosingTicketIdNotExist());
-
-                if (closedTicketExist.IsActive is false)
-                    return Result.Failure(ClosingTicketError.TicketAlreadyCancel());
-
-                var rejectClosingTicket = new ClosingTicket
+                foreach (var close in command.RejectClosingRequests)
                 {
-                    Id = closedTicketExist.Id,
-                    RejectClosedBy = command.RejectClosed_By,
-                    RejectRemarks = command.Reject_Remarks,
-                };
+                    var closedTicketExist = await unitOfWork.ClosingTicket
+                        .ClosingTicketExist(close.ClosingTicketId);
 
-                await unitOfWork.ClosingTicket.RejectClosingTicket(rejectClosingTicket);
+                    if (closedTicketExist is null)
+                        return Result.Failure(ClosingTicketError.ClosingTicketIdNotExist());
 
-                await unitOfWork.ClosingTicket.RemoveClosingApprover(command.ClosingTicketId);
+                    if (closedTicketExist.IsActive is false)
+                        return Result.Failure(ClosingTicketError.TicketAlreadyCancel());
 
-                await unitOfWork.RequestTicket.RemoveTicketHistory(closedTicketExist.TicketConcernId);
+                    var rejectClosingTicket = new ClosingTicket
+                    {
+                        Id = closedTicketExist.Id,
+                        RejectClosedBy = command.RejectClosed_By,
+                        RejectRemarks = command.Reject_Remarks,
+                    };
 
-                var addTicketHistory = new TicketHistory
-                {
-                    TicketConcernId = closedTicketExist.TicketConcernId,
-                    TransactedBy = command.Transacted_By,
-                    TransactionDate = DateTime.Now,
-                    Request = TicketingConString.Reject,
-                    Status = $"{TicketingConString.CloseReject} {userDetails.Fullname}",
-                    Remarks = command.Reject_Remarks,
+                    await unitOfWork.ClosingTicket.RejectClosingTicket(rejectClosingTicket);
 
-                };
+                    await unitOfWork.ClosingTicket.RemoveClosingApprover(close.ClosingTicketId);
 
-                await unitOfWork.RequestTicket.CreateTicketHistory(addTicketHistory, cancellationToken);
+                    await unitOfWork.RequestTicket.RemoveTicketHistory(closedTicketExist.TicketConcernId);
 
-                var addNewTicketTransactionNotification = new TicketTransactionNotification
-                {
+                    var addTicketHistory = new TicketHistory
+                    {
+                        TicketConcernId = closedTicketExist.TicketConcernId,
+                        TransactedBy = command.Transacted_By,
+                        TransactionDate = DateTime.Now,
+                        Request = TicketingConString.Reject,
+                        Status = $"{TicketingConString.CloseReject} {userDetails.Fullname}",
+                        Remarks = command.Reject_Remarks,
 
-                    Message = $"Closing request for ticket number {closedTicketExist.TicketConcernId} was rejected.",
-                    AddedBy = command.RejectClosed_By.Value,
-                    Created_At = DateTime.Now,
-                    ReceiveBy = closedTicketExist.TicketConcern.UserId.Value,
-                    Modules = PathConString.IssueHandlerConcerns,
-                    Modules_Parameter = PathConString.OpenTicket,
-                    PathId = closedTicketExist.TicketConcernId,
+                    };
 
-                };
+                    await unitOfWork.RequestTicket.CreateTicketHistory(addTicketHistory, cancellationToken);
 
-                await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification,cancellationToken);
+                    var addNewTicketTransactionNotification = new TicketTransactionNotification
+                    {
 
+                        Message = $"Closing request for ticket number {closedTicketExist.TicketConcernId} was rejected.",
+                        AddedBy = command.RejectClosed_By.Value,
+                        Created_At = DateTime.Now,
+                        ReceiveBy = closedTicketExist.TicketConcern.UserId.Value,
+                        Modules = PathConString.IssueHandlerConcerns,
+                        Modules_Parameter = PathConString.OpenTicket,
+                        PathId = closedTicketExist.TicketConcernId,
+
+                    };
+
+                    await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification, cancellationToken);
+                }
                 await unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result.Success();
             }

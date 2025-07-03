@@ -21,6 +21,8 @@
             public int ForApprovalOnHoldNotif { get; set; }
             public int ForApprovalTransferNotif { get; set; }
             public int ForApprovalClosingNotif { get; set; }
+            public int ForApprovalTargetDate { get; set ; }
+            public int ApprovalDateNotif { get; set;}
 
         }
     }

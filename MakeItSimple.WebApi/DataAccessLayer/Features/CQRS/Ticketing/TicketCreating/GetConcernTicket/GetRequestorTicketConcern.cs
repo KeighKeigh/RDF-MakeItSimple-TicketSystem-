@@ -4,6 +4,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.GetConcernTicket.GetRequestorTicketConcern.GetRequestorTicketConcernResult;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.GetConcernTicket
@@ -42,19 +43,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             x.Permissions
 
                         }).ToListAsync();
-                    
-
-                    var receiverPermissionList = allUserList
-                    .Where(x => x.Permissions
-                    .Contains(TicketingConString.Receiver))
-                    .Select(x => x.UserRoleName)
-                    .ToList();
-
-                    var issueHandlerPermissionList = allUserList
-                   .Where(x => x.Permissions
-                   .Contains(TicketingConString.IssueHandler))
-                   .Select(x => x.UserRoleName)
-                   .ToList();
 
                     var requestorPermissionList = allUserList
                     .Where(x => x.Permissions
@@ -105,6 +93,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         switch (request.Concern_Status)
                         {
                             case TicketingConString.Approval:
+                                
                                 requestConcernsQuery = requestConcernsQuery
                                     .Where(x => x.ConcernStatus == TicketingConString.ForApprovalTicket);
                                 break;
@@ -141,126 +130,40 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                                 return new PagedList<GetRequestorTicketConcernResult>(new List<GetRequestorTicketConcernResult>(), 0, request.PageNumber, request.PageSize);
                             }
                         }
-
-                        if (request.UserType == TicketingConString.Receiver && requestConcernsQuery.Any())
+                        if(request.UserType == TicketingConString.Receiver)
                         {
-                            var listOfRequest = await requestConcernsQuery
-                                .Select(x => x.User.BusinessUnitId)
-                                .ToListAsync();
+                            var userChannelId = await _context.ChannelUsers
+                                 .Where(cu => cu.UserId == request.UserId)
+                                 .Select(cu => cu.ChannelId)
+                                 .ToListAsync();
 
-                            var businessUnitDefault = await _context.BusinessUnits
-                            .AsNoTracking()
-                            .Where(x => x.IsActive == true)
-                            .Where(x => listOfRequest.Contains(x.Id))
-                            .Select(x => x.Id)
-                            .ToListAsync();
 
-                            var receiverList = await _context.Receivers
-                                .AsNoTrackingWithIdentityResolution()
-                                .Include(x => x.BusinessUnit)
-                                .AsSplitQuery()
-                                .Where(x => businessUnitDefault
-                                .Contains(x.BusinessUnitId.Value) && x.IsActive == true &&
-                                 x.UserId == request.UserId)
-                                .Select(x => x.BusinessUnitId)
-                                .ToListAsync();
-
-                            if (receiverPermissionList.Any(x => x.Contains(request.Role)) && receiverList.Any())
+                            if (userChannelId.Any())
                             {
+                                var serviceProviderIds = await _context.ServiceProviderChannels
+                                    .Where(spc => userChannelId.Contains(spc.ChannelId.Value))
+                                    .Select(spc => spc.ServiceProviderId)
+                                    .Distinct()
+                                    .ToListAsync();
+
+                                var allRelatedChannelIds = await _context.ServiceProviderChannels
+                                    .Where(spc => serviceProviderIds.Contains(spc.ServiceProviderId))
+                                    .Select(spc => spc.ChannelId)
+                                    .ToListAsync();
 
                                 requestConcernsQuery = requestConcernsQuery
-                                    .Where(x => receiverList.Contains(x.User.BusinessUnitId));
-                               
-                                
+                                    .Where(rc =>
+                                        (rc.ChannelId.HasValue && userChannelId.Contains(rc.ChannelId.Value)) && rc.AssignTo == null
+                                        || (!rc.ChannelId.HasValue && rc.ServiceProviderId != null && serviceProviderIds.Contains(rc.ServiceProviderId.Value) && rc.AssignTo == null)
+                                    );
                             }
-                            
                             else
                             {
-                                return new PagedList<GetRequestorTicketConcernResult>(new List<GetRequestorTicketConcernResult>(), 0, request.PageNumber, request.PageSize);
+                                requestConcernsQuery = requestConcernsQuery.Where(x => false);
                             }
-
-                            if (!string.IsNullOrEmpty(request.ServiceProviderName))
-                            {
-                                requestConcernsQuery = requestConcernsQuery
-                                    .Where(x => x.ServiceProvider != null &&
-                                                x.ServiceProvider.ServiceProviderName.Contains(request.ServiceProviderName));
-                            }
-
-                            if (!string.IsNullOrEmpty(request.ChannelName))
-                            {
-                                requestConcernsQuery = requestConcernsQuery
-                                    .Where(x => x.Channel != null &&
-                                                x.Channel.ChannelName.Contains(request.ChannelName));
-                            }
-
-
-
-
-                            //if (!string.IsNullOrEmpty(request.ServiceProviderName))
-                            //{
-
-                            //    var serviceProviderId = await _context.ServiceProviders
-                            //        .Where(sp => sp.ServiceProviderName == request.ServiceProviderName)
-                            //        .Select(sp => sp.Id)
-                            //        .FirstOrDefaultAsync();
-
-                            //    if (serviceProviderId == 0)
-                            //    {
-                            //        return new PagedList<GetRequestorTicketConcernResult>(new List<GetRequestorTicketConcernResult>(), 0, request.PageNumber, request.PageSize);
-                            //    }
-
-                            //    if (string.IsNullOrEmpty(request.ChannelName))
-                            //    {
-
-                            //        var providerChannelIds = await _context.ServiceProviderChannels
-                            //            .Where(sc => sc.ServiceProviderId == serviceProviderId)
-                            //            .Select(sc => sc.ChannelId)
-                            //            .ToListAsync();
-
-
-                            //        var userChannelIds = await _context.ChannelUsers
-                            //            .Where(cu => cu.UserId == request.UserId && providerChannelIds.Contains(cu.ChannelId))
-                            //            .Select(cu => cu.ChannelId)
-                            //            .ToListAsync();
-
-
-                            //        requestConcernsQuery = requestConcernsQuery
-                            //            .Where(rc => rc.ChannelId.HasValue && userChannelIds.Contains(rc.ChannelId.Value));
-                            //    }
-                            //    else
-                            //    {
-                            //        var channelId = await _context.ServiceProviderChannels
-                            //            .Where(sc => sc.ServiceProviderId == serviceProviderId)
-                            //            .Join(_context.Channels,
-                            //                sc => sc.ChannelId,
-                            //                c => c.Id,
-                            //                (sc, c) => new { sc, c })
-                            //            .Where(x => x.c.ChannelName == request.ChannelName)
-                            //            .Select(x => x.c.Id)
-                            //            .FirstOrDefaultAsync();
-
-                            //        if (channelId == 0)
-                            //        {
-                            //            return new PagedList<GetRequestorTicketConcernResult>(new List<GetRequestorTicketConcernResult>(), 0, request.PageNumber, request.PageSize);
-                            //        }
-
-
-                            //        var isInChannel = await _context.ChannelUsers
-                            //            .AnyAsync(cu => cu.UserId == request.UserId && cu.ChannelId == channelId);
-
-                            //        if (!isInChannel)
-                            //        {
-                            //            return new PagedList<GetRequestorTicketConcernResult>(new List<GetRequestorTicketConcernResult>(), 0, request.PageNumber, request.PageSize);
-                            //        }
-
-
-                            //        requestConcernsQuery = requestConcernsQuery
-                            //            .Where(rc => rc.ChannelId == channelId);
-                            //    }
-                            //}
                         }
-
                     }
+                    
 
                 }
 

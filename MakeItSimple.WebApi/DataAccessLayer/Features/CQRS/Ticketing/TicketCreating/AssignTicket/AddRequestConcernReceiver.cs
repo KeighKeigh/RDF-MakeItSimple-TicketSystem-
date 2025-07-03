@@ -32,8 +32,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 var dateToday = DateTime.Today;
 
                 var requestConcernId = new int();
-                var ticketCategoryList = new List<int>();
-                var ticketSubCategoryList = new List<int>();
+                var ticketCategoryList = new List<int?>();
+                var ticketSubCategoryList = new List<int?>();
 
                 var userDetails = await unitOfWork.User
                     .UserExist(command.Modified_By);

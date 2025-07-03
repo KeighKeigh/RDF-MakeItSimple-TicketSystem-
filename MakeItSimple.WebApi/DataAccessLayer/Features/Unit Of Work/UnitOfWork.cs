@@ -40,6 +40,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work
 
             RequestTicket = new RequestTicketRepository(context, contentType);
             ClosingTicket = new ClosingTicketRepository(context);
+            ApproverDate = new ApproverDateRepository(context);
 
 
             PmsForm = new PmsFormRepository(context);
@@ -64,6 +65,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work
         //Ticketing
         public IRequestTicketRepository RequestTicket { get;private set; }
         public IClosingRepository ClosingTicket { get; private set;}
+        public IApproverDateRepository ApproverDate { get; private set; }
 
 
         //Pms Transaction

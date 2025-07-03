@@ -8,6 +8,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
         public class AllTicketReportsQuery : UserParams, IRequest<PagedList<AllTicketReportsResult>>
         {
             public string Search { get; set; }
+
             public int? Unit { get; set; }
             public Guid? UserId { get; set; }
             public DateTime? Date_From { get; set; }

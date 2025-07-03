@@ -43,7 +43,7 @@ namespace MakeItSimple.WebApi.Models
         public int? CompanyId { get; set; }
         public virtual Company Company { get; set; }
 
-        public int? BusinessUnitId { get; set; }
+        public int BusinessUnitId { get; set; }
         public virtual BusinessUnit BusinessUnit { get; set; }
 
         public int ? DepartmentId { get; set; }
@@ -71,7 +71,7 @@ namespace MakeItSimple.WebApi.Models
         public ICollection<ApproverTicketing> ApproversTickets { get; set; }
         public ICollection<RequestConcern> RequestConcerns { get; set;}
         public ICollection<ServiceProviders> SeviceProviders { get; set; }
-        public ICollection<Receiver> Receivers { get; set; } 
+        public ICollection<Receiver> Receivers { get; set; }
 
 
 

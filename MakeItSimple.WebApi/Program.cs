@@ -25,7 +25,7 @@ var config = builder.Configuration;
 
 var connectionString = builder.Configuration.GetConnectionString("Testing");
 builder.Services.AddDbContext<MisDbContext>(x =>
-x.UseSqlServer(connectionString, sqlOptions => sqlOptions.CommandTimeout(180))
+x.UseSqlServer(connectionString, sqlOptions => sqlOptions.CommandTimeout(360))
     .UseSnakeCaseNamingConvention()
     .EnableDetailedErrors()
     .EnableSensitiveDataLogging()

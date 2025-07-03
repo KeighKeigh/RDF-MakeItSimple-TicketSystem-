@@ -1,4 +1,6 @@
-﻿using MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating;
+﻿using DocumentFormat.OpenXml.InkML;
+using MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating;
+using MakeItSimple.WebApi.Models.Setup.ApproverSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
 using NuGet.Packaging.Signing;
 
@@ -16,14 +18,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         Task CreateTicketSubCategory(TicketSubCategory ticketSubCategory, CancellationToken cancellationToken);
         Task CreateTicketAttachment(TicketAttachment ticketAttachment, CancellationToken cancellationToken);
 
-
+        Task<List<Approver>> ApproverBySubUnitList(int? id);
+        Task ApproveDateTicket(ApproverDate approver, CancellationToken cancellationToken);
+        Task CreateApproval(ApproverTicketing approverTicketing, CancellationToken cancellationToken);
         Task<int>PossibleRequestId();
         Task<int> PossibleTicketId();
 
-
+        Task UpdateTicketConcerns(TicketConcern ticketConcern, CancellationToken cancellationToken);
         Task UpdateRequestConcern(RequestConcern requestConcern, CancellationToken cancellationToken);
-
+        Task UpdateTicketConcernss(TicketConcern ticketConcern, CancellationToken cancellationToken);
+        Task UpdateRequestConcerns(RequestConcern requestConcern, CancellationToken cancellationToken);
         Task UpdateTicketConcern(TicketConcern ticketConcern, CancellationToken cancellationToken);
+
         Task UpdateTicketAttachment(TicketAttachment ticketAttachment, CancellationToken cancellationToken);
 
         Task UpdateTicketHistory(TicketHistory ticketHistory,CancellationToken cancellationToken);
@@ -32,8 +38,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
        
 
 
-        Task RemoveTicketCategory(int id, List<int> categoryId, CancellationToken cancellationToken);
-        Task RemoveTicketSubCategory(int id, List<int> subCategoryId, CancellationToken cancellationToken);
+        Task RemoveTicketCategory(int id, List<int?> categoryId, CancellationToken cancellationToken);
+        Task RemoveTicketSubCategory(int id, List<int?> subCategoryId, CancellationToken cancellationToken);
         Task RemoveTicketHistory(int? id);
         Task CancelledTicketConcern(int? id);
         Task CancelledRequestConcern(int? id);
@@ -46,7 +52,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         Task<TicketConcern> TicketConcernExist(int? id);
         Task<TicketConcern> TicketConcernByRequest(int? id);
         Task<TicketCategory> TicketCategoryExist(int? id);
-        Task<TicketSubCategory> TicketSubCategoryExist(int? id);    
+        Task<TicketCategory> TicketCategoryExist(int? id, int? requestConcernId);
+        Task<TicketSubCategory> TicketSubCategoryExist(int? id, int? requestConcernId);
+        Task<TicketSubCategory> TicketSubCategoryExist(int? id);
+
         Task<TicketAttachment> TicketAttachmentExist(int? id);
         Task<List<TicketHistory>> TicketHistoryByForApprovalList(int? id);
         Task<TicketHistory> TicketHistoryMinByForApproval(int? id);

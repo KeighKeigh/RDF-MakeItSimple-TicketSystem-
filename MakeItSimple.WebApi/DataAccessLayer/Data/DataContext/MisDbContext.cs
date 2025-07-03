@@ -95,7 +95,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Data.DataContext
         public virtual DbSet<TicketCategory> TicketCategories { get; set; }
         public virtual DbSet<TicketSubCategory> TicketSubCategories {  get; set; } 
         public virtual DbSet<TicketTechnician> TicketTechnicians { get; set; }
-
+        public virtual DbSet<ApproverDate> ApproverDates { get; set; }
         //Pms Setup
 
         public virtual DbSet<PmsForm> PmsForms { get; set; }

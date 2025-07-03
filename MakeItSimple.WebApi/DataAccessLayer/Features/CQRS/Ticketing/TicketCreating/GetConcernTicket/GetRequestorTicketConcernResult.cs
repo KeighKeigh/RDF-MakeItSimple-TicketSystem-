@@ -57,7 +57,7 @@
             public class GetRequestSubTicketCategory
             {
                 public int? TicketSubCategoryId { get; set; }
-                public int Category_Id { get; set; }
+                public int? Category_Id { get; set; }
                 public int? SubCategoryId { get; set; }
                 public string SubCategory_Description { get; set; }
             }
@@ -76,7 +76,7 @@
           
             public DateTime? Date_Needed { get; set; }
             public string Added_By { get; set; }
-            public DateTime Created_At { get; set; }
+            public DateTime? Created_At { get; set; }
             public string Modified_By { get; set; }
             public DateTime? updated_At { get; set; }
             public bool? Is_Confirmed { get; set; }
@@ -97,7 +97,7 @@
                 public DateTime Created_At { get; set; }
                 public string Modified_By { get; set; }
                 public DateTime? Updated_At { get; set; }
-                public bool Is_Active { get; set; }
+                public bool? Is_Active { get; set; }
                 public bool ? OnHold { get; set; }
                 public DateTime ? OnHold_At { get; set; }
                 public string OnHold_Reasons { get; set; }

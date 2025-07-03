@@ -10,11 +10,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
             public Guid? RejectTransfer_By { get; set; }
             public Guid? Transacted_By { get; set; }
             public string Role { get; set; }
-            public int TransferTicketId { get; set; }
 
             public string Modules { get; set; }
 
             public string Reject_Remarks { get; set; }
+
+            public List<RejectTransferTicketRequest> RejectTransferTicketRequests { get; set; }
+
+            public class RejectTransferTicketRequest
+            {
+                public int? TransferTicketId { get; set; }
+            }
+
         }
     }
 }

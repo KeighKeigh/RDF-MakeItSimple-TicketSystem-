@@ -27,45 +27,49 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Re
                 var userDetails = await _context.Users
                     .FirstOrDefaultAsync(x => x.Id == command.Transacted_By);
 
-                var onHoldTicketExist = await _context.TicketOnHolds
-                    .Include(t => t.TicketConcern)
-                    .FirstOrDefaultAsync(x => x.Id == command.OnHoldTicketId, cancellationToken);
+                foreach(var hold in command.RejectOnHoldRequests)
+                {
+                    var onHoldTicketExist = await _context.TicketOnHolds
+                        .Include(t => t.TicketConcern)
+                        .FirstOrDefaultAsync(x => x.Id == hold.OnHoldTicketId, cancellationToken);
 
-                if (onHoldTicketExist is null)
-                    return Result.Failure(TicketOnHoldError.TicketOnHoldIdNotExist());
+                    if (onHoldTicketExist is null)
+                        return Result.Failure(TicketOnHoldError.TicketOnHoldIdNotExist());
 
-                if (onHoldTicketExist.IsActive is false)
-                    return Result.Failure(TicketRequestError.TicketAlreadyCancel());
+                    if (onHoldTicketExist.IsActive is false)
+                        return Result.Failure(TicketRequestError.TicketAlreadyCancel());
 
-                var userRoleList =
-                    await _context.UserRoles
-                    .Select(u => new
+                    var userRoleList =
+                        await _context.UserRoles
+                        .Select(u => new
+                        {
+                            u.Permissions,
+                            u.UserRoleName,
+                        })
+                        .ToListAsync();
+
+                    var approverUserList = await _context.ApproverTicketings
+                        .Where(x => x.TicketOnHoldId == onHoldTicketExist.Id)
+                        .ToListAsync();
+
+                    if (!approverUserList.Any())
                     {
-                        u.Permissions,
-                        u.UserRoleName,
-                    })
-                    .ToListAsync();
+                        return Result.Failure(TransferTicketError.NoApproverExist());
+                    }
 
-                var approverUserList = await _context.ApproverTicketings
-                    .Where(x => x.TicketOnHoldId == onHoldTicketExist.Id)
-                    .ToListAsync();
+                    var approverPermission = userRoleList
+                    .Where(x => x.Permissions.Contains(TicketingConString.Approver))
+                    .Select(x => x.UserRoleName);
 
-                if (!approverUserList.Any())
-                {
-                    return Result.Failure(TransferTicketError.NoApproverExist());
+                    if (!approverPermission.Any(x => x.Contains(command.Role)))
+                    {
+                        return Result.Failure(TicketRequestError.NotAutorize());
+                    }
+
+                    await UpdateRejectConcernStatus(approverUserList, onHoldTicketExist, command, cancellationToken);
+                    await OnHoldHistory(userDetails, onHoldTicketExist, command, cancellationToken);
+                    
                 }
-
-                var approverPermission = userRoleList
-                .Where(x => x.Permissions.Contains(TicketingConString.Approver))
-                .Select(x => x.UserRoleName);
-
-                if (!approverPermission.Any(x => x.Contains(command.Role)))
-                {
-                    return Result.Failure(TicketRequestError.NotAutorize());
-                }
-
-                await UpdateRejectConcernStatus(approverUserList, onHoldTicketExist, command, cancellationToken);
-                await OnHoldHistory(userDetails, onHoldTicketExist, command, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 return Result.Success();
             }

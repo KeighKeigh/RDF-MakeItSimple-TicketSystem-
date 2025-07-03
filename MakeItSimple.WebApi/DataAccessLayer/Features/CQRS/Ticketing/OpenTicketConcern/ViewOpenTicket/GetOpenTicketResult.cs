@@ -133,7 +133,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                 public class ApproverList
                 {
                     public string ApproverName { get; set; }
-                    public int Approver_Level { get; set; }
+                    public int? Approver_Level { get; set; }
                 }
 
                 public List<GetAttachmentForClosingTicket> GetAttachmentForClosingTickets { get; set; }
@@ -239,10 +239,44 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
 
             }
 
+           
+
+
             public DateTime ? Transaction_Date { get; set; }
 
-            public int Aging_Days { get; set; }
+            public int? Aging_Days { get; set; }
 
+
+            //public List<GetApprovalTargetDate> GetApprovalTargetDates { get; set; }
+
+            //public List<GetForApprovalTicketCategory> GetForApprovalTicketCategories { get; set; }
+
+            //public class GetForApprovalTicketCategory
+            //{
+            //    public int? TicketCategoryId { get; set; }
+            //    public int? CategoryId { get; set; }
+            //    public string Category_Description { get; set; }
+
+            //}
+
+            //public List<GetForApprovalTicketSubCategory> GetForApprovalTicketSubCategories { get; set; }
+
+            //public class GetForApprovalTicketSubCategory
+            //{
+            //    public int? TicketSubCategoryId { get; set; }
+            //    public int? SubCategoryId { get; set; }
+            //    public string SubCategory_Description { get; set; }
+            //}
+
+            //public string Approver { get; set; }
+
+            //public List<ApproverListTargetDate> ApproverListTargetDates { get; set; }
+
+            //public class ApproverListTargetDate
+            //{
+            //    public string ApproverName { get; set; }
+            //    public int? Approver_Level { get; set; }
+            //}
         }
     }
 }

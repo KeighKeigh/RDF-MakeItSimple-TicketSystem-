@@ -53,6 +53,12 @@ namespace MakeItSimple.WebApi.Models.Ticketing
         public DateTime? OnHoldAt { get; set; }
         public string OnHoldReason { get; set; }
 
+        public Guid? AssignTo { get; set; }
+
+        public DateTime? DateApprovedAt { get; set; }
+        public Guid? ApprovedDateBy { get; set; }
+        public virtual User ApprovedDateByUser { get; set; }
+        public bool? IsDateApproved { get; set; }
 
         public ICollection<TicketAttachment> TicketAttachments { get; set; }    
         public ICollection<ClosingTicket> ClosingTickets { get; set; }
@@ -61,6 +67,7 @@ namespace MakeItSimple.WebApi.Models.Ticketing
         public ICollection<TicketCommentView> TicketCommentViews { get; set; }
         public ICollection<TicketHistory> ticketHistories { get; set; }
         public ICollection<TicketOnHold> TicketOnHolds { get; set; }
+        public ICollection<ApproverDate> ApproverDates { get; set; }
 
 
 

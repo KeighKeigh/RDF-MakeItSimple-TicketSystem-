@@ -151,7 +151,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                     DepartmentId = command.DepartmentId,
                     CompanyId = command.CompanyId,
                     LocationId = LocationNotExist.Id,
-                    BusinessUnitId = command.BusinessUnitId,
+                    BusinessUnitId = command.BusinessUnitId.Value,
                     UnitId = command.UnitId,
                     AddedBy = command.Added_By,
                     IsStore = command.Is_Store,

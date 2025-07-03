@@ -151,6 +151,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
                         Channel_Name = x.TicketConcern.RequestConcern.Channel.ChannelName,
                         UserId = x.TicketConcern.UserId,
                         Fullname = x.TicketConcern.User.Fullname,
+                        DateNeeded = x.TicketConcern.RequestConcern.DateNeeded,
                         GetClosingTicketTechnicians = x.ticketTechnicians
                         .Select(t => new GetClosingTicketResults.GetClosingTicketTechnician
                         {

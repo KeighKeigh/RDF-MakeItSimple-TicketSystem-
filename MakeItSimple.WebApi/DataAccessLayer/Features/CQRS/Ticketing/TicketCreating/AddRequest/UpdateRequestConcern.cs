@@ -7,6 +7,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Errors.UserManagement.UserAccount;
 using MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work;
 using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.AddRequest.AddRequestConcern;
@@ -34,449 +35,343 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
             public async Task<Result> Handle(UpdateRequestConcernCommand command, CancellationToken cancellationToken)
             {
-                if (command.AssignTo == null)
+
+                var ticketConcernId = new int(); //????kkkk
+                var requestConcernId = new int();
+                var ticketCategoryList = new List<int?>();
+                var ticketSubCategoryList = new List<int?>();
+
+                var userDetails = await unitOfWork.User
+                    .UserExist(command.Added_By);
+
+                var userIdExist = await unitOfWork.User
+                    .UserExist(command.UserId);
+
+                var handlerDetails = await unitOfWork.User
+                        .UserExist(command.AssignTo);
+
+                if (userIdExist is null)
+                    return Result.Failure(UserError.UserNotExist());
+
+
+                foreach (var category in command.AddRequestTicketCategory)
                 {
-                    
-                    var ticketCategoryList = new List<int>();
-                    var ticketSubCategoryList = new List<int>();
-
-                    var userDetails = await unitOfWork.User
-                        .UserExist(command.Added_By);
-
-                    var userIdExist = await unitOfWork.User
-                        .UserExist(command.UserId);
-
-                    if (userIdExist is null)
-                        return Result.Failure(UserError.UserNotExist());
-
-                    var channelExist = await unitOfWork.Channel
-                      .ChannelExist(command.ChannelId);
-
-                    if (channelExist is null)
-                        return Result.Failure(TicketRequestError.ChannelNotExist());
-
-                    foreach (var category in command.AddRequestTicketCategory)
-                    {
-                        var ticketCategoryExist = await unitOfWork.Category
-                          .CategoryExist(category.CategoryId);
-
-                        if (ticketCategoryExist is null)
-                            return Result.Failure(TicketRequestError.CategoryNotExist());
-                    }
-
-                    foreach (var subCategory in command.AddRequestTicketSubCategory)
-                    {
-                        var ticketSubCategoryExist = await unitOfWork.SubCategory
-                            .SubCategoryExist(subCategory.SubCategoryId);
-
-                        if (ticketSubCategoryExist is null)
-                            return Result.Failure(TicketRequestError.SubCategoryNotExist());
-                    }
+                    var ticketCategoryExist = await unitOfWork.Category
+                      .CategoryExist(category.CategoryId);
 
 
-                    
                 }
 
-                else if(command.AssignTo != null)
+                foreach (var subCategory in command.AddRequestTicketSubCategory)
                 {
-                    var dateToday = DateTime.Today;
+                    var ticketSubCategoryExist = await unitOfWork.SubCategory
+                        .SubCategoryExist(subCategory.SubCategoryId);
 
-                    var requestConcernId = new int();
-                    var ticketCategoryList = new List<int>();
-                    var ticketSubCategoryList = new List<int>();
+                }
 
-                    var userDetails = await unitOfWork.User
-                        .UserExist(command.Modified_By);
+                var requestConcernIdExist = await unitOfWork.RequestTicket
+                    .RequestConcernExist(command.RequestConcernId);
 
-                    var handlerDetails = await unitOfWork.User
-                        .UserExist(command.UserId);
+                var ticketConcernIdExist = await unitOfWork.RequestTicket.TicketConcernExist(command.TicketConcernId);
 
-                    var receiverPermissionList = await unitOfWork.UserRole
-                        .UserRoleByPermission(TicketingConString.Requestor);
+                if (requestConcernIdExist is not null)
+                {
 
-                    var issueHandlerPermissionList = await unitOfWork.UserRole
-                        .UserRoleByPermission(TicketingConString.Requestor);
+                    var ticketConcernExist = await unitOfWork.RequestTicket
+                        .TicketConcernExistByRequestConcernId(command.RequestConcernId);
 
-                    var requestorPermissionList = await unitOfWork.UserRole
-                        .UserRoleByPermission(TicketingConString.Requestor);
+                    if (ticketConcernExist.IsApprove is true)
+                        return Result.Failure(TicketRequestError.TicketAlreadyAssign());
 
-                    switch (await unitOfWork.User.UserExist(command.UserId))
+                    var requestorDetails = await unitOfWork.User
+                             .UserExist(command.UserId);
+                    var updateRequestConcern = new RequestConcern
                     {
-                        case null:
-                            return Result.Failure<int?>(TicketRequestError.UserNotExist());
-                    }
+                        Id = requestConcernIdExist.Id,
+                        Concern = command.Concern,
+                        ChannelId = command.ChannelId == 0 ? null : command.ChannelId,
+                        ContactNumber = command.Contact_Number,
+                        RequestType = command.Request_Type,
 
-                    switch (await unitOfWork.Channel.ChannelExist(command.ChannelId))
-                    {
-                        case null:
-                            return Result.Failure<int?>(TicketRequestError.ChannelNotExist());
-                    }
+                        DateNeeded = command.DateNeeded,
+                        BackJobId = command.BackJobId,
+                        ModifiedBy = command.Modified_By,
+                        Severity = command.Severity,
+                        TargetDate = command.TargetDate.ToString() == "" ? null : command.TargetDate,
+                        AssignTo = command.AssignTo.ToString() == "" ? null : command.AssignTo,
+                        ConcernStatus = command.AssignTo.ToString() == "" ? TicketingConString.ForApprovalTicket : TicketingConString.CurrentlyFixing
+                    };
 
-                    foreach (var category in command.AddRequestTicketCategory)
-                    {
-                        var ticketCategoryExist = await unitOfWork.Category
-                          .CategoryExist(category.CategoryId);
-
-                        if (ticketCategoryExist is null)
-                            return Result.Failure<int?>(TicketRequestError.CategoryNotExist());
-                    }
-
-                    foreach (var subCategory in command.AddRequestTicketSubCategory)
-                    {
-                        var ticketSubCategoryExist = await unitOfWork.SubCategory
-                            .SubCategoryExist(subCategory.SubCategoryId);
-
-                        if (ticketSubCategoryExist is null)
-                            return Result.Failure<int?>(TicketRequestError.SubCategoryNotExist());
-
-                    }
-
-                    if (dateToday > command.TargetDate)
-                        return Result.Failure<int?>(TicketRequestError.DateTimeInvalid());
-
-                    if (command.AssignTo == null)
-                    {
-                        var ticketConcernId = new int();
-                        
-                        
-                        
-                            var requestConcernIdExist = await unitOfWork.RequestTicket
-                            .RequestConcernExist(command.RequestConcernId);
-
-                            if (requestConcernIdExist is not null)
-                            {
-
-
-                                var ticketConcernExist = await unitOfWork.RequestTicket
-                                    .TicketConcernExistByRequestConcernId(command.RequestConcernId);
-
-                                if (ticketConcernExist.IsApprove is true)
-                                    return Result.Failure(TicketRequestError.TicketAlreadyAssign());
-
-                                var updateRequestConcern = new RequestConcern
-                                {
-                                    Id = requestConcernIdExist.Id,
-                                    Concern = command.Concern,
-                                    ChannelId = command.ChannelId,
-                                    ContactNumber = command.Contact_Number,
-                                    RequestType = command.Request_Type,
-                                    DateNeeded = command.DateNeeded,
-                                    BackJobId = command.BackJobId,
-                                    ModifiedBy = command.Modified_By,
-                                    Severity = command.Severity,
-
-                                };
-
-                                await unitOfWork.RequestTicket.UpdateRequestConcern(updateRequestConcern, cancellationToken);
-
-                                ticketConcernId = ticketConcernExist.Id; //kk
-                                requestConcernId = requestConcernIdExist.Id;
-
-                            }
-                            else
-                            {
-                                return Result.Failure(TicketRequestError.RequestConcernIdNotExist());
-                            }
-
-
-                            if (command.AddRequestTicketCategory != null)
-                            {
-                                foreach (var category in command.AddRequestTicketCategory)
-                                {
-                                    var ticketCategoryExist = await unitOfWork.RequestTicket
-                                        .TicketCategoryExist(category.TicketCategoryId);
-
-                                    if (ticketCategoryExist is not null)
-                                    {
-                                        ticketCategoryList.Add(category.TicketCategoryId.Value);
-
-                                    }
-                                    else
-                                    {
-
-                                        var addTicketCategory = new TicketCategory
-                                        {
-                                            RequestConcernId = requestConcernId,
-                                            CategoryId = category.CategoryId.Value,
-                                        };
-
-                                        await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory, cancellationToken);
-
-                                    }
-                                }
-
-                                foreach (var subCategory in command.AddRequestTicketSubCategory)
-                                {
-                                    var ticketSubCategoryExist = await unitOfWork.RequestTicket
-                                        .TicketSubCategoryExist(subCategory.TicketSubCategoryId);
-
-                                    if (ticketSubCategoryExist is not null)
-                                    {
-                                        ticketSubCategoryList.Add(subCategory.TicketSubCategoryId.Value);
-                                    }
-                                    else
-                                    {
-
-                                        var addTicketSubCategory = new TicketSubCategory
-                                        {
-                                            RequestConcernId = requestConcernId,
-                                            SubCategoryId = subCategory.SubCategoryId.Value,
-
-                                        };
-
-                                        await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory, cancellationToken);
-
-                                    }
-
-                                }
-                            }
-
-                            if (ticketCategoryList.Any())
-                                await unitOfWork.RequestTicket.RemoveTicketCategory(requestConcernId, ticketCategoryList, cancellationToken);
-
-                            if (ticketSubCategoryList.Any())
-                                await unitOfWork.RequestTicket.RemoveTicketSubCategory(requestConcernId, ticketSubCategoryList, cancellationToken);
-
-                            if (!Directory.Exists(TicketingConString.AttachmentPath))
-                            {
-                                Directory.CreateDirectory(TicketingConString.AttachmentPath);
-                            }
-
-                            if (command.RequestAttachmentsFile.Count(x => x.Attachment != null) > 0)
-                            {
-                                foreach (var attachments in command.RequestAttachmentsFile.Where(a => a.Attachment.Length > 0))
-                                {
-
-                                    if (attachments.Attachment.Length > 10 * 1024 * 1024)
-                                    {
-                                        return Result.Failure(TicketRequestError.InvalidAttachmentSize());
-                                    }
-
-                                    var allowedFileTypes = new[] { ".jpeg", ".jpg", ".png", ".docx", ".pdf", ".xlsx" };
-                                    var extension = Path.GetExtension(attachments.Attachment.FileName)?.ToLowerInvariant();
-
-                                    if (extension == null || !allowedFileTypes.Contains(extension))
-                                    {
-                                        return Result.Failure(TicketRequestError.InvalidAttachmentType());
-                                    }
-
-                                    var fileName = $"{Guid.NewGuid()}{extension}";
-                                    var filePath = Path.Combine(TicketingConString.AttachmentPath, fileName);
-
-                                    var ticketAttachment = await unitOfWork.RequestTicket
-                                        .TicketAttachmentExist(attachments.TicketAttachmentId);
-
-                                    if (ticketAttachment != null)
-                                    {
-                                        var updateTicketAttachment = new TicketAttachment
-                                        {
-                                            Attachment = filePath,
-                                            FileName = attachments.Attachment.FileName,
-                                            FileSize = attachments.Attachment.Length,
-                                            UpdatedAt = DateTime.Now,
-
-                                        };
-
-                                        await unitOfWork.RequestTicket.UpdateTicketAttachment(updateTicketAttachment, cancellationToken);
-                                    }
-                                    else
-                                    {
-                                        var addAttachment = new TicketAttachment
-                                        {
-                                            TicketConcernId = ticketConcernId, //kk
-                                            Attachment = filePath,
-                                            FileName = attachments.Attachment.FileName,
-                                            FileSize = attachments.Attachment.Length,
-                                            AddedBy = command.Added_By,
-                                        };
-
-                                        await unitOfWork.RequestTicket.CreateTicketAttachment(addAttachment, cancellationToken);
-
-                                    }
-
-                                    await using (var stream = new FileStream(filePath, FileMode.Create))
-                                    {
-                                        await attachments.Attachment.CopyToAsync(stream);
-                                    }
-                                }
-                            }
-                        
-                    }
-
-
+                    await unitOfWork.RequestTicket.UpdateRequestConcern(updateRequestConcern, cancellationToken);
                     if (command.AssignTo != null)
                     {
+                        var updateTicketConcern = new TicketConcern
+                        {
+                            Id = ticketConcernIdExist.Id,
+                            TargetDate = command.TargetDate,
+                            UserId = command.UserId,
+                            IsApprove = false,
+                            IsAssigned = true,
+                            ApprovedBy = command.Added_By,
+                            ApprovedAt = DateTime.Now,
+                            ConcernStatus = TicketingConString.ForApprovalTicket,
+                            AssignTo = command.AssignTo
+                        };
 
-                        
-                        
-                            var ticketConcernExist = await unitOfWork.RequestTicket
-                                   .TicketConcernExist(command.TicketConcernId);
-
-                            if (ticketConcernExist is not null)
-                            {
-                                if (ticketConcernExist.IsActive is false)
-                                    return Result.Failure<int?>(TicketRequestError.TicketAlreadyCancel());
-
-                                var assignTicket = new TicketConcern
-                                {
-                                    Id = ticketConcernExist.Id,
-                                    UserId = command.UserId,
-                                    TargetDate = command.TargetDate,
-                                    ModifiedBy = command.Modified_By,
-                                    ConcernStatus = TicketingConString.CurrentlyFixing,
-
-
-                                };
-
-                                await unitOfWork.RequestTicket.UpdateTicketConcern(assignTicket, cancellationToken);
-
-                                if (ticketConcernExist.RequestConcernId is not null)
-                                {
-
-                                    var updateRequestConcern = new RequestConcern
-                                    {
-                                        Id = ticketConcernExist.RequestConcernId.Value,
-                                        ChannelId = command.ChannelId,
-                                        Concern = command.Concern,
-                                        ModifiedBy = command.Modified_By,
-                                        Severity = command.Severity,
-                                        ServiceProviderId = command.ServiceProviderId,
-                                        DateNeeded = command.DateNeeded,
-                                        TargetDate = command.TargetDate,
-                                        ConcernStatus = TicketingConString.CurrentlyFixing,
-
-                                    };
-
-                                    await unitOfWork.RequestTicket.UpdateRequestConcern(updateRequestConcern, cancellationToken);
-                                }
-
-                                requestConcernId = ticketConcernExist.Id;
-
-                            }
-
-
-                            foreach (var category in command.AddRequestTicketCategory)
-                            {
-                                var ticketCategoryExist = await unitOfWork.RequestTicket
-                                    .TicketCategoryExist(category.TicketCategoryId);
-
-                                if (ticketCategoryExist is not null)
-                                {
-                                    ticketCategoryList.Add(category.TicketCategoryId.Value);
-                                }
-                                else
-                                {
-                                    var addTicketCategory = new TicketCategory
-                                    {
-                                        RequestConcernId = requestConcernId,
-                                        CategoryId = category.CategoryId.Value,
-
-                                    };
-
-                                    await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory, cancellationToken);
-                                }
-
-                            }
-
-                            foreach (var subCategory in command.AddRequestTicketSubCategory)
-                            {
-                                var ticketSubCategoryExist = await unitOfWork.RequestTicket
-                                    .TicketSubCategoryExist(subCategory.TicketSubCategoryId);
-
-                                if (ticketSubCategoryExist is not null)
-                                {
-                                    ticketSubCategoryList.Add(subCategory.TicketSubCategoryId.Value);
-                                }
-                                else
-                                {
-                                    var addTicketSubCategory = new TicketSubCategory
-                                    {
-                                        RequestConcernId = requestConcernId,
-                                        SubCategoryId = subCategory.SubCategoryId.Value,
-
-                                    };
-
-                                    await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory, cancellationToken);
-                                }
-
-                            }
-
-                            if (ticketCategoryList.Any())
-                                await unitOfWork.RequestTicket.RemoveTicketCategory(requestConcernId, ticketCategoryList, cancellationToken);
-
-                            if (ticketSubCategoryList.Any())
-                                await unitOfWork.RequestTicket.RemoveTicketSubCategory(requestConcernId, ticketSubCategoryList, cancellationToken);
-
-                            if (!Directory.Exists(TicketingConString.AttachmentPath))
-                            {
-                                Directory.CreateDirectory(TicketingConString.AttachmentPath);
-                            }
-
-                            if (command.RequestAttachmentsFile.Count(x => x.Attachment != null) > 0)
-                            {
-                                foreach (var attachments in command.RequestAttachmentsFile.Where(a => a.Attachment.Length > 0))
-                                {
-
-                                    if (attachments.Attachment.Length > 10 * 1024 * 1024)
-                                    {
-                                        return Result.Failure<int?>(TicketRequestError.InvalidAttachmentSize());
-                                    }
-
-                                    var allowedFileTypes = new[] { ".jpeg", ".jpg", ".png", ".docx", ".pdf", ".xlsx" };
-                                    var extension = Path.GetExtension(attachments.Attachment.FileName)?.ToLowerInvariant();
-
-                                    if (extension == null || !allowedFileTypes.Contains(extension))
-                                    {
-                                        return Result.Failure<int?>(TicketRequestError.InvalidAttachmentType());
-                                    }
-
-                                    var fileName = $"{Guid.NewGuid()}{extension}";
-                                    var filePath = Path.Combine(TicketingConString.AttachmentPath, fileName);
-
-                                    var ticketAttachment = await unitOfWork.RequestTicket
-                                        .TicketAttachmentExist(attachments.TicketAttachmentId);
-
-                                    if (ticketAttachment != null)
-                                    {
-                                        var updateTicketAttachment = new TicketAttachment
-                                        {
-                                            Attachment = filePath,
-                                            FileName = attachments.Attachment.FileName,
-                                            FileSize = attachments.Attachment.Length,
-                                            UpdatedAt = DateTime.Now,
-
-                                        };
-
-                                        await unitOfWork.RequestTicket.UpdateTicketAttachment(updateTicketAttachment, cancellationToken);
-                                    }
-                                    else
-                                    {
-                                        var addAttachment = new TicketAttachment
-                                        {
-                                            TicketConcernId = ticketConcernExist.Id,
-                                            Attachment = filePath,
-                                            FileName = attachments.Attachment.FileName,
-                                            FileSize = attachments.Attachment.Length,
-                                            AddedBy = command.Added_By,
-                                        };
-
-                                        await unitOfWork.RequestTicket.CreateTicketAttachment(addAttachment, cancellationToken);
-
-                                    }
-
-                                    await using (var stream = new FileStream(filePath, FileMode.Create))
-                                    {
-                                        await attachments.Attachment.CopyToAsync(stream);
-                                    }
-                                }
-
-                            }
-                        
+                        await unitOfWork.RequestTicket.UpdateTicketConcerns(updateTicketConcern, cancellationToken);
                     }
+                    ticketConcernId = ticketConcernExist.Id; //kk
+                    requestConcernId = requestConcernIdExist.Id;
                 }
 
+                if (command.AssignTo != null)
+                {
+
+
+                    var ticketConcernExists = await unitOfWork.RequestTicket
+                               .TicketConcernExist(command.TicketConcernId);
+
+
+                    var addRequestTicketHistory = new TicketHistory
+                    {
+                      TicketConcernId = ticketConcernExists.Id,
+                      TransactedBy = command.Added_By,
+                      TransactionDate = DateTime.Now,
+                      Request = TicketingConString.Request,
+                      Status = $"{TicketingConString.ConcernCreated} {userDetails.Fullname}"
+                    };
+
+                     await unitOfWork.RequestTicket.CreateTicketHistory(addRequestTicketHistory, cancellationToken);
+
+                
+                    var assignedTicketHistory = new TicketHistory
+                    {
+                        TicketConcernId = ticketConcernExists.Id,
+                        TransactedBy = command.Added_By,
+                        TransactionDate = DateTime.Now,
+                        Request = TicketingConString.ConcernAssign,
+                        Status = $"{TicketingConString.RequestAssign} {handlerDetails.Fullname}"
+                    };
+
+                    await unitOfWork.RequestTicket.CreateTicketHistory(assignedTicketHistory, cancellationToken);
+
+
+                    var addNewTicketTransactionNotification = new TicketTransactionNotification
+                    {
+
+                        Message = $"Ticket number {ticketConcernExists.Id} has been assigned",
+                        AddedBy = command.Added_By.Value,
+                        Created_At = DateTime.Now,
+                        ReceiveBy = command.UserId.Value,
+                        Modules = PathConString.IssueHandlerConcerns,
+                        Modules_Parameter = PathConString.ForApproval,
+                        PathId = ticketConcernExists.Id,
+
+                    };
+
+                    await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification, cancellationToken);
+
+                    var addNewTicketTransactionOngoing = new TicketTransactionNotification
+                    {
+
+                        Message = $"Ticket number {ticketConcernExists.RequestConcernId} Target Date is being approved",
+                        AddedBy = command.Added_By.Value,
+                        Created_At = DateTime.Now,
+                        ReceiveBy = command.UserId.Value,
+                        Modules = PathConString.ConcernTickets,
+                        Modules_Parameter = PathConString.ForApproval,
+                        PathId = ticketConcernExists.RequestConcernId.Value,
+
+
+                    };
+
+                    await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionOngoing, cancellationToken);
+
+                }
+
+                //foreach (var category in command.AddRequestTicketCategory)
+                //{
+                //    var ticketCategoryExist = await unitOfWork.RequestTicket
+                //        .TicketCategoryExist(category.CategoryId);
+
+                //    var listofCategory = await context.TicketCategories.Where(x => x.RequestConcernId == ticketCategoryExist.RequestConcernId).Select(x => x.CategoryId).ToListAsync();
+                //    if (listofCategory != null)
+                //    {
+                //        foreach (var list in listofCategory)
+                //        {
+                //            ticketCategoryList.Add(list);
+                //        }
+                //    }
+
+                //    if (ticketCategoryExist is not null)
+                //    {
+
+
+                //         var addTicketCategory = new TicketCategory
+                //         {
+                //                Id = ticketCategoryExist.Id,
+                //                RequestConcernId = requestConcernId,
+                //                CategoryId = category.CategoryId.ToString() == "" ? null : category.CategoryId,
+                //         };
+
+                //         await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory, cancellationToken);
+
+                //    }
+
+
+                //}
+
+                //foreach (var subCategory in command.AddRequestTicketSubCategory)
+                //{
+                //    var ticketSubCategoryExist = await unitOfWork.RequestTicket
+                //        .TicketSubCategoryExist(subCategory.SubCategoryId);
+
+                //var listofSubCategory = await context.TicketSubCategories.Where(x => x.RequestConcernId == ticketSubCategoryExist.RequestConcernId).Select(x => x.SubCategoryId).ToListAsync();
+
+                //if (listofSubCategory != null)
+                //{
+                //    foreach (var list in listofSubCategory)
+                //    {
+                //        ticketSubCategoryList.Add(list);
+                //    }
+                //}
+
+                //    if (ticketSubCategoryExist is not null)
+                //    {
+
+                //        var addTicketSubCategory = new TicketSubCategory
+                //        {
+                //            RequestConcernId = requestConcernId,
+                //            SubCategoryId = subCategory.SubCategoryId.ToString() == "" ? null : subCategory.SubCategoryId,
+
+                //        };
+
+                //        await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory, cancellationToken);
+                //    }
+
+
+                //}
+
+                // Extract IDs from command for validation
+
+
+                
+
+                    // Process categories - add new ones
+                    foreach (var category in command.AddRequestTicketCategory)
+                    {
+                        var ticketCategoryExist = await unitOfWork.RequestTicket
+                            .TicketCategoryExist(category.CategoryId, command.RequestConcernId);
+                    if (category.CategoryId != null)
+                    {
+                        if (ticketCategoryExist is null)
+                        {
+                            // Add new category
+                            var addTicketCategory = new TicketCategory
+                            {
+                                RequestConcernId = requestConcernId,
+                                CategoryId = category.CategoryId,
+                                
+                            };
+                            await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory, cancellationToken);
+                        }
+                    }
+                    }
+
+                    // Process subcategories - add new ones
+                    foreach (var subCategory in command.AddRequestTicketSubCategory)
+                    {
+                        var ticketSubCategoryExist = await unitOfWork.RequestTicket
+                            .TicketSubCategoryExist(subCategory.SubCategoryId, command.RequestConcernId);
+                    if (subCategory.SubCategoryId != null)
+                    {
+                        if (ticketSubCategoryExist is null)
+                        {
+                            // Add new subcategory
+                            var addTicketSubCategory = new TicketSubCategory
+                            {
+                                RequestConcernId = requestConcernId,
+                                SubCategoryId = subCategory.SubCategoryId,
+                            };
+                            await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory, cancellationToken);
+                        }
+                    }
+                    }
+
+                    if (ticketCategoryList.Any())
+                        await unitOfWork.RequestTicket.RemoveTicketCategory(requestConcernId, ticketCategoryList, cancellationToken);
+
+                    if (ticketSubCategoryList.Any())
+                        await unitOfWork.RequestTicket.RemoveTicketSubCategory(requestConcernId, ticketSubCategoryList, cancellationToken);
+
+                
+                if (!Directory.Exists(TicketingConString.AttachmentPath))
+                {
+                    Directory.CreateDirectory(TicketingConString.AttachmentPath);
+                }
+
+                if (command.RequestAttachmentsFile.Count(x => x.Attachment != null) > 0)
+                {
+                    foreach (var attachments in command.RequestAttachmentsFile.Where(a => a.Attachment.Length > 0))
+                    {
+
+                        if (attachments.Attachment.Length > 10 * 1024 * 1024)
+                        {
+                            return Result.Failure(TicketRequestError.InvalidAttachmentSize());
+                        }
+
+                        var allowedFileTypes = new[] { ".jpeg", ".jpg", ".png", ".docx", ".pdf", ".xlsx" };
+                        var extension = Path.GetExtension(attachments.Attachment.FileName)?.ToLowerInvariant();
+
+                        if (extension == null || !allowedFileTypes.Contains(extension))
+                        {
+                            return Result.Failure(TicketRequestError.InvalidAttachmentType());
+                        }
+
+                        var fileName = $"{Guid.NewGuid()}{extension}";
+                        var filePath = Path.Combine(TicketingConString.AttachmentPath, fileName);
+
+                        var ticketAttachment = await unitOfWork.RequestTicket
+                            .TicketAttachmentExist(attachments.TicketAttachmentId);
+
+                        if (ticketAttachment != null)
+                        {
+                            var updateTicketAttachment = new TicketAttachment
+                            {
+                                Attachment = filePath,
+                                FileName = attachments.Attachment.FileName,
+                                FileSize = attachments.Attachment.Length,
+                                UpdatedAt = DateTime.Now,
+
+                            };
+
+                            await unitOfWork.RequestTicket.UpdateTicketAttachment(updateTicketAttachment, cancellationToken);
+                        }
+                        else
+                        {
+                            var addAttachment = new TicketAttachment
+                            {
+                                TicketConcernId = ticketConcernId, //kk
+                                Attachment = filePath,
+                                FileName = attachments.Attachment.FileName,
+                                FileSize = attachments.Attachment.Length,
+                                AddedBy = command.Added_By,
+                            };
+
+                            await unitOfWork.RequestTicket.CreateTicketAttachment(addAttachment, cancellationToken);
+
+                        }
+
+                        await using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await attachments.Attachment.CopyToAsync(stream);
+                        }
+                    }
+                    
+                }
                 await unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result.Success();
+
             }
             
         }

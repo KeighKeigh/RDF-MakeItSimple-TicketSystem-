@@ -9,6 +9,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
         public Guid? Modified_By { get; set; }
         public Guid? Added_By { get; set; }
         public int? TicketConcernId { get; set; }
+        public int? RequestConcernId { get; set; }
         public int? ClosingTicketId { get; set; }
         public string Resolution { get; set; }
         public string Notes { get; set; }

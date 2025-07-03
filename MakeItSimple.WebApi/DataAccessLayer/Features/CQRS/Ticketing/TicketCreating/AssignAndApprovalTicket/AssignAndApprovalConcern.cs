@@ -60,8 +60,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                 // AddRequest
 
                 var requestConcernId = new int();
-                var ticketCategoryList = new List<int>();
-                var ticketSubCategoryList = new List<int>();
+                var ticketCategoryList = new List<int?>();
+                var ticketSubCategoryList = new List<int?>();
 
 
 

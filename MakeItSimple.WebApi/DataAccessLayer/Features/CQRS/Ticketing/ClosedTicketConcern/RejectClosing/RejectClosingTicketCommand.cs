@@ -10,8 +10,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
             public Guid? RejectClosed_By { get; set; }
             public Guid? Transacted_By { get; set; }
             public string Reject_Remarks { get; set; }
-            public int? ClosingTicketId { get; set; }
             public string Modules { get; set; }
+            public List<RejectClosingRequest> RejectClosingRequests { get; set; }
+            public class RejectClosingRequest
+            {
+                public int? ClosingTicketId { get; set; }
+            }
+
 
         }
     }

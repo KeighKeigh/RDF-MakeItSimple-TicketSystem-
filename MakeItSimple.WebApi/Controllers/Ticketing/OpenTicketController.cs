@@ -10,6 +10,14 @@ using Microsoft.AspNetCore.SignalR;
 using MakeItSimple.WebApi.Common.SignalR;
 using MakeItSimple.WebApi.Common.Caching;
 using MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketConcern;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketConcern.GetClosing.GetClosingTicket;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.NewFolder.DateApproval;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketConcern.ApprovalClosing.ApprovalClosingTicket;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketConcern.RejectClosing.RejectClosingTicket;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.ApprovalDateTicket.ApprovalDateTicket;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicketConcern.GetOpenTicketSubUnit.GetOpenTicketSubUnit;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicketConcern.GetClosedTicketSubUnit.GetClosedTicketSubUnit;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.RejectDateTicket.RejectDateTicket;
 
 namespace MakeItSimple.WebApi.Controllers.Ticketing
 {
@@ -82,6 +90,116 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
             }
         }
 
+        [HttpGet("page_subunit")]
+        public async Task<IActionResult> GetClosingTicket([FromQuery] GetOpenTicketSubUnitQuery query)
+        {
+            try
+            {
+                if (User.Identity is ClaimsIdentity identity)
+                {
+                    var userRole = identity.FindFirst(ClaimTypes.Role);
+                    if (userRole != null)
+                    {
+                        query.Role = userRole.Value;
+                    }
+
+                    if (Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
+                    {
+                        query.UserId = userId;
+                    }
+                }
+
+                var closingTicket = await _mediator.Send(query);
+
+                Response.AddPaginationHeader(
+
+                closingTicket.CurrentPage,
+                closingTicket.PageSize,
+                closingTicket.TotalCount,
+                closingTicket.TotalPages,
+                closingTicket.HasPreviousPage,
+                closingTicket.HasNextPage
+
+                );
+
+                var result = new
+                {
+                    closingTicket,
+                    closingTicket.CurrentPage,
+                    closingTicket.PageSize,
+                    closingTicket.TotalCount,
+                    closingTicket.TotalPages,
+                    closingTicket.HasPreviousPage,
+                    closingTicket.HasNextPage
+                };
+
+                var successResult = Result.Success(result);
+
+
+                return Ok(successResult);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+
+        }
+
+
+        [HttpGet("page_close_subunit")]
+        public async Task<IActionResult> GetClosingTicket([FromQuery] GetClosedTicketSubUnitQuery query)
+        {
+            try
+            {
+                if (User.Identity is ClaimsIdentity identity)
+                {
+                    var userRole = identity.FindFirst(ClaimTypes.Role);
+                    if (userRole != null)
+                    {
+                        query.Role = userRole.Value;
+                    }
+
+                    if (Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
+                    {
+                        query.UserId = userId;
+                    }
+                }
+
+                var closingTicket = await _mediator.Send(query);
+
+                Response.AddPaginationHeader(
+
+                closingTicket.CurrentPage,
+                closingTicket.PageSize,
+                closingTicket.TotalCount,
+                closingTicket.TotalPages,
+                closingTicket.HasPreviousPage,
+                closingTicket.HasNextPage
+
+                );
+
+                var result = new
+                {
+                    closingTicket,
+                    closingTicket.CurrentPage,
+                    closingTicket.PageSize,
+                    closingTicket.TotalCount,
+                    closingTicket.TotalPages,
+                    closingTicket.HasPreviousPage,
+                    closingTicket.HasNextPage
+                };
+
+                var successResult = Result.Success(result);
+
+
+                return Ok(successResult);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+
+        }
 
         [HttpGet("history/{id}")]
         public async Task<IActionResult> GetTicketHistory([FromRoute] int id)
@@ -106,7 +224,123 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
             }
         }
 
+        [HttpGet("date")]
+        public async Task<IActionResult> GetDateNotApproved([FromQuery] DateApprovalQuery query)
+        {
+            try
+            {
+                if (User.Identity is ClaimsIdentity identity)
+                {
+                    var userRole = identity.FindFirst(ClaimTypes.Role);
+                    if (userRole != null)
+                    {
+                        query.Role = userRole.Value;
+                    }
 
+                    if (Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
+                    {
+                        query.UserId = userId;
+                    }
+                }
+
+                var closingTicket = await _mediator.Send(query);
+
+                Response.AddPaginationHeader(
+
+                closingTicket.CurrentPage,
+                closingTicket.PageSize,
+                closingTicket.TotalCount,
+                closingTicket.TotalPages,
+                closingTicket.HasPreviousPage,
+                closingTicket.HasNextPage
+
+                );
+
+                var result = new
+                {
+                    closingTicket,
+                    closingTicket.CurrentPage,
+                    closingTicket.PageSize,
+                    closingTicket.TotalCount,
+                    closingTicket.TotalPages,
+                    closingTicket.HasPreviousPage,
+                    closingTicket.HasNextPage
+                };
+
+                var successResult = Result.Success(result);
+
+
+                return Ok(successResult);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+
+        }
+
+        [HttpPut("approval")]
+        public async Task<IActionResult> ApprovalClosingTicket([FromBody] ApprovalDateTicketCommand command)
+        {
+            try
+            {
+                if (User.Identity is ClaimsIdentity identity)
+                {
+                    var userRole = identity.FindFirst(ClaimTypes.Role);
+                    if (userRole != null)
+                    {
+                        command.Role = userRole.Value;
+                    }
+
+                    if (Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
+                    {
+                        command.ApprovedDateBy = userId;
+                        command.Users = userId;
+                        command.Transacted_By = userId;
+                    }
+                }
+                var results = await _mediator.Send(command);
+                if (results.IsFailure)
+                {
+                    return BadRequest(results);
+                }
+                return Ok(results);
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+        }
+
+        [HttpPut("reject")]
+        public async Task<IActionResult> RejectTargetDateTicket([FromBody] RejectDateTicketCommand command)
+        {
+            try
+            {
+
+                if (User.Identity is ClaimsIdentity identity)
+                {
+
+                    if (Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
+                    {
+                        command.RejectDate_By = userId;
+                        command.Transacted_By = userId;
+                    }
+                }
+                var results = await _mediator.Send(command);
+                if (results.IsFailure)
+                {
+                    return BadRequest(results);
+                }
+                return Ok(results);
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+        }
 
     }
 }

@@ -15,7 +15,8 @@ namespace MakeItSimple.WebApi.Common.ConstantString
         // Ticketing Role
 
         public const string Admin = "Admin";
-
+        public const string ApprovalDate = "TargetDate is being approved";
+        public const string ForApprovalTargetDate = "For Approval TargetDate";
         public const string Approver = "Approver";
         public const string Requestor = "Requestor";
         public const string Receiver = "Receiver";
@@ -27,6 +28,9 @@ namespace MakeItSimple.WebApi.Common.ConstantString
         public const string RequestCreated = "A concern was requested by ";
         public const string ConcernCreated = "A concern was created by";
         public const string RequestAssign = "A concern was assigned to ";
+
+        //Date Approval
+        public const string DateApproval = "Ticket Date Approval request approved by";
 
         //Close History
 

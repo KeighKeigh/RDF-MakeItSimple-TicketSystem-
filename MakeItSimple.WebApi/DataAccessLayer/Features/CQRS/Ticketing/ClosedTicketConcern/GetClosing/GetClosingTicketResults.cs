@@ -15,6 +15,8 @@
             public string Channel_Name { get; set; }
             public Guid? UserId { get; set; }
             public string Fullname { get; set; }
+            public  string ServiceProvider { get; set; }
+            public DateTime? DateNeeded { get; set; }
 
             public List<GetClosingTicketTechnician> GetClosingTicketTechnicians { get; set; }
             public class GetClosingTicketTechnician

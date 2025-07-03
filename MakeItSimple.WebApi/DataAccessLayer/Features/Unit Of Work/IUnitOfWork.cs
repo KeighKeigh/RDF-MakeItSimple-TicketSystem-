@@ -30,6 +30,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work
         IPmsQuestionRepository PmsQuestion { get; }
         IPmsApproverRepository PmsApprover { get; }
         IPmsRepository Pms { get; }
+        IApproverDateRepository ApproverDate { get; }
 
         Task RollBackTransaction();
         Task CommitTransaction();

@@ -40,6 +40,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Data.Ticketing
            .HasForeignKey(u => u.RequestorBy)
            .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(u => u.ApprovedDateByUser)
+           .WithMany()
+           .HasForeignKey(u => u.ApprovedDateBy)
+           .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 

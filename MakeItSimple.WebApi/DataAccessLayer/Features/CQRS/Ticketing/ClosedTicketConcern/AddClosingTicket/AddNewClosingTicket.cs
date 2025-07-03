@@ -20,8 +20,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
 
         public async Task<Result> Handle(AddNewClosingTicketCommand command, CancellationToken cancellationToken)
         {
-            var ticketCategoryList = new List<int>();
-            var ticketSubCategoryList = new List<int>();
+            var ticketCategoryList = new List<int?>();
+            var ticketSubCategoryList = new List<int?>();
             var ticketTechnicianList = new List<int>();
 
             var userDetails = await unitOfWork.User
@@ -215,51 +215,97 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
 
             }
 
+            //foreach (var category in command.ClosingTicketCategories)
+            //{
+            //    var ticketCategoryExist = await unitOfWork.RequestTicket
+            //        .TicketCategoryExist(category.CategoryId, command.RequestConcernId);
+
+            //    if (ticketCategoryExist is not null)
+            //    {
+            //        ticketCategoryList.Add(category.CategoryId.Value);
+
+            //    }
+            //    else
+            //    {
+            //        var addTicketCategory = new TicketCategory
+            //        {
+            //            RequestConcernId = ticketConcernExist.RequestConcernId.Value,
+            //            CategoryId = category.CategoryId.Value,
+
+            //        };
+
+            //        await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory,cancellationToken);
+            //    }
+
+            //}
+
+            //foreach (var subCategory in command.ClosingSubTicketCategories)
+            //{
+            //    var ticketSubCategoryExist = await unitOfWork.RequestTicket
+            //        .TicketSubCategoryExist(subCategory.SubCategoryId, command.RequestConcernId);
+
+            //    if (ticketSubCategoryExist is not null)
+            //    {
+            //        ticketSubCategoryList.Add(subCategory.SubCategoryId.Value); 
+            //    }
+            //    else
+            //    {
+            //        var addTicketSubCategory = new TicketSubCategory
+            //        {
+            //            RequestConcernId = ticketConcernExist.RequestConcernId.Value,
+            //            SubCategoryId = subCategory.SubCategoryId.Value,
+
+            //        };
+
+            //        await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory,cancellationToken);
+            //    }
+
+            //}
+
+            //if (ticketCategoryList.Any())
+            //    await unitOfWork.RequestTicket.RemoveTicketCategory(ticketConcernExist.RequestConcernId.Value, ticketCategoryList, cancellationToken);
+
+            //if (ticketSubCategoryList.Any())
+            //    await unitOfWork.RequestTicket.RemoveTicketSubCategory(ticketConcernExist.RequestConcernId.Value, ticketSubCategoryList, cancellationToken);
+
+
             foreach (var category in command.ClosingTicketCategories)
             {
                 var ticketCategoryExist = await unitOfWork.RequestTicket
-                    .TicketCategoryExist(category.TicketCategoryId);
-
-                if (ticketCategoryExist is not null)
+                    .TicketCategoryExist(category.CategoryId, ticketConcernExist.RequestConcernId.Value);
+                if (category.CategoryId != null)
                 {
-                    ticketCategoryList.Add(category.TicketCategoryId.Value);
-
-                }
-                else
-                {
-                    var addTicketCategory = new TicketCategory
+                    if (ticketCategoryExist is null)
                     {
-                        RequestConcernId = ticketConcernExist.RequestConcernId.Value,
-                        CategoryId = category.CategoryId.Value,
-
-                    };
-
-                    await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory,cancellationToken);
+                        // Add new category
+                        var addTicketCategory = new TicketCategory
+                        {
+                            RequestConcernId = ticketConcernExist.RequestConcernId.Value,
+                            CategoryId = category.CategoryId,
+                        };
+                        await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory, cancellationToken);
+                    }
                 }
-
             }
 
+            // Process subcategories - add new ones
             foreach (var subCategory in command.ClosingSubTicketCategories)
             {
                 var ticketSubCategoryExist = await unitOfWork.RequestTicket
-                    .TicketSubCategoryExist(subCategory.TicketSubCategoryId);
-
-                if (ticketSubCategoryExist is not null)
+                    .TicketSubCategoryExist(subCategory.SubCategoryId, ticketConcernExist.RequestConcernId.Value);
+                if (subCategory.SubCategoryId != null)
                 {
-                    ticketSubCategoryList.Add(subCategory.TicketSubCategoryId.Value); 
-                }
-                else
-                {
-                    var addTicketSubCategory = new TicketSubCategory
+                    if (ticketSubCategoryExist is null)
                     {
-                        RequestConcernId = ticketConcernExist.RequestConcernId.Value,
-                        SubCategoryId = subCategory.SubCategoryId.Value,
-
-                    };
-
-                    await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory,cancellationToken);
+                        // Add new subcategory
+                        var addTicketSubCategory = new TicketSubCategory
+                        {
+                            RequestConcernId = ticketConcernExist.RequestConcernId.Value,
+                            SubCategoryId = subCategory.SubCategoryId,
+                        };
+                        await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory, cancellationToken);
+                    }
                 }
-
             }
 
             if (ticketCategoryList.Any())
@@ -267,7 +313,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
 
             if (ticketSubCategoryList.Any())
                 await unitOfWork.RequestTicket.RemoveTicketSubCategory(ticketConcernExist.RequestConcernId.Value, ticketSubCategoryList, cancellationToken);
-
 
             if (ticketTechnicianList.Any())
                 await unitOfWork.ClosingTicket.RemoveTicketTechnician(ticketConcernExist.RequestConcernId.Value, ticketTechnicianList, cancellationToken);
