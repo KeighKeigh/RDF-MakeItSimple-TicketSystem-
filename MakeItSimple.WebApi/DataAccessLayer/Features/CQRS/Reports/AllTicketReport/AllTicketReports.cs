@@ -29,11 +29,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                     .Include(t => t.RequestConcern)
                     .AsSplitQuery()
                     .Where(t => t.IsApprove == true && t.IsTransfer != true && t.IsClosedApprove != true && t.OnHold != true)
-                    .Where(t => t.TargetDate.Value.Date >= request.Date_From.Value.Date && t.TargetDate.Value.Date <= request.Date_To.Value.Date)
+                    .Where(t => t.DateApprovedAt.Value.Date >= request.Date_From.Value.Date && t.DateApprovedAt.Value.Date <= request.Date_To.Value.Date)
                     .Select(o => new AllTicketReportsResult
                     {
 
                         TicketConcernId = o.Id,
+
                         Request_Type = o.RequestConcern.RequestType,
                         BackJobId = o.RequestConcern.BackJobId,
                         Requestor_Name = o.RequestorByUser.Fullname,
@@ -65,7 +66,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = o.TargetDate.Value.Date,
                         Ticket_Status = "Open",
                         Remarks = o.Remarks,
-                        Aging_Days = EF.Functions.DateDiffDay(o.TargetDate.Value.Date, DateTime.Now.Date)
+                        Aging_Days = EF.Functions.DateDiffDay(o.TargetDate.Value.Date, DateTime.Now.Date),
+                        ChannelId = o.RequestConcern.ChannelId.Value,
+                        StartDate = o.DateApprovedAt,
+                        ClosedDate = o.Closed_At
                     }).ToListAsync();
 
                 var transferTicketQuery = await _context.TransferTicketConcerns
@@ -109,7 +113,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = ct.Current_Target_Date.Value.Date,
                         Ticket_Status = "Transfer",
                         Remarks = ct.TransferRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.TargetDate.Value.Date, DateTime.Now.Date)
+                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.TargetDate.Value.Date, DateTime.Now.Date),
+                        ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
+                        StartDate = ct.TicketConcern.DateApprovedAt,
+                        ClosedDate = ct.TicketConcern.Closed_At
                     }).ToListAsync();
 
                 var onHoldTicketQuery = await _context.TicketOnHolds
@@ -153,7 +160,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = ct.TicketConcern.TargetDate.Value.Date,
                         Ticket_Status = "On-Hold",
                         Remarks = ct.OnHoldRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.TargetDate.Value.Date, DateTime.Now.Date)
+                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.TargetDate.Value.Date, DateTime.Now.Date),
+                        ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
+                        StartDate = ct.TicketConcern.DateApprovedAt,
+                        ClosedDate = ct.TicketConcern.Closed_At
+
                     }).ToListAsync();
 
                 var closingTicketQuery = await _context.ClosingTickets
@@ -197,7 +208,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = ct.TicketConcern.TargetDate.Value.Date,
                         Ticket_Status = "Closed",
                         Remarks = ct.ClosingRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.TargetDate.Value.Date, ct.ClosingAt.Value.Date)
+                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.TargetDate.Value.Date, ct.ClosingAt.Value.Date),
+                        ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
+                        StartDate = ct.TicketConcern.DateApprovedAt,
+                        ClosedDate = ct.TicketConcern.Closed_At
+
                     }).ToListAsync(); 
 
 
@@ -244,30 +259,33 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = ct.ClosingTicket.TicketConcern.TargetDate.Value.Date,
                         Ticket_Status = "Closed",
                         Remarks = ct.ClosingTicket.ClosingRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.ClosingTicket.TicketConcern.TargetDate.Value.Date, ct.ClosingTicket.ClosingAt.Value.Date)
+                        Aging_Days = EF.Functions.DateDiffDay(ct.ClosingTicket.TicketConcern.TargetDate.Value.Date, ct.ClosingTicket.ClosingAt.Value.Date),
+                        ChannelId = ct.ClosingTicket.TicketConcern.RequestConcern.ChannelId.Value,
+                        StartDate = ct.ClosingTicket.TicketConcern.DateApprovedAt,
+                        ClosedDate = ct.ClosingTicket.TicketConcern.Closed_At
                     }).ToListAsync();
 
 
-                if (request.Unit is not null)
+                if (request.Channel is not null)
                 {
                      openTicketQuery = openTicketQuery
-                        .Where(x => x.Personnel_Unit == request.Unit)
+                        .Where(x => x.ChannelId == request.Channel)
                         .ToList();
 
                     transferTicketQuery = transferTicketQuery
-                       .Where(x => x.Personnel_Unit == request.Unit)
+                       .Where(x => x.ChannelId == request.Channel)
                        .ToList();
 
                     onHoldTicketQuery = onHoldTicketQuery
-                       .Where(x => x.Personnel_Unit == request.Unit)
+                       .Where(x => x.ChannelId == request.Channel)
                        .ToList();
 
                     closingTicketQuery = closingTicketQuery
-                       .Where(x => x.Personnel_Unit == request.Unit)
+                       .Where(x => x.ChannelId == request.Channel)
                        .ToList();
 
                     closingTicketTechnicianQuery = closingTicketTechnicianQuery
-                       .Where(x => x.Personnel_Unit == request.Unit)
+                       .Where(x => x.ChannelId == request.Channel)
                        .ToList();
 
 
@@ -301,27 +319,111 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                 {
                     openTicketQuery = openTicketQuery
                     .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search))
-                    .ToList();
+                        || x.Personnel.Contains(request.Search)
+                        || x.Request_Type.Contains(request.Search)
+                        || x.BackJobId.ToString().Contains(request.Search)
+                        || x.Requestor_Name.Contains(request.Search)
+                        || x.Company_Code.Contains(request.Search)
+                        || x.Company_Name.Contains(request.Search)
+                        || x.BusinessUnit_Code.Contains(request.Search)
+                        || x.BusinessUnit_Name.Contains(request.Search)
+                        || x.Department_Code.ToString().Contains(request.Search)
+                        || x.Department_Name.Contains(request.Search)
+                        || x.Unit_Code.Contains(request.Search)
+                        || x.Unit_Name.Contains(request.Search)
+                        || x.SubUnit_Code.Contains(request.Search)
+                        || x.SubUnit_Name.Contains(request.Search)
+                        || x.Location_Code.ToString().Contains(request.Search)
+                        || x.Location_Name.Contains(request.Search)
+                        || x.Concerns.Contains(request.Search))
+
+
+
+
+                        .ToList();
 
                     transferTicketQuery = transferTicketQuery
                     .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search))
+                        || x.Personnel.Contains(request.Search)
+                        || x.Request_Type.Contains(request.Search)
+                        || x.BackJobId.ToString().Contains(request.Search)
+                        || x.Requestor_Name.Contains(request.Search)
+                        || x.Company_Code.Contains(request.Search)
+                        || x.Company_Name.Contains(request.Search)
+                        || x.BusinessUnit_Code.Contains(request.Search)
+                        || x.BusinessUnit_Name.Contains(request.Search)
+                        || x.Department_Code.ToString().Contains(request.Search)
+                        || x.Department_Name.Contains(request.Search)
+                        || x.Unit_Code.Contains(request.Search)
+                        || x.Unit_Name.Contains(request.Search)
+                        || x.SubUnit_Code.Contains(request.Search)
+                        || x.SubUnit_Name.Contains(request.Search)
+                        || x.Location_Code.ToString().Contains(request.Search)
+                        || x.Location_Name.Contains(request.Search)
+                        || x.Concerns.Contains(request.Search))
                     .ToList();
 
                     onHoldTicketQuery = onHoldTicketQuery
                    .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search))
+                        || x.Personnel.Contains(request.Search)
+                        || x.Request_Type.Contains(request.Search)
+                        || x.BackJobId.ToString().Contains(request.Search)
+                        || x.Requestor_Name.Contains(request.Search)
+                        || x.Company_Code.Contains(request.Search)
+                        || x.Company_Name.Contains(request.Search)
+                        || x.BusinessUnit_Code.Contains(request.Search)
+                        || x.BusinessUnit_Name.Contains(request.Search)
+                        || x.Department_Code.ToString().Contains(request.Search)
+                        || x.Department_Name.Contains(request.Search)
+                        || x.Unit_Code.Contains(request.Search)
+                        || x.Unit_Name.Contains(request.Search)
+                        || x.SubUnit_Code.Contains(request.Search)
+                        || x.SubUnit_Name.Contains(request.Search)
+                        || x.Location_Code.ToString().Contains(request.Search)
+                        || x.Location_Name.Contains(request.Search)
+                        || x.Concerns.Contains(request.Search))
                     .ToList();
 
                     closingTicketQuery = closingTicketQuery
                    .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search))
+                        || x.Personnel.Contains(request.Search)
+                        || x.Request_Type.Contains(request.Search)
+                        || x.BackJobId.ToString().Contains(request.Search)
+                        || x.Requestor_Name.Contains(request.Search)
+                        || x.Company_Code.Contains(request.Search)
+                        || x.Company_Name.Contains(request.Search)
+                        || x.BusinessUnit_Code.Contains(request.Search)
+                        || x.BusinessUnit_Name.Contains(request.Search)
+                        || x.Department_Code.ToString().Contains(request.Search)
+                        || x.Department_Name.Contains(request.Search)
+                        || x.Unit_Code.Contains(request.Search)
+                        || x.Unit_Name.Contains(request.Search)
+                        || x.SubUnit_Code.Contains(request.Search)
+                        || x.SubUnit_Name.Contains(request.Search)
+                        || x.Location_Code.ToString().Contains(request.Search)
+                        || x.Location_Name.Contains(request.Search)
+                        || x.Concerns.Contains(request.Search))
                     .ToList();
 
                     closingTicketTechnicianQuery = closingTicketTechnicianQuery
                     .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search))
+                        || x.Personnel.Contains(request.Search)
+                        || x.Request_Type.Contains(request.Search)
+                        || x.BackJobId.ToString().Contains(request.Search)
+                        || x.Requestor_Name.Contains(request.Search)
+                        || x.Company_Code.Contains(request.Search)
+                        || x.Company_Name.Contains(request.Search)
+                        || x.BusinessUnit_Code.Contains(request.Search)
+                        || x.BusinessUnit_Name.Contains(request.Search)
+                        || x.Department_Code.ToString().Contains(request.Search)
+                        || x.Department_Name.Contains(request.Search)
+                        || x.Unit_Code.Contains(request.Search)
+                        || x.Unit_Name.Contains(request.Search)
+                        || x.SubUnit_Code.Contains(request.Search)
+                        || x.SubUnit_Name.Contains(request.Search)
+                        || x.Location_Code.ToString().Contains(request.Search)
+                        || x.Location_Name.Contains(request.Search)
+                        || x.Concerns.Contains(request.Search))
                     .ToList();
                 }
 
@@ -383,6 +485,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Ticket_Status = r.Ticket_Status,
                         Remarks = r.Remarks,
                         Aging_Days = r.Aging_Days,
+                        ChannelId = r.ChannelId,
+                        StartDate = r.StartDate,
+                        ClosedDate = r.ClosedDate,
 
                     }).AsQueryable();
 

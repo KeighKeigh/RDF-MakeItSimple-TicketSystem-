@@ -18,6 +18,7 @@
             public DateTime? Updated_At { get; set; }
             public string ApprovedBy { get; set; }
 
+
         }
     }
 }

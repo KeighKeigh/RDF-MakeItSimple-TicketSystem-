@@ -9,7 +9,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.TransferReport
         public class TransferTicketReportsQuery : UserParams, IRequest<PagedList<TransferTicketReportsResult>>
         {
             public string Search { get; set; }
-            public int? Unit { get; set; }
+            public int? Channel { get; set; }
             public Guid? UserId { get; set; }
             [Required]
             public DateTime? Date_From { get; set; }

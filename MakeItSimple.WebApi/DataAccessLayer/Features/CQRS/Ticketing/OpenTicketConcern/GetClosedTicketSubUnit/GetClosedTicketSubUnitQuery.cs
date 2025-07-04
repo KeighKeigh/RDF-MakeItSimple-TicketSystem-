@@ -11,6 +11,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
             public string UserType { get; set; }
             public string Role { get; set; }
             public string Search { get; set; }
+            public bool? IsDelayed { get; set; }
         }
     }
 }

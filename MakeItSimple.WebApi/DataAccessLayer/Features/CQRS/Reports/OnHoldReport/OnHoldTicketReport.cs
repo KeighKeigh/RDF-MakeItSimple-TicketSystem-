@@ -29,9 +29,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OnHoldReport
                     .Include(q => q.AddedByUser)
                     .AsSplitQuery();
 
-                if (request.Unit is not null)
+                if (request.Channel is not null)
                 {
-                    query = query.Where(x => x.AddedByUser.UnitId == request.Unit);
+                    query = query.Where(x => x.TicketConcern.RequestConcern.ChannelId == request.Channel);
 
                     if (request.UserId is not null)
                     {

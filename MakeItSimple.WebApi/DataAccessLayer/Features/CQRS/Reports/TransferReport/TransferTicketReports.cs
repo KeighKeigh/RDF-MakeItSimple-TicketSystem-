@@ -34,9 +34,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.TransferReport
                     .AsSplitQuery();
 
 
-                if (request.Unit is not null)
+                if (request.Channel is not null)
                 {
-                    _transferQuery = _transferQuery.Where(x => x.TransferByUser.UnitId == request.Unit);
+                    _transferQuery = _transferQuery.Where(x => x.TicketConcern.RequestConcern.ChannelId == request.Channel);
 
                     if (request.UserId is not null)
                     {
@@ -68,7 +68,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.TransferReport
                         Remarks = x.TransferRemarks,
                         Modified_By = x.ModifiedByUser.Fullname,
                         Updated_At = x.UpdatedAt,
-                        ApprovedBy = x.ApprovedBy
+                        ApprovedBy = x.ApprovedBy,
+
+
 
 
                     });

@@ -22,26 +22,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
             public async Task<PagedList<OpenTicketReportsResult>> Handle(OpenTicketReportsQuery request, CancellationToken cancellationToken)
             {
 
-                //IQueryable<TicketConcern> ticketQuery = _context.TicketConcerns
-                //    .AsNoTrackingWithIdentityResolution()
-                //    .Include(x => x.AddedByUser)
-                //    .Include(x => x.ModifiedByUser)
-                //    .Include(x => x.RequestorByUser)
-                //    .Include(x => x.User)
-                //    .ThenInclude(x => x.SubUnit)
-                //    .Include(x => x.ClosingTickets)
-                //    .ThenInclude(x => x.TicketAttachments)
-                //    .Include(x => x.TransferTicketConcerns)
-                //    .ThenInclude(x => x.TicketAttachments)
-                //    .Include(x => x.RequestConcern)
-                //    .ThenInclude(x => x.TicketCategories)
-                //    .ThenInclude(x => x.Category)
-                //    .Include(x => x.RequestConcern)
-                //    .ThenInclude(x => x.TicketSubCategories)
-                //    .ThenInclude(x => x.SubCategory)
-
-                //    .AsSplitQuery();
-
                 var results = _context.TicketConcerns
                     .AsNoTrackingWithIdentityResolution()
                     .Include(x => x.AddedByUser)
@@ -62,7 +42,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
 
                     .AsSplitQuery()
                     .Where(x => x.IsApprove == true && x.IsClosedApprove != true && x.OnHold != true && x.IsTransfer != true)
-                    .Where(x => x.TargetDate.Value.Date >= request.Date_From.Value.Date && x.TargetDate.Value.Date <= request.Date_To.Value.Date)
+                    .Where(x => x.DateApprovedAt.Value.Date >= request.Date_From.Value.Date && x.DateApprovedAt.Value.Date <= request.Date_To.Value.Date)
 
                     .Select(t => new OpenTicketReportsResult
                     {
@@ -88,14 +68,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
                         Aging_Days = EF.Functions.DateDiffDay(t.TargetDate.Value.Date, DateTime.Now.Date),
                         Personnel_Unit = t.User.UnitId,
                         Personnel_Id = t.User.Id,
-                        Personnel = t.User.Fullname
+                        Personnel = t.User.Fullname,
+                        ChannelId = t.RequestConcern.ChannelId,
+                        StartDate = t.DateApprovedAt,
+                        
                         
 
                     });
 
-                if (request.Unit is not null)
+                if (request.Channel is not null)
                 {
-                    results = results.Where(x => x.Personnel_Unit == request.Unit);
+                    results = results.Where(x => x.ChannelId == request.Channel);
 
                     if (request.UserId is not null)
                     {
@@ -107,13 +90,37 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
                 {
                     results = results
                         .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search));
+                        || x.Personnel.Contains(request.Search)
+                        || x.Concern_Description.Contains(request.Search)
+                        || x.Requestor_Name.Contains(request.Search)
+                        || x.CompanyName.Contains(request.Search)
+                        || x.Business_Unit_Name.Contains(request.Search)
+                        || x.Department_Name.Contains(request.Search)
+                        || x.Unit_Name.Contains(request.Search)
+                        || x.SubUnit_Name.Contains(request.Search)
+                        || x.Location_Name.Contains(request.Search)
+                        || x.Category_Description.Contains(request.Search)
+                        || x.SubCategory_Description.Contains(request.Search)
+                        || x.Issue_Handler.Contains(request.Search)
+                        || x.Channel_Name.Contains(request.Search)
+                        || x.Modified_By.Contains(request.Search)
+                        || x.Personnel_Unit.ToString().Contains(request.Search)
+                        || x.Personnel_Id.ToString().Contains(request.Search)
+                        || x.ChannelId.ToString().Contains(request.Search)
+                        || x.Personnel.Contains(request.Search)
+                        || x.Personnel.Contains(request.Search)
+                        || x.Personnel.Contains(request.Search)
+                        || x.Personnel.Contains(request.Search)
+                        )
+                        
+                        
+                        
+                        
+                        
+                        
+                        ;
                 }
 
-                /*.GroupJoin(_context.TicketCategories, query => query.RequestConcernId, cat => cat.RequestConcernId, (query, cat) => new {query, cat })
-                    .SelectMany(x => x.cat.DefaultIfEmpty(), (x , cat) => new {x.query, cat })
-                    .GroupJoin(_context.TicketSubCategories, x => x.cat.RequestConcernId , subcat => subcat.RequestConcernId, (x, subcat) => new { x.query, x.cat, subcat})
-                    .SelectMany(x => x.subcat.DefaultIfEmpty(), (x, subcat) => new { x.query,x.cat, subcat })*/
 
                 var final = results
                     .OrderBy(x => x.Target_Date.Value.Date)
@@ -141,7 +148,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
                         Aging_Days = f.Aging_Days,
                         Personnel_Unit = f.Personnel_Unit,
                         Personnel_Id = f.Personnel_Id,
-                        Personnel = f.Personnel
+                        Personnel = f.Personnel,
+                        ChannelId = f.ChannelId,
+                        StartDate = f.StartDate,
 
                     }).AsQueryable();
 

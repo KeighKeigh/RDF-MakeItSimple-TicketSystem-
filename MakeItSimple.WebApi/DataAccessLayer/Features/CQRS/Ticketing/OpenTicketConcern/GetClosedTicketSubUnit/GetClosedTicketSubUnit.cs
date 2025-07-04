@@ -23,11 +23,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
             {
                 var dateToday = DateTime.Today;
 
-                IQueryable<TicketConcern> openTicketsQuery = _context.TicketConcerns.Where(x => x.RequestConcern.IsDone == true)
-                    .AsNoTrackingWithIdentityResolution()
-                    .AsSplitQuery();
+                IQueryable<TicketConcern> delayedTicketsQuery = _context.TicketConcerns
+                .Where(x => x.RequestConcern.IsDone == true &&
+                x.TargetDate.HasValue &&
+                ((x.Closed_At.HasValue && x.Closed_At.Value > x.TargetDate.Value) ||
+                 (!x.Closed_At.HasValue && DateTime.Now > x.TargetDate.Value)))
+                 .AsNoTrackingWithIdentityResolution()
+                .AsSplitQuery();
 
-                if (openTicketsQuery.Any())
+                if (delayedTicketsQuery.Any())
                 {
 
                     var allUserList = await _context.UserRoles
@@ -54,14 +58,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
 
                     if (!string.IsNullOrEmpty(request.Search))
                     {
-                        openTicketsQuery = openTicketsQuery
+                        delayedTicketsQuery = delayedTicketsQuery
                             .Where(x => x.User.Fullname.Contains(request.Search)
                                         || x.ToString().Contains(request.Search));
                     }
 
                     if (!string.IsNullOrEmpty(request.UserType))
                     {
-                        var filterApproval = openTicketsQuery.Select(x => x.Id);
+                        var filterApproval = delayedTicketsQuery.Select(x => x.Id);
 
                         if (request.UserType == TicketingConString.Approver)
                         {
@@ -90,7 +94,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                                 var userRequestIdApprovalList = approverTransactList.Select(x => x.TicketConcernId);
                                 var userIdsInApprovalList = approverTransactList.Select(approval => approval.UserId);
 
-                                openTicketsQuery = openTicketsQuery
+                                delayedTicketsQuery = delayedTicketsQuery
                                     .Where(x => userIdsInApprovalList.Contains(x.ApprovedDateBy)
                                     && userRequestIdApprovalList.Contains(x.Id));
 
@@ -99,7 +103,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                         }
                         else if (request.UserType == TicketingConString.Users)
                         {
-                            openTicketsQuery = openTicketsQuery.Where(x => x.AddedByUser.Id == request.UserId);
+                            delayedTicketsQuery = delayedTicketsQuery.Where(x => x.AddedByUser.Id == request.UserId);
                         }
                         else
                         {
@@ -108,7 +112,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                     }
                 }
 
-                var results = openTicketsQuery
+                var results = delayedTicketsQuery
                     .OrderByDescending(x => x.TargetDate)
                     .Select(x => new GetClosedTicketSubUnitResult
                     {

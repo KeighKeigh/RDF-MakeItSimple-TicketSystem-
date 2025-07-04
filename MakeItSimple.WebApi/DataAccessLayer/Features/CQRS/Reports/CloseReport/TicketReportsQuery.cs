@@ -9,7 +9,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
         {
 
             public string Search { get; set; }
-            public int? Unit { get; set; }
+            public int? Channel { get; set; }
             public Guid? UserId { get; set; }
             public string Remarks { get; set; }
             public DateTime? Date_From { get; set; }

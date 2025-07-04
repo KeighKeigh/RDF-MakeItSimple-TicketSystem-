@@ -9,6 +9,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
         {
             public Guid? UserId { get; set; }
             public string UserType { get; set; }
+            public string TicketStatus { get; set; }
             public string Role { get; set; }
             public string Search { get; set; }
         }

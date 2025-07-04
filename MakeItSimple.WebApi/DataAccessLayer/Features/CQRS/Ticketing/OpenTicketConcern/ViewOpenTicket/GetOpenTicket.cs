@@ -1176,6 +1176,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     ticketConcernQuery = ticketConcernQuery.OrderBy(x => x.Id);
                 }
 
+                if (request.AscendingDate is not null)
+                {
+                    ticketConcernQuery = request.AscendingDate.Value
+                        ? ticketConcernQuery.OrderBy(x => x.TargetDate)
+                        : ticketConcernQuery.OrderByDescending(x => x.TargetDate);
+                }
+                else
+                {
+                    ticketConcernQuery = ticketConcernQuery.OrderBy(x => x.TargetDate);
+                }
+
                 // Get total count before pagination
                 var totalCount = await ticketConcernQuery.CountAsync(cancellationToken);
 

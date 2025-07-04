@@ -10,8 +10,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Ap
             public string Role { get; set; }
             public Guid? Users { get; set; }
             public Guid? Transacted_By { get; set; }
-            public int OnHoldTicketId { get; set; }
-            
+
+
+            public List<ApproveOnHoldRequest> ApproveOnHoldRequests { get; set; }
+
+            public class ApproveOnHoldRequest
+            {
+                public int? OnHoldTicketId { get; set; }
+            }
         }
 
     }

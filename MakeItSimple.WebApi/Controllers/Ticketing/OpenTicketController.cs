@@ -146,60 +146,60 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
         }
 
 
-        [HttpGet("page_close_subunit")]
-        public async Task<IActionResult> GetClosingTicket([FromQuery] GetClosedTicketSubUnitQuery query)
-        {
-            try
-            {
-                if (User.Identity is ClaimsIdentity identity)
-                {
-                    var userRole = identity.FindFirst(ClaimTypes.Role);
-                    if (userRole != null)
-                    {
-                        query.Role = userRole.Value;
-                    }
+        //[HttpGet("page_close_subunit")]
+        //public async Task<IActionResult> GetClosingTicket([FromQuery] GetClosedTicketSubUnitQuery query)
+        //{
+        //    try
+        //    {
+        //        if (User.Identity is ClaimsIdentity identity)
+        //        {
+        //            var userRole = identity.FindFirst(ClaimTypes.Role);
+        //            if (userRole != null)
+        //            {
+        //                query.Role = userRole.Value;
+        //            }
 
-                    if (Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
-                    {
-                        query.UserId = userId;
-                    }
-                }
+        //            if (Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
+        //            {
+        //                query.UserId = userId;
+        //            }
+        //        }
 
-                var closingTicket = await _mediator.Send(query);
+        //        var closingTicket = await _mediator.Send(query);
 
-                Response.AddPaginationHeader(
+        //        Response.AddPaginationHeader(
 
-                closingTicket.CurrentPage,
-                closingTicket.PageSize,
-                closingTicket.TotalCount,
-                closingTicket.TotalPages,
-                closingTicket.HasPreviousPage,
-                closingTicket.HasNextPage
+        //        closingTicket.CurrentPage,
+        //        closingTicket.PageSize,
+        //        closingTicket.TotalCount,
+        //        closingTicket.TotalPages,
+        //        closingTicket.HasPreviousPage,
+        //        closingTicket.HasNextPage
 
-                );
+        //        );
 
-                var result = new
-                {
-                    closingTicket,
-                    closingTicket.CurrentPage,
-                    closingTicket.PageSize,
-                    closingTicket.TotalCount,
-                    closingTicket.TotalPages,
-                    closingTicket.HasPreviousPage,
-                    closingTicket.HasNextPage
-                };
+        //        var result = new
+        //        {
+        //            closingTicket,
+        //            closingTicket.CurrentPage,
+        //            closingTicket.PageSize,
+        //            closingTicket.TotalCount,
+        //            closingTicket.TotalPages,
+        //            closingTicket.HasPreviousPage,
+        //            closingTicket.HasNextPage
+        //        };
 
-                var successResult = Result.Success(result);
+        //        var successResult = Result.Success(result);
 
 
-                return Ok(successResult);
-            }
-            catch (Exception ex)
-            {
-                return Conflict(ex.Message);
-            }
+        //        return Ok(successResult);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Conflict(ex.Message);
+        //    }
 
-        }
+        //}
 
         [HttpGet("history/{id}")]
         public async Task<IActionResult> GetTicketHistory([FromRoute] int id)

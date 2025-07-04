@@ -19,6 +19,8 @@
             public string Remarks { get; set; }
             public string Category { get; set; }
             public int Aging_Day { get; set; }
+            public DateTime? StartDate { get; set; }
+            public DateTime? ClosedDate { get; set;}
 
         }
 

@@ -57,16 +57,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                           x.ClosingTicket.TicketConcern.TargetDate.Value.Year,
                           x.ClosingTicket.TicketConcern.TargetDate.Value.Month,
                           x.ClosingTicket.TicketConcern.TargetDate,
-                          ClosedAt = x.ClosingTicket.TicketConcern.Closed_At,
+                          ClosedDate = x.ClosingTicket.TicketConcern.Closed_At,
                           TechnicianName = x.TechnicianByUser.Fullname,
                           TicketId = x.ClosingTicket.TicketConcernId,
                           ConcernDescription = x.ClosingTicket.TicketConcern.RequestConcern.Concern,
-                          x.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName
+                          x.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
+                          StartDate = x.ClosingTicket.TicketConcern.DateApprovedAt
                       });
 
-                if (request.Unit is not null)
+                if (request.Channel is not null)
                 {
-                    ticketQuery = ticketQuery.Where(x => x.User.UnitId == request.Unit);
+                    ticketQuery = ticketQuery.Where(x => x.RequestConcern.ChannelId == request.Channel);
 
                     if (request.UserId is not null)
                     {
@@ -99,7 +100,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                 {
                     ticketQuery = ticketQuery
                         .Where(x => x.Id.ToString().Contains(request.Search)
-                        || x.User.Fullname.Contains(request.Search));
+                        || x.User.Fullname.Contains(request.Search)
+                        || x.RequestConcern.Concern.Contains(request.Search)
+                        || x.RequestConcern.Channel.ChannelName.Contains(request.Search));
                 }
 
                 var closingTicket = ticketQuery
@@ -108,11 +111,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                             x.TargetDate.Value.Year,
                             x.TargetDate.Value.Month,
                             x.TargetDate,
-                            ClosedAt = x.Closed_At,
+                            ClosedDate = x.Closed_At,
                             TechnicianName = x.User.Fullname,
                             TicketId = x.Id,
                             ConcernDescription = x.RequestConcern.Concern,
-                            x.RequestConcern.Channel.ChannelName
+                            x.RequestConcern.Channel.ChannelName,
+                            StartDate = x.DateApprovedAt,
+                            
+
                         });
 
                 var combinedTickets = closingTicket
@@ -128,13 +134,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                     Ticket_Number = x.TicketId,
                     Description = x.ConcernDescription,
                     Target_Date = x.TargetDate.Value.ToString("MM-dd-yyyy"),
-                    Actual = x.ClosedAt.HasValue ? x.ClosedAt.Value.ToString("MM-dd-yyyy") : "N/A",
-                    Varience = EF.Functions.DateDiffDay(x.TargetDate.Value, x.ClosedAt.Value),
-                    Efficeincy = x.ClosedAt.Value.Date <= x.TargetDate.Value.Date ? "100 %" : "50 %",
+                    Actual = x.ClosedDate.HasValue ? x.ClosedDate.Value.ToString("MM-dd-yyyy") : "N/A",
+                    Varience = EF.Functions.DateDiffDay(x.TargetDate.Value, x.ClosedDate.Value),
+                    Efficeincy = x.ClosedDate.Value.Date <= x.TargetDate.Value.Date ? "100 %" : "50 %",
                     Status = TicketingConString.Closed,
-                    Remarks = x.ClosedAt.Value.Date <= x.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
+                    Remarks = x.ClosedDate.Value.Date <= x.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
                     Category = x.ChannelName,
-                    Aging_Day = EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.ClosedAt.Value.Date)
+                    Aging_Day = EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.ClosedDate.Value.Date),
+                    StartDate = x.StartDate,
+                    ClosedDate = x.ClosedDate,
 
                 }).OrderBy(x => x.Ticket_Number); 
 

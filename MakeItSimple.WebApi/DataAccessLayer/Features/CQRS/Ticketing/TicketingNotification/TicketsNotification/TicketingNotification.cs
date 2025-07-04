@@ -116,6 +116,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                         x.IsDateApproved,
                         x.DateApprovedAt,
                         
+                        
 
                     }).ToListAsync();
 
@@ -209,7 +210,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                         .Count();
 
                     ticketConcernQuery = ticketConcernQuery
-                        .Where(x => x.IsApprove == true && x.AssignTo == request.UserId /*|| transferApprovalList.Contains(x.Id)*/ && ticketConcernQuery.Any())
+                        .Where(x =>  x.AssignTo == request.UserId /*|| transferApprovalList.Contains(x.Id)*/ && ticketConcernQuery.Any())
                         .ToList();
 
                     allTicketNotif = ticketConcernQuery.Count();
@@ -217,6 +218,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     openTicketNotif = ticketConcernQuery
                          .Where(x => x.IsApprove == true && x.IsTransfer != false
                          && x.IsClosedApprove == null && x.OnHold == null)
+                         .Count();
+                    ApprovedDateNotif = ticketConcernQuery
+                         .Where(x => x.IsDateApproved == null && x.DateApprovedAt == null && x.OnHold == null && x.AssignTo == request.UserId && x.RequestConcern.ConcernStatus == TicketingConString.ForApprovalTicket)
                          .Count();
 
                     forTransferNotif = transferQuery
@@ -246,8 +250,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     closedNotif = ticketConcernQuery
                         .Where(x => x.IsClosedApprove == true && x.RequestConcern.Is_Confirm == true && x.OnHold == null)
                         .Count();
-                    ApprovedDateNotif = ticketConcernQuery
-                        .Where(x => x.IsDateApproved == true && x.OnHold == null && x.RequestConcern.ConcernStatus == TicketingConString.ForApprovalTargetDate).Count();
+
                 }
 
                 if (approverPermissionList.Any(x => x.Contains(request.Role)))
@@ -307,9 +310,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                             .Select(approval => approval.UserId)
                             .ToList();
                         
-                        ForApprovalTargetDate = closeQuery
-                              .Where(x => userIdsInApprovalList.Contains(x.TicketApprover)
-                              && userRequestIdApprovalList.Contains(x.Id))
+                        ForApprovalTargetDate = dateApproval
+                              .Where(x => userRequestIdApprovalList.Contains(x.Id))
                               .Count();
                     }
 
