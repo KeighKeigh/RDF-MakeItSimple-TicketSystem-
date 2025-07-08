@@ -143,14 +143,16 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
                      await unitOfWork.RequestTicket.CreateTicketHistory(addRequestTicketHistory, cancellationToken);
 
-                
+
+                    var handlerId = await context.Approvers.Where(x => x.SubUnitId == requestConcernIdExist.User.SubUnitId).FirstOrDefaultAsync();
+                    var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
                     var assignedTicketHistory = new TicketHistory
                     {
                         TicketConcernId = ticketConcernExists.Id,
-                        TransactedBy = command.Added_By,
+                        TransactedBy = handlerId.UserId,
                         TransactionDate = DateTime.Now,
                         Request = TicketingConString.ConcernAssign,
-                        Status = $"{TicketingConString.RequestAssign} {handlerDetails.Fullname}"
+                        Status = $"{TicketingConString.ForApprovalDate}"
                     };
 
                     await unitOfWork.RequestTicket.CreateTicketHistory(assignedTicketHistory, cancellationToken);

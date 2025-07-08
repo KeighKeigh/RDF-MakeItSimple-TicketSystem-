@@ -335,12 +335,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         || x.SubUnit_Name.Contains(request.Search)
                         || x.Location_Code.ToString().Contains(request.Search)
                         || x.Location_Name.Contains(request.Search)
-                        || x.Concerns.Contains(request.Search))
-
-
-
-
-                        .ToList();
+                        || x.Concerns.Contains(request.Search)).ToList();
 
                     transferTicketQuery = transferTicketQuery
                     .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
@@ -450,7 +445,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                 {
                     combineTicketReports.Add(list);
                 }
-
+                
                 var results = combineTicketReports
                     .OrderBy(x => x.Transaction_Date.Value.Date)
                     .ThenBy(x => x.TicketConcernId)

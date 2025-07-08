@@ -22,7 +22,10 @@
             public int ForApprovalTransferNotif { get; set; }
             public int ForApprovalClosingNotif { get; set; }
             public int ForApprovalTargetDate { get; set ; }
+            public int ListOfOpenTicketNotif { get; set; }
+            public int ListOfDelayedTicketNotif { get; set; }
             public int ApprovalDateNotif { get; set;}
+            
 
         }
     }

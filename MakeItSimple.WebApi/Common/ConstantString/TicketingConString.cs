@@ -31,6 +31,7 @@ namespace MakeItSimple.WebApi.Common.ConstantString
 
         //Date Approval
         public const string DateApproval = "Ticket Date Approval request approved by";
+        public const string ForApprovalDate = "For Approval of Target Date";
 
         //Close History
 

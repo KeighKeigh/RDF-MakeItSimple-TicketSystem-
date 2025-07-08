@@ -45,6 +45,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                 var forApprovalClosingNotif = new int();
                 var forApprovalTransferNotif = new int();
                 var forApprovalOnHoldNotif = new int();
+                var openTicketsForApproverNotif = new int();
+                var delayTicketsForApproverNotif = new int();
+
+
+                var dateToday = DateTime.Today;
 
                 var allUserList = await _context.UserRoles
                     .AsNoTracking()
@@ -164,6 +169,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                     }).ToListAsync();
 
+
                 var dateApproval = await _context.ApproverDates
                     .AsNoTracking()
                     .Where(x => x.IsActive)
@@ -176,6 +182,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                         x.TicketApprover
 
                     }).ToListAsync();
+
+                //var openTicketApprover = from concern in _context.RequestConcerns
+                //                         join approver in _context.Approvers
+                //                         on concern.SubUnitId equals approver.SubUnitId into concernApprover
+                //                         from conApp in concernApprover.DefaultIfEmpty()
+                //                         where 
+                //                         select new
+                //                         {
+                //                             Id = concern.Id,
+                //                             TicketApprover = conApp.UserId
+                //                         };
+                                         
 
 
                 if (requestorPermissionList.Any(x => x.Contains(request.Role)))
@@ -265,6 +283,45 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                         }).FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
 
+
+                    var approverSubUnitIds = await _context.Approvers
+                   .AsNoTracking()
+                   .Where(x => x.UserId == userApprover.Id && x.IsActive == true)
+                  .Select(x => x.SubUnitId)
+                  .ToListAsync();
+
+
+                    if (approverSubUnitIds.Any())
+                    {
+                        var openTicketsForApprover = await _context.RequestConcerns
+                            .AsNoTracking()
+                            .Where(x => x.IsActive == true
+                                && x.ConcernStatus == TicketingConString.OnGoing
+                                && approverSubUnitIds.Contains(x.SubUnitId))
+                            .Select(x => new
+                            {
+                                x.Id,
+                                x.SubUnitId,
+                                x.ConcernStatus,
+                                x.UserId,
+                                x.TargetDate
+                            }).ToListAsync();
+
+                        openTicketsForApproverNotif = openTicketsForApprover.Count();
+
+                        var delayedTicketsForApprover = openTicketsForApprover.Where(x => x.TargetDate.Value.Date < dateToday)
+                            .Select(x => new
+                            {
+                                x.Id,
+                                x.SubUnitId,
+                                x.ConcernStatus,
+                                x.UserId
+                            }).ToList();
+
+                        delayTicketsForApproverNotif = delayedTicketsForApprover.Count();
+                    }
+
+
                     var approverTransactList = await _context.ApproverTicketings
                         .AsNoTracking()
                         .Where(x => x.UserId == userApprover.Id)
@@ -281,6 +338,20 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                         }).ToListAsync();
 
+                   
+
+
+
+                    //var approverOpenTicket = await _context.RequestConcerns
+                    //    .AsNoTracking()
+                    //    .Where(x => x.UserId == userApprover.Id)
+                    //    .Where(x => x.IsDone == null)
+                    //    .Select(x => new
+                    //    {
+                    //        x.UserId,
+                    //        x.Id,
+
+                    //    }).ToListAsync();
 
                     if (closeQuery.Any())
                     {
@@ -350,6 +421,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     }
 
 
+
+
                 }
 
 
@@ -407,7 +480,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     ForApprovalTransferNotif = forApprovalTransferNotif,
                     ForApprovalClosingNotif = forApprovalClosingNotif,
                     ForApprovalTargetDate = ForApprovalTargetDate,
-                    ApprovalDateNotif = ApprovedDateNotif
+                    ApprovalDateNotif = ApprovedDateNotif,
+                    ListOfOpenTicketNotif = openTicketsForApproverNotif,
+                    ListOfDelayedTicketNotif = delayTicketsForApproverNotif
                 };
 
 
