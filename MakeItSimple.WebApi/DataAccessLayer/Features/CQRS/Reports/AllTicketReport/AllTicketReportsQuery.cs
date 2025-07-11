@@ -9,6 +9,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
         {
             public string Search { get; set; }
 
+            public int? ServiceProvider { get; set; }
             public int? Channel { get; set; }
             public Guid? UserId { get; set; }
             public DateTime? Date_From { get; set; }

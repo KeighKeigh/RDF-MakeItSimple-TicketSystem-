@@ -24,6 +24,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         Task<int>PossibleRequestId();
         Task<int> PossibleTicketId();
 
+        Task UpdateTicket(TicketConcern ticketConcern, CancellationToken cancellationToken);
+        Task UpdateRequest(RequestConcern requestConcern, CancellationToken cancellationToken);
         Task UpdateTicketConcerns(TicketConcern ticketConcern, CancellationToken cancellationToken);
         Task UpdateRequestConcern(RequestConcern requestConcern, CancellationToken cancellationToken);
         Task UpdateTicketConcernss(TicketConcern ticketConcern, CancellationToken cancellationToken);

@@ -20,6 +20,8 @@ namespace MakeItSimple.WebApi.Common.ConstantString
         public const string Approver = "Approver";
         public const string Requestor = "Requestor";
         public const string Receiver = "Receiver";
+        public const string IssuHandlerRequestor = "Issue Handler / Requestor";
+        public const string Generate = "Generate";
         public const string IssueHandler = "Issue Handler";
         public const string Support = "Support";
 

@@ -29,13 +29,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OnHoldReport
                     .Include(q => q.AddedByUser)
                     .AsSplitQuery();
 
-                if (request.Channel is not null)
+                if (request.ServiceProvider is not null)
                 {
-                    query = query.Where(x => x.TicketConcern.RequestConcern.ChannelId == request.Channel);
+                    query = query.Where(x => x.TicketConcern.RequestConcern.ServiceProviderId == request.ServiceProvider);
 
-                    if (request.UserId is not null)
+                    if (request.Channel is not null)
                     {
-                        query = query.Where(x => x.AddedBy == request.UserId);
+                        query = query.Where(x => x.TicketConcern.RequestConcern.ChannelId == request.Channel);
+
+                        if (request.UserId is not null)
+                        {
+                            query = query.Where(x => x.AddedBy == request.UserId);
+                        }
                     }
                 }
 

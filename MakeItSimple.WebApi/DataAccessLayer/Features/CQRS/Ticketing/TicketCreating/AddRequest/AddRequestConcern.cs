@@ -102,8 +102,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             CompanyId = userIdExist.CompanyId,
                             BusinessUnitId = userIdExist.BusinessUnitId,
                             DepartmentId = userIdExist.DepartmentId,
-                            UnitId = userIdExist.UnitId.ToString() == "" ? null : userIdExist.UnitId,
-                            SubUnitId = userIdExist.SubUnitId.ToString() == "" ? null : userIdExist.SubUnitId,
+                            
                             LocationId = userIdExist.LocationId,
                             DateNeeded = command.DateNeeded,
                             ChannelId = command.ChannelId == 0 ? null : command.ChannelId,

@@ -33,14 +33,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.TransferReport
                     .ThenInclude(x => x.RequestConcern)
                     .AsSplitQuery();
 
-
-                if (request.Channel is not null)
+                if (request.ServiceProvider is not null)
                 {
-                    _transferQuery = _transferQuery.Where(x => x.TicketConcern.RequestConcern.ChannelId == request.Channel);
+                    _transferQuery = _transferQuery.Where(x => x.TicketConcern.RequestConcern.ServiceProviderId == request.ServiceProvider);
 
-                    if (request.UserId is not null)
+                    if (request.Channel is not null)
                     {
-                        _transferQuery = _transferQuery.Where(x => x.TransferBy == request.UserId);
+                        _transferQuery = _transferQuery.Where(x => x.TicketConcern.RequestConcern.ChannelId == request.Channel);
+
+                        if (request.UserId is not null)
+                        {
+                            _transferQuery = _transferQuery.Where(x => x.TransferBy == request.UserId);
+                        }
                     }
                 }
 

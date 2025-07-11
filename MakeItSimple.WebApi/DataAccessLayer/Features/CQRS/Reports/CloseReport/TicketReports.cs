@@ -65,13 +65,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                           StartDate = x.ClosingTicket.TicketConcern.DateApprovedAt
                       });
 
-                if (request.Channel is not null)
+                if (request.ServiceProvider is not null)
                 {
-                    ticketQuery = ticketQuery.Where(x => x.RequestConcern.ChannelId == request.Channel);
+                    ticketQuery = ticketQuery.Where(x => x.RequestConcern.ServiceProviderId == request.ServiceProvider);
 
-                    if (request.UserId is not null)
+                    if (request.Channel is not null)
                     {
-                        ticketQuery = ticketQuery.Where(x => x.UserId == request.UserId);
+                        ticketQuery = ticketQuery.Where(x => x.RequestConcern.ChannelId == request.Channel);
+
+                        if (request.UserId is not null)
+                        {
+                            ticketQuery = ticketQuery.Where(x => x.UserId == request.UserId);
+                        }
                     }
                 }
 

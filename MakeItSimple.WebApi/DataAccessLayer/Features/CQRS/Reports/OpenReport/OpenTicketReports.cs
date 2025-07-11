@@ -41,7 +41,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
                     .ThenInclude(x => x.SubCategory)
 
                     .AsSplitQuery()
-                    .Where(x => x.IsApprove == true && x.IsClosedApprove != true && x.OnHold != true && x.IsTransfer != true)
+                    .Where(x => x.IsApprove == true && x.IsClosedApprove != true && x.OnHold != true && x.IsTransfer != true && x.IsDone != true)
                     .Where(x => x.DateApprovedAt.Value.Date >= request.Date_From.Value.Date && x.DateApprovedAt.Value.Date <= request.Date_To.Value.Date)
 
                     .Select(t => new OpenTicketReportsResult
@@ -71,18 +71,27 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
                         Personnel = t.User.Fullname,
                         ChannelId = t.RequestConcern.ChannelId,
                         StartDate = t.DateApprovedAt,
+                        ServiceProvider = t.RequestConcern.ServiceProviderId,
+                        AssigTo = t.RequestConcern.AssignToUser.Fullname,
+                        
+
                         
                         
 
                     });
 
-                if (request.Channel is not null)
+                if (request.ServiceProvider is not null)
                 {
-                    results = results.Where(x => x.ChannelId == request.Channel);
+                    results = results.Where(x => x.ServiceProvider == request.ServiceProvider);
 
-                    if (request.UserId is not null)
+                    if (request.Channel is not null)
                     {
-                        results = results.Where(x => x.Personnel_Id == request.UserId);
+                        results = results.Where(x => x.ChannelId == request.Channel);
+
+                        if (request.UserId is not null)
+                        {
+                            results = results.Where(x => x.Personnel_Id == request.UserId);
+                        }
                     }
                 }
 
@@ -107,18 +116,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
                         || x.Personnel_Unit.ToString().Contains(request.Search)
                         || x.Personnel_Id.ToString().Contains(request.Search)
                         || x.ChannelId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search)
-                        || x.Personnel.Contains(request.Search)
-                        || x.Personnel.Contains(request.Search)
-                        || x.Personnel.Contains(request.Search)
-                        )
-                        
-                        
-                        
-                        
-                        
-                        
-                        ;
+                        || x.AssigTo.Contains(request.Search));
                 }
 
 
@@ -151,6 +149,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
                         Personnel = f.Personnel,
                         ChannelId = f.ChannelId,
                         StartDate = f.StartDate,
+                        AssigTo = f.AssigTo,
 
                     }).AsQueryable();
 

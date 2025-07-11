@@ -45,7 +45,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                     .UserExist(command.Added_By);
 
                 var userIdExist = await unitOfWork.User
-                    .UserExist(command.UserId);
+                    .UserExist(command.AssignTo);
 
                 var handlerDetails = await unitOfWork.User
                         .UserExist(command.AssignTo);
@@ -74,6 +74,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
                 var ticketConcernIdExist = await unitOfWork.RequestTicket.TicketConcernExist(command.TicketConcernId);
 
+                
+
                 if (requestConcernIdExist is not null)
                 {
 
@@ -92,7 +94,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                         ChannelId = command.ChannelId == 0 ? null : command.ChannelId,
                         ContactNumber = command.Contact_Number,
                         RequestType = command.Request_Type,
-
+                        UnitId = userIdExist.UnitId,
+                        UserId = command.AssignTo,
+                        DepartmentId = userIdExist.DepartmentId,
+                        SubUnitId = userIdExist.SubUnitId,
                         DateNeeded = command.DateNeeded,
                         BackJobId = command.BackJobId,
                         ModifiedBy = command.Modified_By,
@@ -109,7 +114,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                         {
                             Id = ticketConcernIdExist.Id,
                             TargetDate = command.TargetDate,
-                            UserId = command.UserId,
+                            UserId = command.AssignTo,
                             IsApprove = false,
                             IsAssigned = true,
                             ApprovedBy = command.Added_By,
@@ -144,7 +149,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                      await unitOfWork.RequestTicket.CreateTicketHistory(addRequestTicketHistory, cancellationToken);
 
 
-                    var handlerId = await context.Approvers.Where(x => x.SubUnitId == requestConcernIdExist.User.SubUnitId).FirstOrDefaultAsync();
+                    var handlerId = await context.Approvers.Where(x => x.SubUnitId == requestConcernIdExist.SubUnitId).FirstOrDefaultAsync();
                     var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
                     var assignedTicketHistory = new TicketHistory
                     {

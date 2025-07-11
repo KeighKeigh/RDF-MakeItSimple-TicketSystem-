@@ -184,7 +184,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                     TransactedBy = command.Transacted_By,
                     TransactionDate = DateTime.Now,
                     Request = TicketingConString.ForTransfer,
-                    Status = $"{TicketingConString.TransferRequest} to {command.Transfer_To}"
+                    Status = TicketingConString.TransferRequest
 
                 };
 

@@ -35,7 +35,8 @@
             public string Ticket_Status { get; set; }
             public string Remarks { get; set; }
             public int Aging_Days {  get; set; }     
-            public int ChannelId { get; set; }
+            public int? ChannelId { get; set; }
+            public int? ServiceProvider { get; set; }
             public DateTime? StartDate { get; set; }
             public DateTime? ClosedDate { get; set; }
             public string AssignTo { get; set; }

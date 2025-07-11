@@ -27,8 +27,11 @@
             public int? Personnel_Unit { get; set; }
             public Guid? Personnel_Id { get; set; }
             public string Personnel { get; set; }
+            public int? ServiceProvider { get; set; }
             public int? ChannelId { get; set; }
             public DateTime? StartDate { get; set; }
+            public string AssigTo { get; set; }
+
 
         }
     }

@@ -106,6 +106,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 update.ConcernStatus = ticketConcern.ConcernStatus;
             }
 
+            
         }
         public async Task UpdateRequestConcern(RequestConcern requestConcern, CancellationToken cancellationToken)
         {
@@ -163,9 +164,62 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
             {
                 update.AssignTo = requestConcern.AssignTo;
             }
+            if (update.SubUnitId != requestConcern.SubUnitId && requestConcern.SubUnitId is not null)
+            {
+                update.SubUnitId = requestConcern.SubUnitId;
+            }
+            if (update.UnitId != requestConcern.UnitId && requestConcern.UnitId is not null)
+            {
+                update.UnitId = requestConcern.UnitId;
+            }
+            if (update.UserId != requestConcern.UserId && requestConcern.UserId is not null)
+            {
+                update.UserId = requestConcern.UserId;
+            }
+            if (update.DepartmentId != requestConcern.DepartmentId && requestConcern.DepartmentId is not null)
+            {
+                update.DepartmentId = requestConcern.DepartmentId;
+            }
+
+            if (isChange)
+            {
+                update.ModifiedBy = requestConcern.ModifiedBy;
+                update.UpdatedAt = DateTime.Now;
+            }
+
+            await context.SaveChangesAsync();
+
+        }
+
+
+        public async Task UpdateRequest(RequestConcern requestConcern, CancellationToken cancellationToken)
+        {
+            bool isChange = false;
+
+            var update = await context.RequestConcerns
+                .FirstOrDefaultAsync(x => x.Id == requestConcern.Id, cancellationToken);
+
+
             if (update.ChannelId != requestConcern.ChannelId && requestConcern.ChannelId is not null)
             {
                 update.ChannelId = requestConcern.ChannelId;
+                isChange = true;
+            }
+
+            if (update.UserId != requestConcern.UserId && requestConcern.UserId is not null)
+            {
+                update.UserId = requestConcern.UserId;
+                isChange = true;
+            }
+
+            if (update.AddedBy != requestConcern.AddedBy && requestConcern.AddedBy is not null)
+            {
+                update.AddedBy = requestConcern.AddedBy;
+                isChange = true;
+            }
+            if (update.AssignTo != requestConcern.AssignTo && requestConcern.AssignTo is not null)
+            {
+                update.AssignTo = requestConcern.AssignTo;
             }
 
             if (isChange)
@@ -176,6 +230,31 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
 
         }
 
+        public async Task UpdateTicket(TicketConcern ticketConcern, CancellationToken cancellationToken)
+        {
+            var update = await context.TicketConcerns.FirstOrDefaultAsync(x => x.Id == ticketConcern.Id, cancellationToken);
+
+
+            if (update.UserId != ticketConcern.UserId && ticketConcern.UserId is not null)
+            {
+                update.UserId = ticketConcern.UserId;
+
+            }
+            if (update.AssignTo != ticketConcern.AssignTo && ticketConcern.AssignTo is not null)
+            {
+                update.AssignTo = ticketConcern.AssignTo;
+
+            }
+            if (update.AddedBy != ticketConcern.AddedBy && ticketConcern.AddedBy is not null)
+            {
+                update.AddedBy = ticketConcern.AddedBy;
+            }
+            if (update.RequestorBy != ticketConcern.RequestorBy && ticketConcern.RequestorBy is not null)
+            {
+                update.RequestorBy = ticketConcern.RequestorBy;
+            }
+
+        }
         //kk
 
         public async Task UpdateTicketConcernss(TicketConcern ticketConcern, CancellationToken cancellationToken)
