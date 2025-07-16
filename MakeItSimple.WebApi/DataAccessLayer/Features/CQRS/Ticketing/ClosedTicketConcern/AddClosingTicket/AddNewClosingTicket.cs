@@ -277,6 +277,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
                 {
                     if (ticketCategoryExist is null)
                     {
+                        ticketCategoryList.Add(category.CategoryId.Value);
                         // Add new category
                         var addTicketCategory = new TicketCategory
                         {
@@ -284,6 +285,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
                             CategoryId = category.CategoryId,
                         };
                         await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory, cancellationToken);
+                    }
+                    else
+                    {
+                        ticketCategoryList.Add(category.CategoryId.Value);
                     }
                 }
             }
@@ -297,6 +302,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
                 {
                     if (ticketSubCategoryExist is null)
                     {
+                        ticketSubCategoryList.Add(subCategory.SubCategoryId.Value);
                         // Add new subcategory
                         var addTicketSubCategory = new TicketSubCategory
                         {
@@ -304,6 +310,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
                             SubCategoryId = subCategory.SubCategoryId,
                         };
                         await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory, cancellationToken);
+                    }
+                    else
+                    { 
+                        ticketSubCategoryList.Add(subCategory.SubCategoryId.Value); 
                     }
                 }
             }

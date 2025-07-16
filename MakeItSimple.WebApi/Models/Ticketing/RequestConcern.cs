@@ -60,6 +60,15 @@ namespace MakeItSimple.WebApi.Models.Ticketing
         public int? SubUnitId { get; set; }
         public virtual SubUnit SubUnit { get; set; }
 
+
+        //requestor 
+        public int? ReqUnitId { get; set; }
+        public virtual Unit ReqUnit { get; set; }
+
+        public int? ReqSubUnitId { get; set; }
+        public virtual SubUnit ReqSubUnit { get; set; }
+
+
         public int? ChannelId { get; set; }
         public virtual Channel Channel { get; set; }
 

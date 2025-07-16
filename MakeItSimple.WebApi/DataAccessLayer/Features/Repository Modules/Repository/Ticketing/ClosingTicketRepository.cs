@@ -27,10 +27,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
 
         public async Task<List<Approver>> ApproverBySubUnitList(int? id)
         {
-           return await context.Approvers
-                .Include(x => x.User)
-                .Where(x => x.SubUnitId == id)
-                .ToListAsync();
+            return await context.Approvers
+                 .Include(x => x.User)
+                 .Where(x => x.SubUnitId == id)
+                 .ToListAsync();
         }
 
         public async Task<List<ApproverTicketing>> ApproverThatNullByClosingTicketList(int? id)
@@ -40,7 +40,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .ToListAsync();
         }
 
-        public async Task<ClosingTicket>ClosingTicketExist(int? id)
+        public async Task<ClosingTicket> ClosingTicketExist(int? id)
         {
             return await context.ClosingTickets
                 .Include(x => x.TicketConcern)
@@ -55,7 +55,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
 
         public async Task CreateApproval(ApproverTicketing approverTicketing, CancellationToken cancellationToken)
         {
-            await context.ApproverTicketings.AddAsync(approverTicketing,cancellationToken);
+            await context.ApproverTicketings.AddAsync(approverTicketing, cancellationToken);
         }
 
         public async Task CreateClosingTicket(ClosingTicket closingTicket, CancellationToken cancellationToken)
@@ -65,7 +65,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
 
         public async Task CreateTicketTechnician(TicketTechnician ticketTechnician, CancellationToken cancellationToken)
         {
-            await context.TicketTechnicians.AddAsync(ticketTechnician,cancellationToken);
+            await context.TicketTechnicians.AddAsync(ticketTechnician, cancellationToken);
         }
 
         public async Task ForClosingTicket(int? id)
@@ -85,7 +85,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
 
         public async Task<TicketTechnician> TicketTechnicianExist(int? id)
         {
-             return await context.TicketTechnicians.FirstOrDefaultAsync(x => x.Id == id);
+            return await context.TicketTechnicians.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task UpdateClosingTicket(ClosingTicket closingTicket, CancellationToken cancellationToken)
@@ -93,7 +93,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
             bool IsChanged = false;
 
             var update = await context.ClosingTickets
-                .FirstOrDefaultAsync(x => x.Id == closingTicket.Id,cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == closingTicket.Id, cancellationToken);
 
             if (update.Resolution != closingTicket.Resolution)
             {
@@ -180,7 +180,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .SetProperty(u => u.IsDone, u => true)
                 .SetProperty(u => u.Resolution, u => requestConcern.Resolution)
                 .SetProperty(u => u.ConcernStatus, u => requestConcern.ConcernStatus));
-           
+
         }
 
         public async Task NextApproverUser(int? id, Guid? userId)
@@ -193,9 +193,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
 
         public async Task RemoveClosingApprover(int? id)
         {
-           await context.ApproverTicketings
-                .Where(x => x.ClosingTicketId == id)
-                .ExecuteDeleteAsync();
+            await context.ApproverTicketings
+                 .Where(x => x.ClosingTicketId == id)
+                 .ExecuteDeleteAsync();
         }
 
         public async Task CancelClosingTicket(int? id)
@@ -228,7 +228,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .SetProperty(c => c.ConcernStatus, c => TicketingConString.Done));
         }
 
-        public async  Task ConfirmTicketHistory(int? id)
+        public async Task ConfirmTicketHistory(int? id)
         {
             var updateTicketConcern = await context.TicketConcerns
                 .Where(x => x.Id == id)
@@ -241,8 +241,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .SetProperty(u => u.TransactedBy, u => updateTicketConcern.RequestorBy)
                 .SetProperty(u => u.TransactionDate, u => DateTime.Now)
                 .SetProperty(u => u.Request, u => TicketingConString.Confirm)
-                .SetProperty(u => u.Status, u => TicketingConString.CloseConfirm));                
+                .SetProperty(u => u.Status, u => TicketingConString.CloseConfirm));
         }
+        //kk
+
+        //public async Task RequestorConfirmation(int? id, Guid? requestor)
+        //{
+        //    var requestApprover = await context.TicketConcerns
+        //        .Where(x => x.RequestConcernId == id && x.AddedBy == requestor).FirstOrDefaultAsync();
+
+            
+        //}
 
         public async Task RejectClosingTicket(ClosingTicket closingTicket)
         {
@@ -267,7 +276,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
 
         }
 
-        public async Task ReturnClosingTicket(int? id, string status)
+        public async Task ReturnClosingTicket(int? id, string status, string remarks)
         {
 
             var ticketConcernExist = await context.TicketConcerns
@@ -287,7 +296,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .SetProperty(u => u.Closed_At, u => null)
                 .SetProperty(u => u.ClosedApproveBy, u => null)
                 .SetProperty(u => u.ConcernStatus, u => status)
-                .SetProperty(u => u.IsDone, u => null));
+                .SetProperty(u => u.IsDone, u => null)
+                .SetProperty(u => u.Remarks, u => remarks));
 
 
             await context.ClosingTickets

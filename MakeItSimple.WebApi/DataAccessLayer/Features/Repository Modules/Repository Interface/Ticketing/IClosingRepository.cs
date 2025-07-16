@@ -23,7 +23,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         Task RemoveClosingApprover(int? id);
         Task CancelClosingTicket(int? id);
         Task RejectClosingTicket(ClosingTicket closingTicket);
-        Task ReturnClosingTicket(int? id, string status);
+        Task ReturnClosingTicket(int? id, string status, string remarks);
 
 
         Task UpdateClosingTicket(ClosingTicket closingTicket,CancellationToken cancellationToken);
@@ -35,6 +35,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         Task ApprovedRequestConcernByClosing(RequestConcern requestConcern, CancellationToken cancellation);
         Task ConfirmClosingTicket(int? id);
         Task ConfirmTicketHistory(int? id);
+        //Task RequestorConfirmation(int? id, Guid? requestor);
         
 
 

@@ -39,7 +39,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
                 if (requestConcernExist.Is_Confirm is true)
                     return Result.Failure(TicketRequestError.TicketAlreadyApproved());
 
-                await unitOfWork.ClosingTicket.ReturnClosingTicket(command.RequestConcernId, TicketingConString.OnGoing);
+                await unitOfWork.ClosingTicket.ReturnClosingTicket(command.RequestConcernId, TicketingConString.OnGoing, command.Remarks);
 
                 await unitOfWork.RequestTicket.RemoveTicketHistory(requestConcernExist.TicketConcerns.First().Id);
 

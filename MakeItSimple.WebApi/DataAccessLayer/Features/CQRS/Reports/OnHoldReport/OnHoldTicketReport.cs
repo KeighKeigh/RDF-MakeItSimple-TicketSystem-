@@ -64,7 +64,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OnHoldReport
                         IsHold = r.IsHold,
                         Resume_At = r.ResumeAt,
                         ApprovedDate = r.ApprovedAt,
-                        ApprovedBy = r.ApprovedBy
+                        ApprovedBy = r.ApprovedBy,
+                        ServiceProviderId = r.TicketConcern.RequestConcern.ServiceProviderId,
+                        ServiceProviderName = r.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
+                        ChannelId = r.TicketConcern.RequestConcern.ChannelId,
+                        ChannelName = r.TicketConcern.RequestConcern.Channel.ChannelName
                     });
 
 

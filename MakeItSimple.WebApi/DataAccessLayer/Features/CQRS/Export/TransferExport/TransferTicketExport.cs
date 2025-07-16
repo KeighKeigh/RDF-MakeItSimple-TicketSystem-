@@ -41,21 +41,31 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport
                         Remarks = x.TransferRemarks,
                         Modified_By = x.ModifiedByUser.Fullname,
                         Updated_At = x.UpdatedAt,
-                        ApprovedBy = x.ApprovedBy
-                        
+                        ApprovedBy = x.ApprovedBy,
+                        ServiceProviderId = x.TicketConcern.RequestConcern.ServiceProviderId,
+                        ServiceProviderName = x.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
+                        ChannnelId = x.TicketConcern.RequestConcern.ChannelId,
+                        ChannnelName = x.TicketConcern.RequestConcern.Channel.ChannelName
+
+
 
                     }).ToListAsync(cancellationToken);
 
-
-                if (request.Unit is not null)
+                if (request.ServiceProvider is not null)
                 {
-                    _transferQuery = _transferQuery.Where(x => x.Unit == request.Unit)
-                        .ToList();
-
-                    if (request.UserId is not null)
-                    {
-                        _transferQuery = _transferQuery.Where(x => x.UserId == request.UserId)
+                    _transferQuery = _transferQuery.Where(x => x.ServiceProviderId == request.ServiceProvider)
                             .ToList();
+
+                    if (request.Channel is not null)
+                    {
+                        _transferQuery = _transferQuery.Where(x => x.ChannnelId == request.Channel)
+                            .ToList();
+
+                        if (request.UserId is not null)
+                        {
+                            _transferQuery = _transferQuery.Where(x => x.UserId == request.UserId)
+                                .ToList();
+                        }
                     }
                 }
 
@@ -85,7 +95,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport
                         Transfer_Remarks = r.Transfer_Remarks,
                         Modified_By = r.Modified_By,
                         Updated_At = r.Updated_At,
-                        ApprovedBy = r.ApprovedBy
+                        ApprovedBy = r.ApprovedBy,
+                        ServiceProviderId = r.ServiceProviderId,
+                        ServiceProviderName = r.ServiceProviderName,
+                        ChannnelId = r.ChannnelId,
+                        ChannnelName = r.ChannnelName,
                     });
                 using (var workbook = new XLWorkbook())
                 {
@@ -103,7 +117,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport
                         "Current Target Date",
                         "Modified By",
                         "Updated At",
-                        "Approved By"
+                        "Approved By",
+                        "Service Provider",
+                        "Channel"
 
                     };
 
@@ -134,6 +150,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport
                         row.Cell(10).Value = _transferQuery[index - 1].Modified_By;
                         row.Cell(11).Value = _transferQuery[index - 1].Updated_At;
                         row.Cell(12).Value = _transferQuery[index - 1].ApprovedBy;
+                        row.Cell(13).Value = _transferQuery[index - 1].ServiceProviderName;
+                        row.Cell(14).Value = _transferQuery[index - 1].ChannnelName;
                     }
 
                     worksheet.Columns().AdjustToContents();

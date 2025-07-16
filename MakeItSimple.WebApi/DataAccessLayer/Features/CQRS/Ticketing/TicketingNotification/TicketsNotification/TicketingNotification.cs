@@ -175,6 +175,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     .Where(x => x.IsActive)
                     .Where(x => x.IsApproved == false)
                     .Where(x => x.IsRejectDate == false)
+                    
                     .Select(x => new
                     {
                         x.Id,
@@ -238,8 +239,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                          .Where(x => x.IsApprove == true && x.IsTransfer != false
                          && x.IsClosedApprove == null && x.OnHold == null)
                          .Count();
+
                     ApprovedDateNotif = ticketConcernQuery
-                         .Where(x => x.IsDateApproved == null && x.DateApprovedAt == null && x.OnHold == null && x.AssignTo == request.UserId && x.RequestConcern.ConcernStatus == TicketingConString.ForApprovalTicket)
+                         .Where(x => x.IsDateApproved == null 
+                         && x.OnHold == null)
                          .Count();
 
                     forTransferNotif = transferQuery

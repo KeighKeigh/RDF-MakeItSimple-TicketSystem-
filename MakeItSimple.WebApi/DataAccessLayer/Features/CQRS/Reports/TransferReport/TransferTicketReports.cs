@@ -73,6 +73,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.TransferReport
                         Modified_By = x.ModifiedByUser.Fullname,
                         Updated_At = x.UpdatedAt,
                         ApprovedBy = x.ApprovedBy,
+                        ServiceProviderId = x.TicketConcern.RequestConcern.ServiceProviderId,
+                        ServiceProviderName = x.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
+                        ChannelId = x.TicketConcern.RequestConcern.ChannelId,
+                        ChannelName = x.TicketConcern.RequestConcern.Channel.ChannelName
 
 
 

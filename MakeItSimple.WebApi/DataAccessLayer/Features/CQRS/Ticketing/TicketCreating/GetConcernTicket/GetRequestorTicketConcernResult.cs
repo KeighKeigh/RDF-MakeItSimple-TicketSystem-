@@ -29,6 +29,16 @@
             public string SubUnit_Code { get; set; }
             public string SubUnit_Name { get; set; }
 
+
+            public int? ReqUnitId { get; set; }
+            public string ReUnit_Code { get; set; }
+            public string ReqUnit_Name { get; set; }
+
+            public int? ReqSubUnitId { get; set; }
+            public string ReqSubUnit_Code { get; set; }
+            public string ReqSubUnit_Name { get; set; }
+
+
             public int? LocationId { get; set; }
             public string Location_Code { get; set; }
             public string Location_Name { get; set; }

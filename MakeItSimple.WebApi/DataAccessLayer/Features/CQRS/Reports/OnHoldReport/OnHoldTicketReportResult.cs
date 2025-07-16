@@ -13,6 +13,10 @@
             public DateTime? Resume_At { get; set; }
             public DateTime? ApprovedDate { get; set; }
             public string ApprovedBy { get; set; }
+            public int? ServiceProviderId { get; set; }
+            public string ServiceProviderName { get; set;}
+            public int? ChannelId { get; set; }
+            public string ChannelName { get; set; }
             
 
         }

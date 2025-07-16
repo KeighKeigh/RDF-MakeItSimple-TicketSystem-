@@ -21,9 +21,11 @@
             public string Efficeincy { get; set; }
             public string Status { get; set; }
             public string Remarks { get; set; }
-            public string Category { get; set; }
+            public int? ChannelId { get; set; }
+            public string ChannelName { get; set; }
             public int Aging_Days { get; set; }
-
+            public int? ServiceProvider { get; set; }
+            public string ServiceProviderName { get; set; }
         }
     }
 }

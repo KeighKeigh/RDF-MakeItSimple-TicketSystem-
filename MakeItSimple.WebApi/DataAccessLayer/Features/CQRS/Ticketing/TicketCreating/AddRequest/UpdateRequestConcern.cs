@@ -10,6 +10,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConcern.ViewOpenTicket.GetOpenTicket.GetOpenTicketResult.GetForClosingTicket;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.AddRequest.AddRequestConcern;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddRequest
@@ -44,14 +45,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                 var userDetails = await unitOfWork.User
                     .UserExist(command.Added_By);
 
-                var userIdExist = await unitOfWork.User
-                    .UserExist(command.AssignTo);
+                
 
                 var handlerDetails = await unitOfWork.User
                         .UserExist(command.AssignTo);
 
-                if (userIdExist is null)
-                    return Result.Failure(UserError.UserNotExist());
+                //if (userIdExist is null)
+                //    return Result.Failure(UserError.UserNotExist());
 
 
                 foreach (var category in command.AddRequestTicketCategory)
@@ -79,6 +79,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                 if (requestConcernIdExist is not null)
                 {
 
+                    
+
                     var ticketConcernExist = await unitOfWork.RequestTicket
                         .TicketConcernExistByRequestConcernId(command.RequestConcernId);
 
@@ -94,10 +96,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                         ChannelId = command.ChannelId == 0 ? null : command.ChannelId,
                         ContactNumber = command.Contact_Number,
                         RequestType = command.Request_Type,
-                        UnitId = userIdExist.UnitId,
-                        UserId = command.AssignTo,
-                        DepartmentId = userIdExist.DepartmentId,
-                        SubUnitId = userIdExist.SubUnitId,
                         DateNeeded = command.DateNeeded,
                         BackJobId = command.BackJobId,
                         ModifiedBy = command.Modified_By,
@@ -110,6 +108,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                     await unitOfWork.RequestTicket.UpdateRequestConcern(updateRequestConcern, cancellationToken);
                     if (command.AssignTo != null)
                     {
+
+                        var userIdExist = await unitOfWork.User
+                             .UserExist(command.AssignTo);
+                        var updateRequest = new RequestConcern
+                        {
+                            Id = requestConcernIdExist.Id,
+                            UnitId = userIdExist.UnitId,
+                            DepartmentId = userIdExist.DepartmentId,
+                            SubUnitId = userIdExist.SubUnitId,
+                        };
+                        await unitOfWork.RequestTicket.UpdateRequestConcern(updateRequest, cancellationToken);
+
                         var updateTicketConcern = new TicketConcern
                         {
                             Id = ticketConcernIdExist.Id,
@@ -136,31 +146,86 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                     var ticketConcernExists = await unitOfWork.RequestTicket
                                .TicketConcernExist(command.TicketConcernId);
 
+                    var approverList = await unitOfWork.RequestTicket
+                    .ApproverBySubUnitList(ticketConcernExists.User.SubUnitId);
+
+                    if (!approverList.Any())
+                        return Result.Failure(ClosingTicketError.NoApproverHasSetup());
+
+                    if (!approverList.Any())
+                        return Result.Failure(ClosingTicketError.NoApproverHasSetup());
+
+                    var approverUser = approverList
+                .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
+
+                    var addNewDateApproveConcern = new ApproverDate
+                    {
+                        TicketConcernId = ticketConcernExists.Id,
+                        IsApproved = false,
+                        TicketApprover = approverUser.UserId,
+                        AddedBy = command.Added_By,
+                        Notes = command.Notes,
+                    };
+
+                    await unitOfWork.RequestTicket.ApproveDateTicket(addNewDateApproveConcern, cancellationToken);
+
+                    await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                    foreach (var approver in approverList)
+                    {
+                        var addNewApprover = new ApproverTicketing
+                        {
+                            TicketConcernId = ticketConcernExists.Id,
+                            ApproverDateId = addNewDateApproveConcern.Id,
+                            UserId = approver.UserId,
+                            ApproverLevel = approver.ApproverLevel,
+                            AddedBy = command.Added_By,
+                            CreatedAt = DateTime.Now,
+                            Status = TicketingConString.ApprovalDate,
+                        };
+
+                        await unitOfWork.RequestTicket.CreateApproval(addNewApprover, cancellationToken);
+
+                    }
 
                     var addRequestTicketHistory = new TicketHistory
                     {
-                      TicketConcernId = ticketConcernExists.Id,
-                      TransactedBy = command.Added_By,
-                      TransactionDate = DateTime.Now,
-                      Request = TicketingConString.Request,
-                      Status = $"{TicketingConString.ConcernCreated} {userDetails.Fullname}"
+                        TicketConcernId = ticketConcernExists.Id,
+                        TransactedBy = command.Added_By,
+                        TransactionDate = DateTime.Now,
+                        Request = TicketingConString.Request,
+                        Status = $"{TicketingConString.ConcernCreated} {userDetails.Fullname}"
                     };
 
-                     await unitOfWork.RequestTicket.CreateTicketHistory(addRequestTicketHistory, cancellationToken);
+                    await unitOfWork.RequestTicket.CreateTicketHistory(addRequestTicketHistory, cancellationToken);
 
+                    var assignedTicketHistory = new TicketHistory
+                    {
+                        TicketConcernId = ticketConcernExists.Id,
+                        TransactedBy = command.Added_By,
+                        TransactionDate = DateTime.Now,
+                        Request = TicketingConString.ConcernAssign,
+                        Status = $"{TicketingConString.RequestAssign} {handlerDetails.Fullname}"
+                    };
+
+                    await unitOfWork.RequestTicket.CreateTicketHistory(assignedTicketHistory, cancellationToken);
+
+
+
+                    //kk
 
                     var handlerId = await context.Approvers.Where(x => x.SubUnitId == requestConcernIdExist.SubUnitId).FirstOrDefaultAsync();
                     var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
-                    var assignedTicketHistory = new TicketHistory
+                    var approveTicketDateHistory = new TicketHistory
                     {
                         TicketConcernId = ticketConcernExists.Id,
                         TransactedBy = handlerId.UserId,
                         TransactionDate = DateTime.Now,
-                        Request = TicketingConString.ConcernAssign,
+                        Request = TicketingConString.ForApprovalTicket,
                         Status = $"{TicketingConString.ForApprovalDate}"
                     };
 
-                    await unitOfWork.RequestTicket.CreateTicketHistory(assignedTicketHistory, cancellationToken);
+                    await unitOfWork.RequestTicket.CreateTicketHistory(approveTicketDateHistory, cancellationToken);
 
 
                     var addNewTicketTransactionNotification = new TicketTransactionNotification
@@ -273,6 +338,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                     {
                         if (ticketCategoryExist is null)
                         {
+                            ticketCategoryList.Add(category.CategoryId.Value);
                             // Add new category
                             var addTicketCategory = new TicketCategory
                             {
@@ -282,7 +348,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                             };
                             await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory, cancellationToken);
                         }
+                        else
+                        {
+                            ticketCategoryList.Add(category.CategoryId.Value);
+                        }
                     }
+                    
                     }
 
                     // Process subcategories - add new ones
@@ -294,6 +365,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                     {
                         if (ticketSubCategoryExist is null)
                         {
+                            ticketSubCategoryList.Add(subCategory.SubCategoryId.Value);
                             // Add new subcategory
                             var addTicketSubCategory = new TicketSubCategory
                             {
@@ -302,7 +374,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                             };
                             await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory, cancellationToken);
                         }
+                        else
+                        {
+                            ticketSubCategoryList.Add(subCategory.SubCategoryId.Value);
+                        }
                     }
+                   
                     }
 
                     if (ticketCategoryList.Any())

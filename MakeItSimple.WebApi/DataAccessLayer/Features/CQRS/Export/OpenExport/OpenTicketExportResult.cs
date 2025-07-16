@@ -15,7 +15,10 @@
             public string Unit_Name { get; set; }
             public string SubUnit_Name { get; set; }
             public string Location_Name { get; set; }
+            public int? Channel_Id { get; set; }
             public string Channel_Name { get; set; }
+            public int? ServiceProvider_Id { get; set; }
+            public string ServiceProvider_Name { get; set; }
             public string Category_Description { get; set; }
             public string SubCategory_Description { get; set; }
             public string Issue_Handler { get; set; }

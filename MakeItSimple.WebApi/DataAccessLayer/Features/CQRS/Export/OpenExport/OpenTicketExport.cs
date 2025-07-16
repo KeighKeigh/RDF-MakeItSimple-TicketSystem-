@@ -40,6 +40,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         Category_Description = string.Join(", ", t.RequestConcern.TicketCategories.Select(rc => rc.Category.CategoryDescription)),
                         SubCategory_Description = string.Join(", ", t.RequestConcern.TicketSubCategories.Select(rc => rc.SubCategory.SubCategoryDescription)),
                         Issue_Handler = t.User.Fullname,
+                        Channel_Id = t.RequestConcern.ChannelId,
                         Channel_Name = t.RequestConcern.Channel.ChannelName,
                         Target_Date = t.TargetDate.Value.Date,
                         Created_At = t.CreatedAt.Date,
@@ -47,24 +48,32 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         Updated_At = t.UpdatedAt,
                         Remarks = t.Remarks,
                         Aging_Days = EF.Functions.DateDiffDay(t.TargetDate.Value.Date, DateTime.Now.Date),
+                        ServiceProvider_Id = t.RequestConcern.ServiceProviderId,
+                        ServiceProvider_Name = t.RequestConcern.ServiceProvider.ServiceProviderName
                         
 
                     }).ToListAsync(cancellationToken);
 
-                if (request.Unit is not null)
+                if (request.ServiceProvider is not null)
                 {
                     openTicket = openTicket
-                        .Where(x => x.UnitId == request.Unit)
-                        .ToList();
+                            .Where(x => x.ServiceProvider_Id == request.ServiceProvider)
+                            .ToList();
 
-                    if (request.UserId is not null)
+                    if (request.Channel is not null)
                     {
                         openTicket = openTicket
-                            .Where(x => x.UserId == request.UserId)
+                            .Where(x => x.Channel_Id == request.Channel)
                             .ToList();
+
+                        if (request.UserId is not null)
+                        {
+                            openTicket = openTicket
+                                .Where(x => x.UserId == request.UserId)
+                                .ToList();
+                        }
                     }
                 }
-
                 if (!string.IsNullOrEmpty(request.Search))
                 {
                     openTicket = openTicket
@@ -99,6 +108,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         Updated_At = r.Updated_At,
                         Remarks = r.Remarks,
                         Aging_Days = r.Aging_Days,
+                        ServiceProvider_Name = r.ServiceProvider_Name,
                         
                     }).ToList();
 
@@ -116,6 +126,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         "Unit Name",
                         "Sub Unit Name",
                         "Location Name",
+                        "Service Provider",
                         "Channel Name",
                         "Category Description",
                         "Sub Category Description",
@@ -126,6 +137,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         "Updated At",
                         "Remarks",
                         "Aging Days",
+                        
                         
                     };
 
@@ -153,16 +165,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OpenExport
                         row.Cell(7).Value = resultOpenTicket[index - 1].Unit_Name;
                         row.Cell(8).Value = resultOpenTicket[index - 1].SubUnit_Name;
                         row.Cell(9).Value = resultOpenTicket[index - 1].Location_Name;
-                        row.Cell(10).Value = resultOpenTicket[index - 1].Channel_Name;
-                        row.Cell(11).Value = resultOpenTicket[index - 1].Category_Description;
-                        row.Cell(12).Value = resultOpenTicket[index - 1].SubCategory_Description;
-                        row.Cell(13).Value = resultOpenTicket[index - 1].Issue_Handler;
-                        row.Cell(14).Value = resultOpenTicket[index - 1].Target_Date;
-                        row.Cell(15).Value = resultOpenTicket[index - 1].Created_At;
-                        row.Cell(16).Value = resultOpenTicket[index - 1].Modified_By;
-                        row.Cell(17).Value = resultOpenTicket[index - 1].Updated_At;
-                        row.Cell(18).Value = resultOpenTicket[index - 1].Remarks;
-                        row.Cell(19).Value = resultOpenTicket[index - 1].Aging_Days;
+                        row.Cell(10).Value = resultOpenTicket[index - 1].ServiceProvider_Name;
+                        row.Cell(11).Value = resultOpenTicket[index - 1].Channel_Name;
+                        row.Cell(12).Value = resultOpenTicket[index - 1].Category_Description;
+                        row.Cell(13).Value = resultOpenTicket[index - 1].SubCategory_Description;
+                        row.Cell(14).Value = resultOpenTicket[index - 1].Issue_Handler;
+                        row.Cell(15).Value = resultOpenTicket[index - 1].Target_Date;
+                        row.Cell(16).Value = resultOpenTicket[index - 1].Created_At;
+                        row.Cell(17).Value = resultOpenTicket[index - 1].Modified_By;
+                        row.Cell(18).Value = resultOpenTicket[index - 1].Updated_At;
+                        row.Cell(19).Value = resultOpenTicket[index - 1].Remarks;
+                        row.Cell(20).Value = resultOpenTicket[index - 1].Aging_Days;
                         
 
                     }

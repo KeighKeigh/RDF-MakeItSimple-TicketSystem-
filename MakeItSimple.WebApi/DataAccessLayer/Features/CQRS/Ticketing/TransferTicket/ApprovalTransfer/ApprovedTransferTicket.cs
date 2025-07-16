@@ -96,14 +96,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                     {
                         await UpdateTransferTicket(transferTicketExist, userDetails, command, cancellationToken);
                     }
-
-                    var channelUser = await _context.ChannelUsers.Where(x => x.UserId == transferTicketExist.TransferTo).FirstOrDefaultAsync();
+                    
+                    var channelUser = await _context.ChannelUsers.Include(x => x.Channel)
+                        .Where(x => x.UserId == transferTicketExist.TransferTo && x.Channel.IsActive == true).FirstOrDefaultAsync();
                     var updateRequestConcern = new RequestConcern
                     {
                         Id = transferTicketExist.TicketConcern.RequestConcern.Id,
                         ChannelId = channelUser.ChannelId,
                         AssignTo = channelUser.UserId,
-                        UserId = channelUser.UserId,
+                        
                     };
 
                     await unitOfWork.RequestTicket.UpdateRequest(updateRequestConcern, cancellationToken);
@@ -114,6 +115,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                             UserId = transferTicketExist.TransferTo,
                             AssignTo = transferTicketExist.TransferTo,
                             RequestorBy = transferTicketExist.TransferTo,
+                            ApprovedDateBy = command.Users,
                         };
 
                         await unitOfWork.RequestTicket.UpdateTicket(updateTicketConcern, cancellationToken);

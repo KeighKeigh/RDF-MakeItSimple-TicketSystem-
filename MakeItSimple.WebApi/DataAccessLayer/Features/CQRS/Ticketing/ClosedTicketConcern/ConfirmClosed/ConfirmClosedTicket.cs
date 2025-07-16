@@ -27,6 +27,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
                 var requestConcernExist = await unitOfWork.RequestTicket
                     .RequestConcernExist(command.RequestConcernId);
 
+                //var requestorConfirmation = await unitOfWork.ClosingTicket.RequestorConfirmation(command.RequestConcernId, command.Transacted_By);
                 if (requestConcernExist is null)
                     return Result.Failure(TicketRequestError.RequestConcernIdNotExist());
 

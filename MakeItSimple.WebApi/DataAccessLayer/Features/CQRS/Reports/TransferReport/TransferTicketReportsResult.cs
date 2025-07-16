@@ -17,6 +17,10 @@
             public string Modified_By { get; set; }
             public DateTime? Updated_At { get; set; }
             public string ApprovedBy { get; set; }
+            public int? ChannelId { get; set; }
+            public string ChannelName { get; set; }
+            public int? ServiceProviderId { get; set; }
+            public string ServiceProviderName { get; set;}
 
 
         }

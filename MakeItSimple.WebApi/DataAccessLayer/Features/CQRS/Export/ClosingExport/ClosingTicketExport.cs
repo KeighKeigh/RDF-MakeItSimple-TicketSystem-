@@ -43,7 +43,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                             TechnicianName = x.TechnicianByUser.Fullname,
                             TicketId = x.ClosingTicket.TicketConcernId,
                             ConcernDescription = x.ClosingTicket.TicketConcern.RequestConcern.Concern,
-                            x.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName
+                            x.ClosingTicket.TicketConcern.RequestConcern.ChannelId,
+                            x.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
+                            x.ClosingTicket.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
+                            x.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId
                         });
 
                 var closingTicket =  _context.TicketConcerns
@@ -73,7 +76,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         TechnicianName = x.User.Fullname,
                         TicketId = x.Id,
                         ConcernDescription = x.RequestConcern.Concern,
-                        x.RequestConcern.Channel.ChannelName
+                        x.RequestConcern.ChannelId,
+                        x.RequestConcern.Channel.ChannelName,
+                        x.RequestConcern.ServiceProvider.ServiceProviderName,
+                        x.RequestConcern.ServiceProviderId
                     });
 
                 var combineTicket = closingTicket
@@ -97,19 +103,26 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         Efficeincy = x.ClosedAt.Value.Date <= x.TargetDate.Value.Date ? "100 %" : "50 %",
                         Status = TicketingConString.Closed,
                         Remarks = x.ClosedAt.Value.Date <= x.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
-                        Category = x.ChannelName,
-                        Aging_Days = EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.ClosedAt.Value.Date)
+                        ChannelName = x.ChannelName,
+                        Aging_Days = EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.ClosedAt.Value.Date),
+                        ServiceProvider = x.ServiceProviderId,
+                        ServiceProviderName = x.ServiceProviderName
+                        
 
                     }).ToListAsync();
 
-
-                if (request.Unit is not null)
+                if (request.ServiceProvider is not null)
                 {
-                    closing = closing.Where(x => x.Unit == request.Unit).ToList();
+                    closing = closing.Where(x => x.ServiceProvider == request.ServiceProvider).ToList();
 
-                    if (request.UserId is not null)
+                    if (request.Channel is not null)
                     {
-                        closing = closing.Where(x => x.UserId == request.UserId).ToList();
+                        closing = closing.Where(x => x.ChannelId == request.Channel).ToList();
+
+                        if (request.UserId is not null)
+                        {
+                            closing = closing.Where(x => x.UserId == request.UserId).ToList();
+                        }
                     }
                 }
 
@@ -161,8 +174,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         "Varience",
                         "Efficiency",
                         "Remarks",
-                        "Category",
-                        "Aging Days"
+                        "Channel Name",
+                        "Aging Days",
+                        "Service Provider"
 
                     };
 
@@ -193,8 +207,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         row.Cell(10).Value = closing[index - 1].Varience;
                         row.Cell(11).Value = closing[index - 1].Efficeincy;
                         row.Cell(12).Value = closing[index - 1].Remarks;
-                        row.Cell(13).Value = closing[index - 1].Category;
+                        row.Cell(13).Value = closing[index - 1].ChannelName;
                         row.Cell(14).Value = closing[index - 1].Aging_Days;
+                        row.Cell(15).Value = closing[index - 1].ServiceProviderName;
 
 
                     }

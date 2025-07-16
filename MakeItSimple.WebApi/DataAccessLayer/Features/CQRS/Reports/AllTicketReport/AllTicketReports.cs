@@ -71,7 +71,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         StartDate = o.DateApprovedAt,
                         ClosedDate = o.Closed_At,
                         ServiceProvider = o.RequestConcern.ServiceProviderId.Value,
-                        AssignTo = o.RequestConcern.AssignToUser.Fullname
+                        AssignTo = o.RequestConcern.AssignToUser.Fullname,
+                        ServiceProviderName = o.RequestConcern.ServiceProvider.ServiceProviderName
+                        
                     }).ToListAsync();
 
                 var transferTicketQuery = await _context.TransferTicketConcerns
@@ -101,7 +103,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Location_Name = ct.TicketConcern.RequestConcern.Location.LocationName,
                         Personnel_Unit = ct.TicketConcern.User.UnitId,
                         Personnel_Id = ct.TicketConcern.UserId,
-                        Personnel = ct.TicketConcern.User.Fullname,
+                        Personnel = ct.TransferToUser.Fullname,
                         Concerns = ct.TicketConcern.RequestConcern.Concern,
                         Channel_Name = ct.TicketConcern.RequestConcern.Channel.ChannelName,
                         TicketCategoryDescriptions = string.Join(", ", ct.TicketConcern.RequestConcern.TicketCategories
@@ -120,7 +122,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         StartDate = ct.TicketConcern.DateApprovedAt,
                         ClosedDate = ct.TicketConcern.Closed_At,
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
-                        AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname
+                        AssignTo = ct.TransferToUser.Fullname,
+                        ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
                     }).ToListAsync();
 
                 var onHoldTicketQuery = await _context.TicketOnHolds
@@ -168,8 +171,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
                         StartDate = ct.TicketConcern.DateApprovedAt,
                         ClosedDate = ct.TicketConcern.Closed_At,
-                        ServiceProvider =  ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
-                        AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname
+                        ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
+                        AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname,
+                        ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
 
                     }).ToListAsync();
 
@@ -219,7 +223,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         StartDate = ct.TicketConcern.DateApprovedAt,
                         ClosedDate = ct.TicketConcern.Closed_At,
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
-                        AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname
+                        AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname,
+                        ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
                     }).ToListAsync(); 
 
 
@@ -271,7 +276,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         StartDate = ct.ClosingTicket.TicketConcern.DateApprovedAt,
                         ClosedDate = ct.ClosingTicket.TicketConcern.Closed_At,
                         ServiceProvider = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId.Value,
-                        AssignTo = ct.ClosingTicket.TicketConcern.RequestConcern.AssignToUser.Fullname
+                        AssignTo = ct.ClosingTicket.TicketConcern.RequestConcern.AssignToUser.Fullname,
+                        ServiceProviderName  = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
                     }).ToListAsync();
 
                 if (request.ServiceProvider is not null)
@@ -348,114 +354,111 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
 
                 if (!string.IsNullOrEmpty(request.Search))
                 {
+                    var normalizedSearch = System.Text.RegularExpressions.Regex.Replace(request.Search.ToLower().Trim(), @"\s+", " ");
+
                     openTicketQuery = openTicketQuery
-                    .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search)
-                        || x.Request_Type.Contains(request.Search)
-                        || x.BackJobId.ToString().Contains(request.Search)
-                        || x.Requestor_Name.Contains(request.Search)
-                        || x.Company_Code.Contains(request.Search)
-                        || x.Company_Name.Contains(request.Search)
-                        || x.BusinessUnit_Code.Contains(request.Search)
-                        || x.BusinessUnit_Name.Contains(request.Search)
-                        || x.Department_Code.ToString().Contains(request.Search)
-                        || x.Department_Name.Contains(request.Search)
-                        || x.Unit_Code.Contains(request.Search)
-                        || x.Unit_Name.Contains(request.Search)
-                        || x.SubUnit_Code.Contains(request.Search)
-                        || x.SubUnit_Name.Contains(request.Search)
-                        || x.Location_Code.ToString().Contains(request.Search)
-                        || x.Location_Name.Contains(request.Search)
-                        || x.Concerns.Contains(request.Search)
-                        || x.AssignTo.Contains(request.Search)).ToList();
+                    .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
+                        || x.Personnel.ToLower().Contains(request.Search)
+                        || x.Request_Type.ToLower().Contains(request.Search)
+                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
+                        || x.Requestor_Name.ToLower().Contains(request.Search)
+                        || x.Company_Code.ToLower().Contains(request.Search)
+                        || x.Company_Name.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
+                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Department_Name.ToLower().Contains(request.Search)
+                        || x.Unit_Code.ToLower().Contains(request.Search)
+                        || x.Unit_Name.ToLower().Contains(request.Search)
+                        || x.SubUnit_Code.ToLower().Contains(request.Search)
+                        || x.SubUnit_Name.ToLower().Contains(request.Search)
+                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Location_Name.ToLower().Contains(request.Search)
+                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
 
                     transferTicketQuery = transferTicketQuery
-                    .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search)
-                        || x.Request_Type.Contains(request.Search)
-                        || x.BackJobId.ToString().Contains(request.Search)
-                        || x.Requestor_Name.Contains(request.Search)
-                        || x.Company_Code.Contains(request.Search)
-                        || x.Company_Name.Contains(request.Search)
-                        || x.BusinessUnit_Code.Contains(request.Search)
-                        || x.BusinessUnit_Name.Contains(request.Search)
-                        || x.Department_Code.ToString().Contains(request.Search)
-                        || x.Department_Name.Contains(request.Search)
-                        || x.Unit_Code.Contains(request.Search)
-                        || x.Unit_Name.Contains(request.Search)
-                        || x.SubUnit_Code.Contains(request.Search)
-                        || x.SubUnit_Name.Contains(request.Search)
-                        || x.Location_Code.ToString().Contains(request.Search)
-                        || x.Location_Name.Contains(request.Search)
-                        || x.Concerns.Contains(request.Search)
-                        || x.AssignTo.Contains(request.Search))
-                    .ToList();
+                    .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
+                        || x.Personnel.ToLower().Contains(request.Search)
+                        || x.Request_Type.ToLower().Contains(request.Search)
+                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
+                        || x.Requestor_Name.ToLower().Contains(request.Search)
+                        || x.Company_Code.ToLower().Contains(request.Search)
+                        || x.Company_Name.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
+                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Department_Name.ToLower().Contains(request.Search)
+                        || x.Unit_Code.ToLower().Contains(request.Search)
+                        || x.Unit_Name.ToLower().Contains(request.Search)
+                        || x.SubUnit_Code.ToLower().Contains(request.Search)
+                        || x.SubUnit_Name.ToLower().Contains(request.Search)
+                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Location_Name.ToLower().Contains(request.Search)
+                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
 
                     onHoldTicketQuery = onHoldTicketQuery
-                   .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search)
-                        || x.Request_Type.Contains(request.Search)
-                        || x.BackJobId.ToString().Contains(request.Search)
-                        || x.Requestor_Name.Contains(request.Search)
-                        || x.Company_Code.Contains(request.Search)
-                        || x.Company_Name.Contains(request.Search)
-                        || x.BusinessUnit_Code.Contains(request.Search)
-                        || x.BusinessUnit_Name.Contains(request.Search)
-                        || x.Department_Code.ToString().Contains(request.Search)
-                        || x.Department_Name.Contains(request.Search)
-                        || x.Unit_Code.Contains(request.Search)
-                        || x.Unit_Name.Contains(request.Search)
-                        || x.SubUnit_Code.Contains(request.Search)
-                        || x.SubUnit_Name.Contains(request.Search)
-                        || x.Location_Code.ToString().Contains(request.Search)
-                        || x.Location_Name.Contains(request.Search)
-                        || x.Concerns.Contains(request.Search)
-                        || x.AssignTo.Contains(request.Search))
-                    .ToList();
-
+                   .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
+                        || x.Personnel.ToLower().Contains(request.Search)
+                        || x.Request_Type.ToLower().Contains(request.Search)
+                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
+                        || x.Requestor_Name.ToLower().Contains(request.Search)
+                        || x.Company_Code.ToLower().Contains(request.Search)
+                        || x.Company_Name.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
+                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Department_Name.ToLower().Contains(request.Search)
+                        || x.Unit_Code.ToLower().Contains(request.Search)
+                        || x.Unit_Name.ToLower().Contains(request.Search)
+                        || x.SubUnit_Code.ToLower().Contains(request.Search)
+                        || x.SubUnit_Name.ToLower().Contains(request.Search)
+                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Location_Name.ToLower().Contains(request.Search)
+                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
                     closingTicketQuery = closingTicketQuery
-                   .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search)
-                        || x.Request_Type.Contains(request.Search)
-                        || x.BackJobId.ToString().Contains(request.Search)
-                        || x.Requestor_Name.Contains(request.Search)
-                        || x.Company_Code.Contains(request.Search)
-                        || x.Company_Name.Contains(request.Search)
-                        || x.BusinessUnit_Code.Contains(request.Search)
-                        || x.BusinessUnit_Name.Contains(request.Search)
-                        || x.Department_Code.ToString().Contains(request.Search)
-                        || x.Department_Name.Contains(request.Search)
-                        || x.Unit_Code.Contains(request.Search)
-                        || x.Unit_Name.Contains(request.Search)
-                        || x.SubUnit_Code.Contains(request.Search)
-                        || x.SubUnit_Name.Contains(request.Search)
-                        || x.Location_Code.ToString().Contains(request.Search)
-                        || x.Location_Name.Contains(request.Search)
-                        || x.Concerns.Contains(request.Search)
-                        || x.AssignTo.Contains(request.Search))
-                    .ToList();
+                   .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
+                        || x.Personnel.ToLower().Contains(request.Search)
+                        || x.Request_Type.ToLower().Contains(request.Search)
+                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
+                        || x.Requestor_Name.ToLower().Contains(request.Search)
+                        || x.Company_Code.ToLower().Contains(request.Search)
+                        || x.Company_Name.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
+                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Department_Name.ToLower().Contains(request.Search)
+                        || x.Unit_Code.ToLower().Contains(request.Search)
+                        || x.Unit_Name.ToLower().Contains(request.Search)
+                        || x.SubUnit_Code.ToLower().Contains(request.Search)
+                        || x.SubUnit_Name.ToLower().Contains(request.Search)
+                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Location_Name.ToLower().Contains(request.Search)
+                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
 
                     closingTicketTechnicianQuery = closingTicketTechnicianQuery
-                    .Where(x => x.TicketConcernId.ToString().Contains(request.Search)
-                        || x.Personnel.Contains(request.Search)
-                        || x.Request_Type.Contains(request.Search)
-                        || x.BackJobId.ToString().Contains(request.Search)
-                        || x.Requestor_Name.Contains(request.Search)
-                        || x.Company_Code.Contains(request.Search)
-                        || x.Company_Name.Contains(request.Search)
-                        || x.BusinessUnit_Code.Contains(request.Search)
-                        || x.BusinessUnit_Name.Contains(request.Search)
-                        || x.Department_Code.ToString().Contains(request.Search)
-                        || x.Department_Name.Contains(request.Search)
-                        || x.Unit_Code.Contains(request.Search)
-                        || x.Unit_Name.Contains(request.Search)
-                        || x.SubUnit_Code.Contains(request.Search)
-                        || x.SubUnit_Name.Contains(request.Search)
-                        || x.Location_Code.ToString().Contains(request.Search)
-                        || x.Location_Name.Contains(request.Search)
-                        || x.Concerns.Contains(request.Search)
-                        || x.AssignTo.Contains(request.Search))
-                    .ToList();
+                    .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
+                        || x.Personnel.ToLower().Contains(request.Search)
+                        || x.Request_Type.ToLower().Contains(request.Search)
+                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
+                        || x.Requestor_Name.ToLower().Contains(request.Search)
+                        || x.Company_Code.ToLower().Contains(request.Search)
+                        || x.Company_Name.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
+                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
+                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Department_Name.ToLower().Contains(request.Search)
+                        || x.Unit_Code.ToLower().Contains(request.Search)
+                        || x.Unit_Name.ToLower().Contains(request.Search)
+                        || x.SubUnit_Code.ToLower().Contains(request.Search)
+                        || x.SubUnit_Name.ToLower().Contains(request.Search)
+                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
+                        || x.Location_Name.ToLower().Contains(request.Search)
+                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
                 }
 
                 foreach (var list in openTicketQuery)
@@ -520,7 +523,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         StartDate = r.StartDate,
                         ClosedDate = r.ClosedDate,
                         AssignTo = r.AssignTo,
-                        ServiceProvider = r.ServiceProvider
+                        ServiceProvider = r.ServiceProvider,
+                        ServiceProviderName = r.ServiceProviderName,
 
                     }).AsQueryable();
 

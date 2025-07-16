@@ -109,6 +109,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Authentication
                     .Include(x => x.SeviceProviders)//kk
                     .SingleOrDefaultAsync(x => x.Username == command.UsernameOrEmail);
 
+                if (user == null || !BCrypt.Net.BCrypt.Verify(command.Password, user.Password))
+                {
+
+                    return Result.Failure(AuthenticationError.UsernameAndPasswordIncorrect());
+                }
+
                 var userChannels = await _context.ChannelUsers
                     .Where(x => x.UserId == user.Id && x.IsActive == true)
                     .Join(_context.Channels.Where(x => x.IsActive == true), cu => cu.ChannelId, c => c.Id,

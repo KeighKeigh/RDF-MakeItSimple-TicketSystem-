@@ -106,7 +106,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 update.ConcernStatus = ticketConcern.ConcernStatus;
             }
 
-            
+            await context.SaveChangesAsync();
         }
         public async Task UpdateRequestConcern(RequestConcern requestConcern, CancellationToken cancellationToken)
         {
@@ -181,6 +181,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 update.DepartmentId = requestConcern.DepartmentId;
             }
 
+
             if (isChange)
             {
                 update.ModifiedBy = requestConcern.ModifiedBy;
@@ -253,7 +254,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
             {
                 update.RequestorBy = ticketConcern.RequestorBy;
             }
-
+            if (update.ApprovedDateBy != ticketConcern.ApprovedDateBy && ticketConcern.ApprovedDateBy is not null)
+            {
+                update.ApprovedDateBy = ticketConcern.ApprovedDateBy;
+            }
         }
         //kk
 

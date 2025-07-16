@@ -35,7 +35,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.CategorySetup
             public async Task<Result> Handle(UpsertCategoryCommand command, CancellationToken cancellationToken)
             {
 
-                var CategoryAlreadyExist = await _context.Categories.FirstOrDefaultAsync(x => x.CategoryDescription == command.Category_Description, cancellationToken);
+                var CategoryAlreadyExist = await _context.Categories.FirstOrDefaultAsync(x => x.CategoryDescription == command.Category_Description && x.ChannelId == command.ChannelId, cancellationToken);
 
                 if (CategoryAlreadyExist != null)
                 {

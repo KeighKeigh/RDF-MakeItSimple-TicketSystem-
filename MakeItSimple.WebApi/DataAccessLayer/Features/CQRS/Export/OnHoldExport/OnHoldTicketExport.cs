@@ -44,20 +44,28 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
                         Resume_At = r.ResumeAt,
                         ApprovedAt = r.ApprovedAt,
                         ApprovedBy = r.ApprovedBy,
-                        
+                        ServiceProviderId = r.TicketConcern.RequestConcern.ServiceProviderId,
+                        ServiceProviderName = r.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
+                        ChannelId = r.TicketConcern.RequestConcern.ChannelId,
+                        ChannelName = r.TicketConcern.RequestConcern.Channel.ChannelName
+
+
                     }).ToListAsync();
 
-
-                if (request.Unit is not null)
+                if (request.ServiceProvider is not null)
                 {
-                    query = query.Where(x => x.Unit == request.Unit).ToList();
+                    query = query.Where(x => x.ServiceProviderId == request.ServiceProvider).ToList();
 
-                    if (request.UserId is not null)
+                    if (request.Channel is not null)
                     {
-                        query = query.Where(x => x.UserId == request.UserId).ToList();
+                        query = query.Where(x => x.ChannelId == request.Channel).ToList();
+
+                        if (request.UserId is not null)
+                        {
+                            query = query.Where(x => x.UserId == request.UserId).ToList();
+                        }
                     }
                 }
-
 
                 if (!string.IsNullOrEmpty(request.Search))
                 {
@@ -81,6 +89,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
                         Resume_At = r.Resume_At,
                         ApprovedAt = r.ApprovedAt,
                         ApprovedBy = r.ApprovedBy,
+                        ServiceProviderId = r.ServiceProviderId,
+                        ServiceProviderName = r.ServiceProviderName,
+                        ChannelId = r.ChannelId,
+                        ChannelName = r.ChannelName,
                     }).ToList();
 
                 using (var workbook = new XLWorkbook())
@@ -95,7 +107,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
                         "Hold Date",
                         "Resume Date",
                         "Approved Date",
-                        "Approved By"
+                        "Approved By",
+                        "Service Provider",
+                        "Channel"
+                        
                     };
 
                     var range = worksheet.Range(worksheet.Cell(1, 1), worksheet.Cell(1, headers.Count));
@@ -122,6 +137,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport
                         row.Cell(6).Value = finalQuery[index - 1].Resume_At;
                         row.Cell(7).Value = finalQuery[index - 1].ApprovedAt;
                         row.Cell(8).Value = finalQuery[index - 1].ApprovedBy;
+                        row.Cell(9).Value = finalQuery[index - 1].ServiceProviderName;
+                        row.Cell(10).Value = finalQuery[index - 1].ChannelName;
                     }
 
 
