@@ -105,6 +105,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
             {
                 update.ConcernStatus = ticketConcern.ConcernStatus;
             }
+            if (update.IsDateApproved != ticketConcern.IsDateApproved && ticketConcern.IsDateApproved is not null)
+            {
+                update.IsDateApproved = ticketConcern.IsDateApproved;
+            }
+            if (update.DateApprovedAt != ticketConcern.DateApprovedAt && ticketConcern.DateApprovedAt is not null)
+            {
+                update.DateApprovedAt = ticketConcern.DateApprovedAt;
+            }
 
             await context.SaveChangesAsync();
         }

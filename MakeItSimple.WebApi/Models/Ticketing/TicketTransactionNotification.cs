@@ -5,7 +5,7 @@
         public int Id { get; set; }
         public string Message { get; set; }
 
-        public Guid AddedBy { get; set; }
+        public Guid? AddedBy { get; set; }
         public virtual User AddedByUser { get; set; }
         public DateTime Created_At { get; set; }
 

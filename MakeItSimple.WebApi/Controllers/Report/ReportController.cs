@@ -10,6 +10,7 @@ using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.TransferReport
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OnHoldReport.OnHoldTicketReport;
 using MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport.AllTicketReports;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport.SLAReport;
 
 namespace MakeItSimple.WebApi.Controllers.Report
 {
@@ -191,6 +192,47 @@ namespace MakeItSimple.WebApi.Controllers.Report
 
         [HttpGet("on-hold")]
         public async Task<IActionResult> OnHoldTicketReport([FromQuery] OnHoldTicketReportQuery query)
+        {
+            try
+            {
+
+                var reports = await _mediator.Send(query);
+
+                Response.AddPaginationHeader(
+
+                reports.CurrentPage,
+                reports.PageSize,
+                reports.TotalCount,
+                reports.TotalPages,
+                reports.HasPreviousPage,
+                reports.HasNextPage
+
+                );
+
+                var result = new
+                {
+                    reports,
+                    reports.CurrentPage,
+                    reports.PageSize,
+                    reports.TotalCount,
+                    reports.TotalPages,
+                    reports.HasPreviousPage,
+                    reports.HasNextPage
+                };
+
+                var successResult = Result.Success(result);
+
+                return Ok(successResult);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+
+        }
+
+        [HttpGet("sla-report")]
+        public async Task<IActionResult> SLATicketReports([FromQuery] SLAReportQuery query)
         {
             try
             {

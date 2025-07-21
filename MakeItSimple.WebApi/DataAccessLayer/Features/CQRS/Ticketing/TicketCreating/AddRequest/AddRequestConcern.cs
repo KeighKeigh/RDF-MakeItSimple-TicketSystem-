@@ -379,7 +379,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 else if(command.AssignTo != null)
                 {
                     var dateToday = DateTime.Today;
-
+                    var nextDay = DateTime.Today.AddDays(1);
                     var requestConcernId = new int();
 
 
@@ -518,7 +518,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             UserId = command.UserId,
                             Concern = concern.Concern,
                             AddedBy = command.Added_By,
-                            ConcernStatus = TicketingConString.ForApprovalTicket,
+                            ConcernStatus = command.TargetDate.Value.Date <= nextDay.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
                             CompanyId = requestorDetails.CompanyId,
                             BusinessUnitId = requestorDetails.BusinessUnitId,
                             DepartmentId = requestorDetails.DepartmentId,
@@ -544,17 +544,23 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                         requestConcernId = addRequestConcern.Id;
 
+                        var handlerIds = await context.Approvers.Where(x => x.SubUnitId == addRequestConcern.User.SubUnitId).FirstOrDefaultAsync();
                         var addTicketConcern = new TicketConcern
                         {
                             RequestConcernId = requestConcernId,
                             TargetDate = command.TargetDate,
                             UserId = command.UserId,
                             RequestorBy = command.UserId,
-                            IsApprove = false,
+                            IsApprove = command.TargetDate.Value.Date <= nextDay.Date ? true : false,
                             AddedBy = command.Added_By,
-                            ConcernStatus = TicketingConString.ForApprovalTicket,
+                            ConcernStatus = command.TargetDate.Value.Date <= nextDay.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
                             IsAssigned = true,
                             AssignTo = command.AssignTo.ToString() == "" ? null : command.AssignTo,
+                            IsDateApproved = command.TargetDate.Value.Date <= nextDay.Date ? true : false,
+                            DateApprovedAt = command.TargetDate.Value.Date <= nextDay.Date ? dateToday.Date : null,
+                            ApprovedDateBy = command.TargetDate.Value.Date <= nextDay.Date ? handlerIds.UserId : null,
+                            ApprovedAt = command.TargetDate.Value.Date <= nextDay.Date ? dateToday.Date : null,
+                            ApprovedBy = command.TargetDate.Value.Date <= nextDay.Date ? handlerIds.UserId : null,
 
                         };
 
@@ -589,36 +595,46 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         var approverUser = approverList
                     .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
 
+
+                        var handlerId = await context.Approvers.Where(x => x.SubUnitId == addTicketConcern.User.SubUnitId).FirstOrDefaultAsync();
+                        var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
                         var addNewDateApproveConcern = new ApproverDate
                         {
                             TicketConcernId = addTicketConcern.Id,
-                            IsApproved = false,
+                            IsApproved = command.TargetDate.Value.Date <= nextDay.Date ? true : false,
                             TicketApprover = approverUser.UserId,
                             AddedBy = command.Added_By,
                             Notes = command.Notes,
+                            ApprovedDateBy = command.TargetDate.Value.Date <= nextDay.Date ? approverUser.UserId : null,
+                            ApprovedDateAt = command.TargetDate.Value.Date <= nextDay.Date ? dateToday : null,
+
+
+
                         };
 
                         await unitOfWork.RequestTicket.ApproveDateTicket(addNewDateApproveConcern, cancellationToken);
 
                         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-                        foreach (var approver in approverList)
-                        {
-                            var addNewApprover = new ApproverTicketing
+                       
+                            foreach (var approver in approverList)
                             {
-                                TicketConcernId = ticketConcernExist.Id,
-                                ApproverDateId = addNewDateApproveConcern.Id,
-                                UserId = approver.UserId,
-                                ApproverLevel = approver.ApproverLevel,
-                                AddedBy = command.Added_By,
-                                CreatedAt = DateTime.Now,
-                                Status = TicketingConString.ApprovalDate,
-                            };
+                                var addNewApprover = new ApproverTicketing
+                                {
+                                    TicketConcernId = ticketConcernExist.Id,
+                                    ApproverDateId = addNewDateApproveConcern.Id,
+                                    UserId = approver.UserId,
+                                    ApproverLevel = approver.ApproverLevel,
+                                    AddedBy = command.Added_By,
+                                    CreatedAt = DateTime.Now,
+                                    Status = TicketingConString.ApprovalDate,
+                                    IsApprove = command.TargetDate.Value.Date <= nextDay.Date ?  true : null,
+                                };
 
-                            await unitOfWork.RequestTicket.CreateApproval(addNewApprover, cancellationToken);
+                                await unitOfWork.RequestTicket.CreateApproval(addNewApprover, cancellationToken);
 
-                        }
-
+                            }
+                        
                         var addRequestTicketHistory = new TicketHistory
                         {
                             TicketConcernId = ticketConcernExist.Id,
@@ -642,51 +658,97 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         await unitOfWork.RequestTicket.CreateTicketHistory(assignedTicketHistory, cancellationToken);
 
 
-                        var handlerId = await context.Approvers.Where(x => x.SubUnitId == addTicketConcern.User.SubUnitId).FirstOrDefaultAsync();
-                        var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
-                        var approveTicketDateHistory = new TicketHistory
+                        //var handlerId = await context.Approvers.Where(x => x.SubUnitId == addTicketConcern.User.SubUnitId).FirstOrDefaultAsync();
+                        //var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
+                        if (command.TargetDate.Value.Date > nextDay.Date)
                         {
-                            TicketConcernId = ticketConcernExist.Id,
-                            TransactedBy = handlerId.UserId,
-                            TransactionDate = DateTime.Now,
-                            Request = TicketingConString.ForApprovalTicket,
-                            Status = $"{TicketingConString.ForApprovalDate}"
-                        };
+                            var approveTicketDateHistory = new TicketHistory
+                            {
+                                TicketConcernId = ticketConcernExist.Id,
+                                TransactedBy = handlerId.UserId,
+                                TransactionDate = DateTime.Now,
+                                Request = TicketingConString.ForApprovalTicket,
+                                Status = $"{TicketingConString.ForApprovalDate}"
+                            };
 
-                        await unitOfWork.RequestTicket.CreateTicketHistory(approveTicketDateHistory, cancellationToken);
+                            await unitOfWork.RequestTicket.CreateTicketHistory(approveTicketDateHistory, cancellationToken);
 
-                        var addNewTicketTransactionNotification = new TicketTransactionNotification
+                            var addNewTicketTransactionNotification = new TicketTransactionNotification
+                            {
+
+                                Message = $"Ticket number {ticketConcernExist.Id} Target Date is now being approved!",
+                                AddedBy = command.Added_By.Value,
+                                Created_At = DateTime.Now,
+                                ReceiveBy = command.UserId.Value,
+                                Modules = PathConString.IssueHandlerConcerns,
+                                Modules_Parameter = PathConString.ForApproval,
+                                PathId = ticketConcernExist.Id,
+
+                            };
+
+                            await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification, cancellationToken);
+                        }
+                        else
                         {
+                            var approveTicketDateHistory = new TicketHistory
+                            {
+                                TicketConcernId = ticketConcernExist.Id,
+                                TransactedBy = handlerId.UserId,
+                                TransactionDate = DateTime.Now,
+                                Request = TicketingConString.ApprovedDate,
+                                Status = $"{TicketingConString.OnGoing}"
+                            };
 
-                            Message = $"Ticket number {ticketConcernExist.Id} Target Date is now being approved!",
-                            AddedBy = command.Added_By.Value,
-                            Created_At = DateTime.Now,
-                            ReceiveBy = command.UserId.Value,
-                            Modules = PathConString.IssueHandlerConcerns,
-                            Modules_Parameter = PathConString.ForApproval,
-                            PathId = ticketConcernExist.Id,
+                            await unitOfWork.RequestTicket.CreateTicketHistory(approveTicketDateHistory, cancellationToken);
 
-                        };
+                            var addNewTicketTransactionNotification = new TicketTransactionNotification
+                            {
 
-                        await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification, cancellationToken);
+                                Message = $"Ticket number {ticketConcernExist.Id}, Target Date is approved",
+                                AddedBy = handlerId.UserId,
+                                Created_At = DateTime.Now,
+                                ReceiveBy = addRequestConcern.UserId.Value,
+                                Modules = PathConString.ConcernTickets,
+                                Modules_Parameter = PathConString.Ongoing,
+                                PathId = ticketConcernExist.Id
 
-                        //var addNewTicketTransactionOngoing = new TicketTransactionNotification
-                        //{
+                            };
 
-                        //    Message = $"Ticket number {ticketConcernExist.RequestConcernId} is now ongoing",
-                        //    AddedBy = command.Added_By.Value,
-                        //    Created_At = DateTime.Now,
-                        //    ReceiveBy = command.UserId.Value,
-                        //    Modules = PathConString.ConcernTickets,
-                        //    Modules_Parameter = PathConString.Ongoing,
-                        //    PathId = ticketConcernExist.RequestConcernId.Value,
+                            await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification, cancellationToken);
+
+                            var addNewTransactionConfirmationNotification = new TicketTransactionNotification
+                            {
+
+                                Message = $"Ticket number {ticketConcernExist.Id}, Target Date is approved",
+                                AddedBy = handlerId.UserId,
+                                Created_At = DateTime.Now,
+                                ReceiveBy = ticketConcernExist.UserId.Value,
+                                Modules = PathConString.IssueHandlerConcerns,
+                                Modules_Parameter = PathConString.Ongoing,
+                                PathId = ticketConcernExist.Id
+
+                            };
+
+                            await unitOfWork.RequestTicket.CreateTicketNotification(addNewTransactionConfirmationNotification, cancellationToken);
+
+                            var addNewTicketTransactionOngoing = new TicketTransactionNotification
+                            {
+
+                                Message = $"Ticket number {ticketConcernExist.Id} is now ongoing",
+                                AddedBy = handlerId.UserId,
+                                Created_At = DateTime.Now,
+                                ReceiveBy = addRequestConcern.UserId.Value,
+                                Modules = PathConString.ConcernTickets,
+                                Modules_Parameter = PathConString.Ongoing,
+                                PathId = ticketConcernExist.Id,
 
 
-                        //};
+                            };
 
-                        //await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionOngoing, cancellationToken);
+                            await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionOngoing, cancellationToken);
 
-
+                        }
+       
                         if (command.AddRequestTicketCategories != null)
                         {
 
@@ -697,12 +759,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                                 if (category.CategoryId != null)
                                 {
-                                    //if (ticketCategoryExist is not null)
-                                    //{
                                         ticketCategoryList.Add(category.CategoryId.Value);
-                                    //}
-                                    //else if (category.CategoryId != null)
-                                    //{
+
                                         var addTicketCategory = new TicketCategory
                                         {
                                             RequestConcernId = requestConcernId,
@@ -711,7 +769,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                                         };
 
                                         await unitOfWork.RequestTicket.CreateTicketCategory(addTicketCategory, cancellationToken);
-                                    //}
                                 }
 
                             }
@@ -724,12 +781,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                                 if (subCategory.SubCategoryId != null)
                                 {
-                                    //if (ticketSubCategoryExist is not null)
-                                    //{
                                         ticketSubCategoryList.Add(subCategory.SubCategoryId.Value);
-                                    //}
-                                    //else if (subCategory.SubCategoryId != null)
-                                    //{
+                                   
                                         var addTicketSubCategory = new TicketSubCategory
                                         {
                                             RequestConcernId = requestConcernId,
@@ -738,7 +791,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                                         };
 
                                         await unitOfWork.RequestTicket.CreateTicketSubCategory(addTicketSubCategory, cancellationToken);
-                                    //}
                                 }
                             }
                         }
