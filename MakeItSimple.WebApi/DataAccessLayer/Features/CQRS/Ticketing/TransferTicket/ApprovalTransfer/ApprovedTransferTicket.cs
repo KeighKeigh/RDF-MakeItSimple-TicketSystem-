@@ -114,7 +114,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                             Id = transferTicketExist.TicketConcern.Id,
                             UserId = transferTicketExist.TransferTo,
                             AssignTo = transferTicketExist.TransferTo,
-                            RequestorBy = transferTicketExist.TransferTo,
                             ApprovedDateBy = command.Users,
                         };
 

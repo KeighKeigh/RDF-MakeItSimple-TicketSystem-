@@ -118,7 +118,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                             UnitId = userIdExist.UnitId,
                             DepartmentId = userIdExist.DepartmentId,
                             SubUnitId = userIdExist.SubUnitId,
-                            ConcernStatus = command.TargetDate.Value.Date <= nextDay.Date ? TicketingConString.ForApprovalDate : TicketingConString.OnGoing,
+                            ConcernStatus = command.TargetDate.Value.Date <= nextDay.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
                         };
                         await unitOfWork.RequestTicket.UpdateRequestConcern(updateRequest, cancellationToken);
 
@@ -132,10 +132,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                             IsAssigned = true,
                             ApprovedBy = command.TargetDate.Value.Date <= nextDay.Date ? handlerIds.UserId : null,
                             ApprovedAt = command.TargetDate.Value.Date <= nextDay.Date ? dateToday.Date : null,
-                            ConcernStatus = command.TargetDate.Value.Date <= nextDay.Date ? TicketingConString.ForApprovalDate : TicketingConString.OnGoing,
+                            ConcernStatus = command.TargetDate.Value.Date <= nextDay.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
                             AssignTo = command.AssignTo,
-                            IsDateApproved = command.TargetDate.Value.Date <= nextDay.Date ? true : false,
+                            IsDateApproved = command.TargetDate.Value.Date <= nextDay.Date ? true : null,
                             DateApprovedAt = command.TargetDate.Value.Date <= nextDay.Date ? dateToday.Date : null,
+                            ApprovedDateBy = command.TargetDate.Value.Date <= nextDay.Date ? handlerIds.UserId : null,
                         };
 
                         await unitOfWork.RequestTicket.UpdateTicketConcerns(updateTicketConcern, cancellationToken);
@@ -179,8 +180,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
                     await unitOfWork.SaveChangesAsync(cancellationToken);
 
-                    if (command.TargetDate > nextDay)
-                    {
+                    
                         foreach (var approver in approverList)
                         {
                             var addNewApprover = new ApproverTicketing
@@ -192,12 +192,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                                 AddedBy = command.Added_By,
                                 CreatedAt = DateTime.Now,
                                 Status = TicketingConString.ApprovalDate,
+                                IsApprove = command.TargetDate.Value.Date <= nextDay.Date ? true : null,
                             };
 
                             await unitOfWork.RequestTicket.CreateApproval(addNewApprover, cancellationToken);
 
                         }
-                    }
+                    
                     var addRequestTicketHistory = new TicketHistory
                     {
                         TicketConcernId = ticketConcernExists.Id,

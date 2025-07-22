@@ -117,7 +117,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                         Solution = ct.TicketConcern.RequestConcern.Resolution,
                         RequestType = ct.TicketConcern.RequestConcern.RequestType,
                         Status = ct.TicketConcern.RequestConcern.ConcernStatus,
-                        Rating = ct.TicketConcern.TargetDate.Value.Date >= dateToday.Date ? "On Time" : "Delay",
+                        Rating = ct.TicketConcern.TargetDate.Value.Date >= ct.TicketConcern.Closed_At .Value.Date ? "On Time" : "Delay",
                         Category = string.Join(", ", ct.TicketConcern.RequestConcern.TicketCategories.Select(rc => rc.Category.CategoryDescription)),
                         SubCategory = string.Join(", ", ct.TicketConcern.RequestConcern.TicketSubCategories.Select(rc => rc.SubCategory.SubCategoryDescription)),
                         Position = "",
