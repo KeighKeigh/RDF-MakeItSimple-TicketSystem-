@@ -23,6 +23,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
 
                 var combineTicketReports = new List<AllTicketReportsResult>();
 
+                var cutoffTime = TimeSpan.FromHours(16);
 
                 var openTicketQuery = await _context.TicketConcerns
                     .AsNoTrackingWithIdentityResolution()
@@ -66,7 +67,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = o.TargetDate.Value.Date,
                         Ticket_Status = "Open",
                         Remarks = o.Remarks,
-                        Aging_Days = EF.Functions.DateDiffDay(o.TargetDate.Value.Date, DateTime.Now.Date),
+                        Aging_Days = EF.Functions.DateDiffDay(o.DateApprovedAt.Value.Date, DateTime.Now.Date),
                         ChannelId = o.RequestConcern.ChannelId.Value,
                         StartDate = o.DateApprovedAt,
                         ClosedDate = o.Closed_At,
@@ -117,7 +118,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = ct.Current_Target_Date.Value.Date,
                         Ticket_Status = "Transfer",
                         Remarks = ct.TransferRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.TargetDate.Value.Date, DateTime.Now.Date),
+                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.DateApprovedAt.Value.Date, DateTime.Now.Date),
                         ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
                         StartDate = ct.TicketConcern.DateApprovedAt,
                         ClosedDate = ct.TicketConcern.Closed_At,
@@ -167,7 +168,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = ct.TicketConcern.TargetDate.Value.Date,
                         Ticket_Status = "On-Hold",
                         Remarks = ct.OnHoldRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.TargetDate.Value.Date, DateTime.Now.Date),
+                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.DateApprovedAt.Value.Date, DateTime.Now.Date),
                         ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
                         StartDate = ct.TicketConcern.DateApprovedAt,
                         ClosedDate = ct.TicketConcern.Closed_At,
@@ -218,13 +219,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = ct.TicketConcern.TargetDate.Value.Date,
                         Ticket_Status = "Closed",
                         Remarks = ct.ClosingRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.TargetDate.Value.Date, ct.ClosingAt.Value.Date),
+                        Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.DateApprovedAt.Value.Date, ct.ClosingAt.Value.Date),
                         ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
                         StartDate = ct.TicketConcern.DateApprovedAt,
                         ClosedDate = ct.TicketConcern.Closed_At,
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname,
-                        ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
+                        ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
+                        ClosingStatus = (ct.TicketConcern.TargetDate.Value.Date == ct.TicketConcern.Closed_At.Value.Date && ct.TicketConcern.Closed_At.Value.TimeOfDay > cutoffTime) ? "Delayed" 
+                        : ct.TicketConcern.TargetDate.Value.Date >= ct.TicketConcern.Closed_At.Value.Date ?  "On-Time"
+                        : "Delayed"
+
                     }).ToListAsync(); 
 
 
@@ -271,13 +276,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Target_Date = ct.ClosingTicket.TicketConcern.TargetDate.Value.Date,
                         Ticket_Status = "Closed",
                         Remarks = ct.ClosingTicket.ClosingRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.ClosingTicket.TicketConcern.TargetDate.Value.Date, ct.ClosingTicket.ClosingAt.Value.Date),
+                        Aging_Days = EF.Functions.DateDiffDay(ct.ClosingTicket.TicketConcern.DateApprovedAt.Value.Date, ct.ClosingTicket.ClosingAt.Value.Date),
                         ChannelId = ct.ClosingTicket.TicketConcern.RequestConcern.ChannelId.Value,
                         StartDate = ct.ClosingTicket.TicketConcern.DateApprovedAt,
                         ClosedDate = ct.ClosingTicket.TicketConcern.Closed_At,
                         ServiceProvider = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.ClosingTicket.TicketConcern.RequestConcern.AssignToUser.Fullname,
-                        ServiceProviderName  = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
+                        ClosingStatus = (ct.ClosingTicket.TicketConcern.TargetDate.Value.Date == ct.ClosingTicket.TicketConcern.Closed_At.Value.Date && ct.ClosingTicket.TicketConcern.Closed_At.Value.TimeOfDay > cutoffTime) ? "Delayed"
+                        : ct.ClosingTicket.TicketConcern.TargetDate.Value.Date >= ct.ClosingTicket.TicketConcern.Closed_At.Value.Date ? "On-Time"
+                        : "Delayed"
                     }).ToListAsync();
 
                 if (request.ServiceProvider is not null)
@@ -525,6 +532,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         AssignTo = r.AssignTo,
                         ServiceProvider = r.ServiceProvider,
                         ServiceProviderName = r.ServiceProviderName,
+                        ClosingStatus = r.ClosingStatus
 
                     }).AsQueryable();
 

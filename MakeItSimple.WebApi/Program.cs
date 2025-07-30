@@ -23,7 +23,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work;
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
-var connectionString = builder.Configuration.GetConnectionString("Testing");
+var connectionString = builder.Configuration.GetConnectionString("Production");
 builder.Services.AddDbContext<MisDbContext>(x =>
 x.UseSqlServer(connectionString, sqlOptions => sqlOptions.CommandTimeout(360))
     .UseSnakeCaseNamingConvention()

@@ -73,6 +73,27 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
 
                         await unitOfWork.RequestTicket.UpdateTicketHistory(updateHistoryApproval, cancellationToken);
 
+                        //var resolutionHIstory = new TicketHistory
+                        //{
+                        //    Id = ticketHistoryApproval.Id,
+                        //    TransactedBy = command.Transacted_By,
+                        //    Request = "Resolution",
+                        //    Status = $"Resolution : {closingTicketExist.Resolution}"
+                        //};
+
+                        //await unitOfWork.RequestTicket.UpdateTicketHistory(updateHistoryApproval, cancellationToken);
+
+                        var resolutionHIstory = new TicketHistory
+                        {
+                            TicketConcernId = closingTicketExist.TicketConcernId,
+                            TransactedBy = command.Transacted_By,
+                            TransactionDate = DateTime.Now,
+                            Request = "Resolution",
+                            Status = $"Resolution : {closingTicketExist.Resolution}"
+                        };
+
+                        await unitOfWork.RequestTicket.CreateTicketHistory(resolutionHIstory, cancellationToken);
+
                         if (validateUserApprover is not null)
                         {
 

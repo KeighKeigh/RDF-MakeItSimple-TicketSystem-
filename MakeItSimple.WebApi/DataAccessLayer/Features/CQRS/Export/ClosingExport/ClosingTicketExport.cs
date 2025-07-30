@@ -106,7 +106,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         ChannelName = x.ChannelName,
                         Aging_Days = EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.ClosedAt.Value.Date),
                         ServiceProvider = x.ServiceProviderId,
-                        ServiceProviderName = x.ServiceProviderName
+                        ServiceProviderName = x.ServiceProviderName,
+                        ChannelId = x.ChannelId
+                        
                         
 
                     }).ToListAsync();

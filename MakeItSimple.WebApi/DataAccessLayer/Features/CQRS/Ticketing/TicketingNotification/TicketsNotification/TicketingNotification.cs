@@ -290,42 +290,42 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                         }).FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
 
 
-                  //  var approverSubUnitIds = await _context.Approvers
-                  // .AsNoTracking()
-                  // .Where(x => x.UserId == userApprover.Id && x.IsActive == true)
-                  //.Select(x => x.SubUnitId)
-                  //.ToListAsync();
+                    var approverSubUnitIds = await _context.Approvers
+                   .AsNoTracking()
+                   .Where(x => x.UserId == userApprover.Id && x.IsActive == true)
+                  .Select(x => x.SubUnitId)
+                  .ToListAsync();
 
 
-                  //  if (approverSubUnitIds.Any())
-                  //  {
-                  //      var openTicketsForApprover = await _context.RequestConcerns
-                  //          .AsNoTracking()
-                  //          .Where(x => x.IsActive == true
-                  //              && x.ConcernStatus == TicketingConString.OnGoing
-                  //              && approverSubUnitIds.Contains(x.SubUnitId))
-                  //          .Select(x => new
-                  //          {
-                  //              x.Id,
-                  //              x.SubUnitId,
-                  //              x.ConcernStatus,
-                  //              x.UserId,
-                  //              x.TargetDate
-                  //          }).ToListAsync();
+                    if (approverSubUnitIds.Any())
+                    {
+                        var openTicketsForApprover = await _context.RequestConcerns
+                            .AsNoTracking()
+                            .Where(x => x.IsActive == true
+                                && x.ConcernStatus == TicketingConString.OnGoing
+                                && approverSubUnitIds.Contains(x.SubUnitId))
+                            .Select(x => new
+                            {
+                                x.Id,
+                                x.SubUnitId,
+                                x.ConcernStatus,
+                                x.UserId,
+                                x.TargetDate
+                            }).ToListAsync();
 
-                  //      openTicketsForApproverNotif = openTicketsForApprover.Count();
+                        openTicketsForApproverNotif = openTicketsForApprover.Count();
 
-                  //      var delayedTicketsForApprover = openTicketsForApprover.Where(x => x.TargetDate.Value.Date < dateToday)
-                  //          .Select(x => new
-                  //          {
-                  //              x.Id,
-                  //              x.SubUnitId,
-                  //              x.ConcernStatus,
-                  //              x.UserId
-                  //          }).ToList();
+                        var delayedTicketsForApprover = openTicketsForApprover.Where(x => x.TargetDate.Value.Date < dateToday)
+                            .Select(x => new
+                            {
+                                x.Id,
+                                x.SubUnitId,
+                                x.ConcernStatus,
+                                x.UserId
+                            }).ToList();
 
-                  //      delayTicketsForApproverNotif = delayedTicketsForApprover.Count();
-                  //  }
+                        delayTicketsForApproverNotif = delayedTicketsForApprover.Count();
+                    }
 
 
                     var approverTransactList = await _context.ApproverTicketings

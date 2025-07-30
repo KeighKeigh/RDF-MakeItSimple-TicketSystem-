@@ -1014,7 +1014,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     ticketConcernQuery = ticketConcernQuery
                         .Where(x => x.User.Fullname.ToLower().Contains(request.Search.ToLower())
                             || x.User.SubUnit.SubUnitName.ToLower().Contains(request.Search.ToLower())
-                            || x.Id.ToString().Contains(request.Search));
+                            || x.Id.ToString().Contains(request.Search)
+                            || x.RequestConcern.Concern.ToLower().Contains(request.Search.ToLower()));
                 }
 
                 if (request.Status is not null)
@@ -1154,7 +1155,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     }
                     else if (request.UserType == TicketingConString.Receiver)
                     {
-                        // Use pre-calculated business units
+                        
                         ticketConcernQuery = ticketConcernQuery
                             .Where(x => receiverBusinessUnits.Contains(x.RequestorByUser.BusinessUnitId));
                     }
@@ -1164,7 +1165,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     }
                 }
 
-                // Apply ordering
+          
                 if (request.Ascending is not null)
                 {
                     ticketConcernQuery = request.Ascending.Value
@@ -1187,7 +1188,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     ticketConcernQuery = ticketConcernQuery.OrderBy(x => x.TargetDate);
                 }
 
-                // Get total count before pagination
+                
                 var totalCount = await ticketConcernQuery.CountAsync(cancellationToken);
 
                 if (totalCount == 0)
@@ -1195,14 +1196,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     return new PagedList<GetOpenTicketResult>(new List<GetOpenTicketResult>(), 0, request.PageNumber, request.PageSize);
                 }
 
-                // Get basic ticket data first (minimal includes)
+             
                 var pagedTicketIds = await ticketConcernQuery
                     .Skip((request.PageNumber - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .Select(x => x.Id)
                     .ToListAsync(cancellationToken);
 
-                // Load only the required data for these specific tickets
                 var pagedTicketConcerns = await _context.TicketConcerns
                     .AsNoTracking()
                     .Where(x => pagedTicketIds.Contains(x.Id))
@@ -1225,18 +1225,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         x.IsActive,
                         x.Remarks,
 
-                        // User info
                         IssueHandlerName = x.User.Fullname,
                         IssueHandlerSubUnit = x.User.SubUnit.SubUnitName,
-
-                        // Requestor info
                         RequestorName = x.RequestorByUser.Fullname,
                         RequestorDepartmentCode = x.RequestorByUser.Department.DepartmentCode,
                         RequestorDepartmentName = x.RequestorByUser.Department.DepartmentName,
                         RequestorSubUnitCode = x.RequestorByUser.SubUnit.SubUnitCode,
                         RequestorBusinessUnitId = x.RequestorByUser.BusinessUnitId,
-
-                        // Request concern info
                         ConcernDescription = x.RequestConcern.Concern,
                         DateNeeded = x.RequestConcern.DateNeeded,
                         Notes = x.RequestConcern.Notes,
@@ -1246,37 +1241,25 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         BackJobConcern = x.RequestConcern.BackJob.Concern,
                         ChannelId = x.RequestConcern.ChannelId,
                         ChannelName = x.RequestConcern.Channel.ChannelName,
-                        IsConfirm = x.RequestConcern.Is_Confirm,
-
-                        // Company info
+                        IsConfirm = x.RequestConcern.Is_Confirm,        
                         CompanyCode = x.RequestConcern.Company.CompanyCode,
-                        CompanyName = x.RequestConcern.Company.CompanyName,
-
-                        // Business unit info
+                        CompanyName = x.RequestConcern.Company.CompanyName,                 
                         BusinessUnitCode = x.RequestConcern.BusinessUnit.BusinessCode,
-                        BusinessUnitName = x.RequestConcern.BusinessUnit.BusinessName,
-
-                        // Unit info
+                        BusinessUnitName = x.RequestConcern.BusinessUnit.BusinessName,    
                         UnitCode = x.RequestConcern.Unit.UnitCode,
                         UnitName = x.RequestConcern.Unit.UnitName,
-
-                        // Location info
                         LocationCode = x.RequestConcern.Location.LocationCode,
                         LocationName = x.RequestConcern.Location.LocationName,
-
-                        // Added/Modified by
                         AddedByName = x.AddedByUser.Fullname,
-                        ModifiedByName = x.ModifiedByUser.Fullname,
-
-                        // Max transaction date
+                        ModifiedByName = x.ModifiedByUser.Fullname,    
                         MaxTransactionDate = x.ticketHistories.Any() ? x.ticketHistories.Max(h => h.TransactionDate) : null
                     })
                     .ToListAsync(cancellationToken);
 
-                // Get the RequestConcernIds for the paged tickets
+                
                 var requestConcernIds = pagedTicketConcerns.Select(x => x.RequestConcernId).ToList();
 
-                // Load related collections separately for better performance
+               
                 var ticketCategories = await _context.TicketCategories
                     .AsNoTracking()
                     .Where(tc => requestConcernIds.Contains(tc.RequestConcernId))
@@ -1301,20 +1284,27 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     })
                     .ToListAsync(cancellationToken);
 
-                // Load other collections only if needed (you can add these back if required)
-                var closingTickets = new List<dynamic>(); // Placeholder for now
-                var ticketOnHolds = new List<dynamic>(); // Placeholder for now  
-                var transferTickets = new List<dynamic>(); // Placeholder for now
+               
+                var closingTickets = new List<dynamic>(); 
+                var ticketOnHolds = new List<dynamic>();  
+                var transferTickets = new List<dynamic>(); 
 
-                // Project to result model in memory using the flattened data
+
                 var results = ticketConcernQuery
                     .OrderBy(x => x.TargetDate)
                     .Select(x => new GetOpenTicketResult
                     {
 
-                        Closed_Status = x.RequestConcern.Is_Confirm == null ? null : x.TargetDate.Value.Day >= x.Closed_At.Value.Day && x.IsClosedApprove == true
-                        ? TicketingConString.OnTime : x.TargetDate.Value.Day < x.Closed_At.Value.Day && x.IsClosedApprove == true
-                        ? TicketingConString.Delay : null,
+                        //Closed_Status = x.RequestConcern.Is_Confirm == null ? null : x.TargetDate.Value.Day >= x.Closed_At.Value.Day && x.IsClosedApprove == true
+                        //? TicketingConString.OnTime : x.TargetDate.Value.Day < x.Closed_At.Value.Day && x.IsClosedApprove == true
+                        //? TicketingConString.Delay : null,
+                        Closed_Status = x.RequestConcern.Is_Confirm == null ? null :
+                           x.IsClosedApprove == true ?
+                          (x.TargetDate.Value.Date == x.Closed_At.Value.Date && x.Closed_At.Value.TimeOfDay > TimeSpan.FromHours(16)) ?
+                          TicketingConString.Delay :
+                           x.TargetDate.Value.Date >= x.Closed_At.Value.Date ?
+                           TicketingConString.OnTime : 
+                          TicketingConString.Delay : null,
                         TicketConcernId = x.Id,
                         RequestConcernId = x.RequestConcernId,
                         Concern_Description = x.RequestConcern.Concern,
@@ -1505,9 +1495,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         .ToList(),
 
                         Transaction_Date = x.ticketHistories.Max(x => x.TransactionDate).Value,
-                        //Aging_Days = x.Closed_At != null ? EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.Closed_At.Value.Date)
-                        //: EF.Functions.DateDiffDay(x.TargetDate.Value.Date, DateTime.Now.Date)
-                        Aging_Days = x.RequestConcern.Is_Confirm == null ? null : EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.Closed_At.Value.Date) <= 0 ? 0 : EF.Functions.DateDiffDay(x.Closed_At.Value.Date, x.TargetDate.Value.Date )
+                        
+                        Aging_Days = x.RequestConcern.Is_Confirm == null ? null : EF.Functions.DateDiffDay(x.DateApprovedAt.Value.Date, x.Closed_At.Value.Date) <= 0 ? 0 : EF.Functions.DateDiffDay(x.DateApprovedAt.Value.Date, x.Closed_At.Value.Date )
 
                     });
 

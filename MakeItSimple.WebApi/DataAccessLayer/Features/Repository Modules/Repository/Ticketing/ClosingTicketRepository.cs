@@ -262,7 +262,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
             await context.ClosingTickets
                 .Where(x => x.Id == closingTicket.Id)
                 .ExecuteUpdateAsync(update => update
-                .SetProperty(u => u.RejectClosedAt, u => DateTime.Now)
+                .SetProperty(u => u. , u => DateTime.Now)
                 .SetProperty(u => u.IsRejectClosed, u => true)
                 .SetProperty(u => u.RejectClosedBy, u => closingTicket.RejectClosedBy)
                 .SetProperty(u => u.RejectRemarks, u => closingTicket.RejectRemarks)

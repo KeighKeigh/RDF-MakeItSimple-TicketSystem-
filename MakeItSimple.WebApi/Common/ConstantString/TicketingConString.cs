@@ -29,7 +29,8 @@ namespace MakeItSimple.WebApi.Common.ConstantString
 
         public const string RequestCreated = "A concern was requested by ";
         public const string ConcernCreated = "A concern was created by";
-        public const string RequestAssign = "A concern was assigned to ";
+        public const string RequestAssign = "A Ticket was assigned to ";
+        public const string TicketCreated = "A Ticket was created by ";
 
         //Date Approval
         public const string DateApproval = "Ticket Date Approval request approved by";
@@ -110,6 +111,7 @@ namespace MakeItSimple.WebApi.Common.ConstantString
         public const string OnTime = "On-Time";
         public const string Delay = "Delay";
         public const string Technician = "Technician";
+        public const string Ticketing = "Ticketing";
 
         //
 

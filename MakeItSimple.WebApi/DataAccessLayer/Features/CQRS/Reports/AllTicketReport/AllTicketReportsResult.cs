@@ -41,6 +41,7 @@
             public DateTime? StartDate { get; set; }
             public DateTime? ClosedDate { get; set; }
             public string AssignTo { get; set; }
+            public string ClosingStatus { get; set; }
 
 
         }

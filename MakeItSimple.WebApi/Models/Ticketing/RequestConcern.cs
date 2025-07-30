@@ -90,6 +90,8 @@ namespace MakeItSimple.WebApi.Models.Ticketing
         public User AssignToUser {get; set;}
         public int? ServiceProviderId { get; set; }
         public virtual ServiceProviders ServiceProvider { get; set; }
+        public int? TransferChannelId { get; set; }
+        public virtual Channel TransferChannel { get; set; }
 
         public ICollection<TicketConcern> TicketConcerns { get; set; }
         public ICollection<TicketCategory> TicketCategories { get; set; }

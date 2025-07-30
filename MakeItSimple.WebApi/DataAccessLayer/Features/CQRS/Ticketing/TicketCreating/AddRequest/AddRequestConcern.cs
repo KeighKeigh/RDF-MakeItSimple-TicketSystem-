@@ -379,7 +379,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 else if(command.AssignTo != null)
                 {
                     var dateToday = DateTime.Today;
-                    var nextDay = DateTime.Today.AddDays(1);
+                    var approvedDate = DateTime.Today.AddDays(2);
                     var requestConcernId = new int();
 
 
@@ -518,7 +518,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             UserId = command.UserId,
                             Concern = concern.Concern,
                             AddedBy = command.Added_By,
-                            ConcernStatus = command.TargetDate.Value.Date <= nextDay.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
+                            ConcernStatus = command.TargetDate.Value.Date <= approvedDate.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
                             CompanyId = requestorDetails.CompanyId,
                             BusinessUnitId = requestorDetails.BusinessUnitId,
                             DepartmentId = requestorDetails.DepartmentId,
@@ -551,16 +551,16 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             TargetDate = command.TargetDate,
                             UserId = command.UserId,
                             RequestorBy = command.UserId,
-                            IsApprove = command.TargetDate.Value.Date <= nextDay.Date ? true : false,
+                            IsApprove = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
                             AddedBy = command.Added_By,
-                            ConcernStatus = command.TargetDate.Value.Date <= nextDay.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
+                            ConcernStatus = command.TargetDate.Value.Date <= approvedDate.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
                             IsAssigned = true,
                             AssignTo = command.AssignTo.ToString() == "" ? null : command.AssignTo,
-                            IsDateApproved = command.TargetDate.Value.Date <= nextDay.Date ? true : false,
-                            DateApprovedAt = command.TargetDate.Value.Date <= nextDay.Date ? dateToday.Date : null,
-                            ApprovedDateBy = command.TargetDate.Value.Date <= nextDay.Date ? handlerIds.UserId : null,
-                            ApprovedAt = command.TargetDate.Value.Date <= nextDay.Date ? dateToday.Date : null,
-                            ApprovedBy = command.TargetDate.Value.Date <= nextDay.Date ? handlerIds.UserId : null,
+                            IsDateApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
+                            DateApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday.Date : null,
+                            ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.UserId : null,
+                            ApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday.Date : null,
+                            ApprovedBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.UserId : null,
 
                         };
 
@@ -601,12 +601,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         var addNewDateApproveConcern = new ApproverDate
                         {
                             TicketConcernId = addTicketConcern.Id,
-                            IsApproved = command.TargetDate.Value.Date <= nextDay.Date ? true : false,
+                            IsApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
                             TicketApprover = approverUser.UserId,
                             AddedBy = command.Added_By,
                             Notes = command.Notes,
-                            ApprovedDateBy = command.TargetDate.Value.Date <= nextDay.Date ? approverUser.UserId : null,
-                            ApprovedDateAt = command.TargetDate.Value.Date <= nextDay.Date ? dateToday : null,
+                            ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? approverUser.UserId : null,
+                            ApprovedDateAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday : null,
 
 
 
@@ -628,20 +628,20 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                                     AddedBy = command.Added_By,
                                     CreatedAt = DateTime.Now,
                                     Status = TicketingConString.ApprovalDate,
-                                    IsApprove = command.TargetDate.Value.Date <= nextDay.Date ?  true : null,
+                                    IsApprove = command.TargetDate.Value.Date <= approvedDate.Date ?  true : null,
                                 };
 
                                 await unitOfWork.RequestTicket.CreateApproval(addNewApprover, cancellationToken);
 
                             }
-                        
+
                         var addRequestTicketHistory = new TicketHistory
                         {
                             TicketConcernId = ticketConcernExist.Id,
                             TransactedBy = command.Added_By,
                             TransactionDate = DateTime.Now,
-                            Request = TicketingConString.Request,
-                            Status = $"{TicketingConString.ConcernCreated} {userDetails.Fullname}"
+                            Request = TicketingConString.Ticketing,
+                            Status = $"{TicketingConString.TicketCreated} {userDetails.Fullname}"
                         };
 
                         await unitOfWork.RequestTicket.CreateTicketHistory(addRequestTicketHistory, cancellationToken);
@@ -658,9 +658,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         await unitOfWork.RequestTicket.CreateTicketHistory(assignedTicketHistory, cancellationToken);
 
 
-                        //var handlerId = await context.Approvers.Where(x => x.SubUnitId == addTicketConcern.User.SubUnitId).FirstOrDefaultAsync();
-                        //var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
-                        if (command.TargetDate.Value.Date > nextDay.Date)
+
+                        if (command.TargetDate.Value.Date > approvedDate.Date)
                         {
                             var approveTicketDateHistory = new TicketHistory
                             {
@@ -690,17 +689,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         }
                         else
                         {
-                            var approveTicketDateHistory = new TicketHistory
-                            {
-                                TicketConcernId = ticketConcernExist.Id,
-                                TransactedBy = handlerId.UserId,
-                                TransactionDate = DateTime.Now,
-                                Request = TicketingConString.ApprovedDate,
-                                Status = $"{TicketingConString.OnGoing}"
-                            };
-
-                            await unitOfWork.RequestTicket.CreateTicketHistory(approveTicketDateHistory, cancellationToken);
-
                             var addNewTicketTransactionNotification = new TicketTransactionNotification
                             {
 

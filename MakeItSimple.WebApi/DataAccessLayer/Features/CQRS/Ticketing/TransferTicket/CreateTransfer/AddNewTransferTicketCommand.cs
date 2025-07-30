@@ -15,6 +15,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
             public int? TransferTicketId { get; set; }
             public int? TicketConcernId { get; set; }
             public string TransferRemarks { get; set; }
+            public int? TransferChannelId { get; set; }
             public List<AddTransferAttachment> AddTransferAttachments { get; set; }
 
             public class AddTransferAttachment
