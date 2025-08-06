@@ -152,10 +152,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
 
                 await _context.TransferTicketConcerns.AddAsync(addTransferTicket);
 
-                //var transferchannelId = await _context.RequestConcerns.Where(x => x.Id == ticketConcern.RequestConcernId).FirstOrDefaultAsync();
-                //if (transferchannelId != null) {
-                //    transferchannelId.TransferChannelId = command.TransferChannelId;
-                //}
+                var transferchannelId = await _context.RequestConcerns.Where(x => x.Id == ticketConcern.RequestConcernId).FirstOrDefaultAsync();
+                if (transferchannelId != null)
+                {
+                    transferchannelId.TransferChannelId = command.TransferChannelId;
+                }
 
                 await _context.SaveChangesAsync(cancellationToken);
 

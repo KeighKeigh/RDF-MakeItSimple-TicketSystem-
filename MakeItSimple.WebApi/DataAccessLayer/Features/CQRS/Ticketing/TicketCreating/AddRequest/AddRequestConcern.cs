@@ -43,6 +43,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
             public async Task<Result> Handle(AddRequestConcernCommand command, CancellationToken cancellationToken)
             {
+
+                var ticketId = "";
                 if (command.AssignTo == null)
                 {
                     var ticketConcernId = new int(); //????kkkk
@@ -144,6 +146,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         await unitOfWork.RequestTicket.CreateTicketConcern(addTicketConcern, cancellationToken);
                         await unitOfWork.SaveChangesAsync(cancellationToken);
 
+                        ticketId = addTicketConcern.Id.ToString();
                         //var cache = await cacheService.GetOpenTickets();
 
                         //var chechcache = cache.Where(x => x.UserId == addTicketConcern.UserId);
@@ -234,8 +237,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                         //kk
 
-                        var userReceiverByBusinessUnit = await unitOfWork.Receiver
-                             .ReceiverExistByBusinessUnitId(userIdExist.BusinessUnitId);
 
                         var addNewTicketTransactionNotification = new TicketTransactionNotification
                         {
@@ -243,7 +244,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             Message = $"New request concern number {requestConcernId} has received",
                             AddedBy = command.Added_By.Value,
                             Created_At = DateTime.Now,
-                            ReceiveBy = userReceiverByBusinessUnit.UserId.Value,
                             Modules = PathConString.ReceiverConcerns,
                             PathId = requestConcernId
 
@@ -352,11 +352,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                                         FileSize = attachments.Attachment.Length,
                                         AddedBy = command.Added_By,
                                     };
-
+                                    
                                     await unitOfWork.RequestTicket.CreateTicketAttachment(addAttachment, cancellationToken);
 
                                 }
-
+                                
                                 await using (var stream = new FileStream(filePath, FileMode.Create))
                                 {
                                     await attachments.Attachment.CopyToAsync(stream);
@@ -378,7 +378,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                 else if(command.AssignTo != null)
                 {
-                    var dateToday = DateTime.Today;
+                    var dateToday = DateTime.Now;
                     var approvedDate = DateTime.Today.AddDays(2);
                     var requestConcernId = new int();
 
@@ -444,7 +444,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                     }
 
-                    if (dateToday > command.TargetDate)
+                    if (dateToday.Date > command.TargetDate)
                         return Result.Failure<int?>(TicketRequestError.DateTimeInvalid());
 
                     foreach (var concern in command.ListOfConcerns)
@@ -557,7 +557,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             IsAssigned = true,
                             AssignTo = command.AssignTo.ToString() == "" ? null : command.AssignTo,
                             IsDateApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
-                            DateApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday.Date : null,
+                            DateApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday : null,
                             ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.UserId : null,
                             ApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday.Date : null,
                             ApprovedBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.UserId : null,
@@ -842,6 +842,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                                         AddedBy = command.Added_By,
                                     };
 
+                                    
                                     await unitOfWork.RequestTicket.CreateTicketAttachment(addAttachment, cancellationToken);
 
                                 }
@@ -858,7 +859,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 }
 
                 await unitOfWork.SaveChangesAsync(cancellationToken);
-                return Result.Success();
+                return Result.Success(ticketId);
             }
 
         }

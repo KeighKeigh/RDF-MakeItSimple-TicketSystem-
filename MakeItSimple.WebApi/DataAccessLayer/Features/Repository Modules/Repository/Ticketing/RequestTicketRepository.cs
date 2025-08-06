@@ -50,7 +50,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .TicketConcerns
                 .Include(x => x.User)
                 .Include(x => x.RequestorByUser)
-                .FirstOrDefaultAsync(x => x.Id == id);   
+                .FirstOrDefaultAsync(x => x.RequestConcernId == id);   
         }
 
         public async Task UpdateTicketConcerns(TicketConcern ticketConcern, CancellationToken cancellationToken)

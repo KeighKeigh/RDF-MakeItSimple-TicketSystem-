@@ -23,7 +23,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
 
                 var combineTicketReports = new List<AllTicketReportsResult>();
 
-                var cutoffTime = TimeSpan.FromHours(16);
+                //var cutoffTime = TimeSpan.FromHours(16);
 
                 var openTicketQuery = await _context.TicketConcerns
                     .AsNoTrackingWithIdentityResolution()
@@ -215,7 +215,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         Date_Needed = ct.TicketConcern.RequestConcern.DateNeeded,
                         Contact_Number = ct.TicketConcern.RequestConcern.ContactNumber,
                          Notes = ct.Notes,
-                        Transaction_Date = ct.ClosingAt.Value.Date,
+                        Transaction_Date = ct.ClosingAt,
                         Target_Date = ct.TicketConcern.TargetDate.Value.Date,
                         Ticket_Status = "Closed",
                         Remarks = ct.ClosingRemarks,
@@ -226,8 +226,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname,
                         ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
-                        ClosingStatus = (ct.TicketConcern.TargetDate.Value.Date == ct.TicketConcern.Closed_At.Value.Date && ct.TicketConcern.Closed_At.Value.TimeOfDay > cutoffTime) ? "Delayed" 
-                        : ct.TicketConcern.TargetDate.Value.Date >= ct.TicketConcern.Closed_At.Value.Date ?  "On-Time"
+                        ClosingStatus = ct.TicketConcern.TargetDate.Value.Date >= ct.TicketConcern.Closed_At.Value.Date ?  "On-Time"
                         : "Delayed"
 
                     }).ToListAsync(); 
@@ -282,8 +281,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         ClosedDate = ct.ClosingTicket.TicketConcern.Closed_At,
                         ServiceProvider = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.ClosingTicket.TicketConcern.RequestConcern.AssignToUser.Fullname,
-                        ClosingStatus = (ct.ClosingTicket.TicketConcern.TargetDate.Value.Date == ct.ClosingTicket.TicketConcern.Closed_At.Value.Date && ct.ClosingTicket.TicketConcern.Closed_At.Value.TimeOfDay > cutoffTime) ? "Delayed"
-                        : ct.ClosingTicket.TicketConcern.TargetDate.Value.Date >= ct.ClosingTicket.TicketConcern.Closed_At.Value.Date ? "On-Time"
+                        ClosingStatus = ct.ClosingTicket.TicketConcern.TargetDate.Value.Date >= ct.ClosingTicket.TicketConcern.Closed_At.Value.Date ? "On-Time"
                         : "Delayed"
                     }).ToListAsync();
 

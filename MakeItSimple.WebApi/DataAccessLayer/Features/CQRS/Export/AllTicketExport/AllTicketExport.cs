@@ -61,6 +61,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
             public DateTime? StartDate { get; set; }
             public DateTime? ClosedDate { get; set; }
             public string AssignTo { get; set; }
+            public string ClosingStatus { get; set; }
+            public string Technician1 { get; set; }
+            public string Technician2 { get; set; }
+            public string Technician3 { get; set; }
+            public string Resolution { get; set; }
+            public DateTime? CreatedTime { get; set; }
+            public DateTime? CompletedTime { get; set; }
+            public string Severity { get; set; }
+            public DateTime? DateStarted { get; set; }
+            public int? RequestConcernId { get; set; }
+            
 
 
         }
@@ -76,7 +87,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
 
             public async Task<Unit> Handle(AllTicketExportCommand request, CancellationToken cancellationToken)
             {
-                var combineTicketReports = new List<AllTicketReportsResult>();
+                var combineTicketReports = new List<AllTicketExportResult>();
 
 
                 var openTicketQuery = await _context.TicketConcerns
@@ -85,7 +96,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                     .AsSplitQuery()
                     .Where(t => t.IsApprove == true && t.IsTransfer != true && t.IsClosedApprove != true && t.OnHold != true && t.IsDone != true)
                     .Where(t => t.DateApprovedAt.Value.Date >= request.Date_From.Value.Date && t.DateApprovedAt.Value.Date <= request.Date_To.Value.Date)
-                    .Select(o => new AllTicketReportsResult
+                    .Select(o => new AllTicketExportResult
                     {
 
                         TicketConcernId = o.Id,
@@ -127,7 +138,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                         ClosedDate = o.Closed_At,
                         ServiceProvider = o.RequestConcern.ServiceProviderId.Value,
                         AssignTo = o.RequestConcern.AssignToUser.Fullname,
-                        ServiceProviderName = o.RequestConcern.ServiceProvider.ServiceProviderName
+                        ServiceProviderName = o.RequestConcern.ServiceProvider.ServiceProviderName,
+                        CreatedTime = o.RequestConcern.CreatedAt,
+                        Severity = o.RequestConcern.Severity,
+                        DateStarted = o.DateApprovedAt,
+                        RequestConcernId = o.RequestConcernId
+
+
 
                     }).ToListAsync();
 
@@ -138,7 +155,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                     .AsSplitQuery()
                     .Where(x => x.IsTransfer == true && x.IsActive == true)
                     .Where(t => t.TransferAt.Value.Date >= request.Date_From.Value.Date && t.TransferAt.Value.Date <= request.Date_To.Value.Date)
-                    .Select(ct => new AllTicketReportsResult
+                    .Select(ct => new AllTicketExportResult
                     {
                         TicketConcernId = ct.TicketConcernId,
                         Request_Type = ct.TicketConcern.RequestConcern.RequestType,
@@ -178,7 +195,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                         ClosedDate = ct.TicketConcern.Closed_At,
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.TransferToUser.Fullname,
-                        ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
+                        ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
+                        CreatedTime = ct.TicketConcern.RequestConcern.CreatedAt,
+                        Severity = ct.TicketConcern.RequestConcern.Severity,
+                        DateStarted = ct.TicketConcern.DateApprovedAt,
+                        RequestConcernId = ct.TicketConcern.RequestConcernId,
                     }).ToListAsync();
 
                 var onHoldTicketQuery = await _context.TicketOnHolds
@@ -188,7 +209,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                     .AsSplitQuery()
                     .Where(x => x.IsHold == true && x.IsActive == true)
                     .Where(t => t.CreatedAt.Date >= request.Date_From.Value.Date && t.CreatedAt.Date <= request.Date_To.Value.Date)
-                    .Select(ct => new AllTicketReportsResult
+                    .Select(ct => new AllTicketExportResult
                     {
                         TicketConcernId = ct.TicketConcernId,
                         Request_Type = ct.TicketConcern.RequestConcern.RequestType,
@@ -228,7 +249,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                         ClosedDate = ct.TicketConcern.Closed_At,
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname,
-                        ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
+                        ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
+                        CreatedTime = ct.TicketConcern.RequestConcern.CreatedAt,
+                        Severity = ct.TicketConcern.RequestConcern.Severity,
+                        DateStarted = ct.TicketConcern.DateApprovedAt,
+                        RequestConcernId = ct.TicketConcern.RequestConcernId,
 
                     }).ToListAsync();
 
@@ -239,7 +264,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                     .AsSplitQuery()
                     .Where(x => x.IsClosing == true && x.IsActive == true)
                     .Where(t => t.ClosingAt.Value.Date >= request.Date_From.Value.Date && t.ClosingAt.Value.Date <= request.Date_To.Value.Date)
-                    .Select(ct => new AllTicketReportsResult
+                    .Select(ct => new AllTicketExportResult
                     {
                         TicketConcernId = ct.TicketConcernId,
                         Request_Type = ct.TicketConcern.RequestConcern.RequestType,
@@ -280,61 +305,71 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname,
                         ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
-                        ClosingStatus = ct.TicketConcern.TargetDate.Value.Date < ct.TicketConcern.Closed_At.Value.Date ? "Delayed" : "On-Time"
+                        ClosingStatus = ct.TicketConcern.TargetDate.Value.Date < ct.TicketConcern.Closed_At.Value.Date ? "Delayed" : "On-Time",
+                        Technician1 = ct.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname).Skip(0).Take(1).FirstOrDefault(),
+                        Technician2 = ct.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname).Skip(1).Take(1).FirstOrDefault(),
+                        Technician3 = ct.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname).Skip(2).Take(1).FirstOrDefault(),
+                        Resolution = ct.TicketConcern.RequestConcern.Resolution,
+                        CreatedTime = ct.TicketConcern.RequestConcern.CreatedAt,
+                        CompletedTime = ct.TicketConcern.Closed_At,
+                        Severity = ct.TicketConcern.RequestConcern.Severity,
+                        DateStarted = ct.TicketConcern.DateApprovedAt,
+                        RequestConcernId = ct.TicketConcern.RequestConcernId,
+
                     }).ToListAsync();
 
 
-                var closingTicketTechnicianQuery = await _context.TicketTechnicians
-                    .AsNoTrackingWithIdentityResolution()
-                    .Include(ct => ct.ClosingTicket)
-                    .ThenInclude(ct => ct.TicketConcern)
-                    .ThenInclude(ct => ct.RequestConcern)
-                    .Include(ct => ct.TechnicianByUser)
-                    .AsSplitQuery()
-                    .Where(ct => ct.ClosingTicket.IsClosing == true && ct.ClosingTicket.IsActive == true)
-                    .Where(t => t.ClosingTicket.ClosingAt.Value.Date >= request.Date_From.Value.Date && t.ClosingTicket.ClosingAt.Value.Date <= request.Date_To.Value.Date)
-                    .Select(ct => new AllTicketReportsResult
-                    {
-                        TicketConcernId = ct.ClosingTicket.TicketConcernId,
-                        Request_Type = ct.ClosingTicket.TicketConcern.RequestConcern.RequestType,
-                        BackJobId = ct.ClosingTicket.TicketConcern.RequestConcern.BackJobId,
-                        Requestor_Name = ct.ClosingTicket.TicketConcern.RequestorByUser.Fullname,
-                        Company_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Company.CompanyCode,
-                        Company_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Company.CompanyName,
-                        BusinessUnit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.BusinessUnit.BusinessCode,
-                        BusinessUnit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.BusinessUnit.BusinessName,
-                        Department_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Department.DepartmentCode,
-                        Department_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Department.DepartmentName,
-                        Unit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Unit.UnitCode,
-                        Unit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Unit.UnitName,
-                        SubUnit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.SubUnit.SubUnitCode,
-                        SubUnit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.SubUnit.SubUnitCode,
-                        Location_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Location.LocationCode,
-                        Location_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Location.LocationName,
-                        Personnel_Unit = ct.TechnicianByUser.UnitId,
-                        Personnel_Id = ct.TechnicianBy,
-                        Personnel = ct.TechnicianByUser.Fullname,
-                        Concerns = ct.ClosingTicket.TicketConcern.RequestConcern.Concern,
-                        Channel_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
-                        TicketCategoryDescriptions = string.Join(", ", ct.ClosingTicket.TicketConcern.RequestConcern.TicketCategories
-                           .Select(x => x.Category.CategoryDescription)),
-                        TicketSubCategoryDescriptions = string.Join(", ", ct.ClosingTicket.TicketConcern.RequestConcern.TicketSubCategories
-                            .Select(x => x.SubCategory.SubCategoryDescription)),
-                        Date_Needed = ct.ClosingTicket.TicketConcern.RequestConcern.DateNeeded,
-                        Contact_Number = ct.ClosingTicket.TicketConcern.RequestConcern.ContactNumber,
-                        Notes = ct.ClosingTicket.Notes,
-                        Transaction_Date = ct.ClosingTicket.ClosingAt.Value.Date,
-                        Target_Date = ct.ClosingTicket.TicketConcern.TargetDate.Value.Date,
-                        Ticket_Status = "Closed",
-                        Remarks = ct.ClosingTicket.ClosingRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.ClosingTicket.TicketConcern.DateApprovedAt.Value.Date, ct.ClosingTicket.ClosingAt.Value.Date),
-                        ChannelId = ct.ClosingTicket.TicketConcern.RequestConcern.ChannelId.Value,
-                        StartDate = ct.ClosingTicket.TicketConcern.DateApprovedAt,
-                        ClosedDate = ct.ClosingTicket.TicketConcern.Closed_At,
-                        ServiceProvider = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId.Value,
-                        AssignTo = ct.ClosingTicket.TicketConcern.RequestConcern.AssignToUser.Fullname,
-                        ServiceProviderName = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
-                    }).ToListAsync();
+                //var closingTicketTechnicianQuery = await _context.TicketTechnicians
+                //    .AsNoTrackingWithIdentityResolution()
+                //    .Include(ct => ct.ClosingTicket)
+                //    .ThenInclude(ct => ct.TicketConcern)
+                //    .ThenInclude(ct => ct.RequestConcern)
+                //    .Include(ct => ct.TechnicianByUser)
+                //    .AsSplitQuery()
+                //    .Where(ct => ct.ClosingTicket.IsClosing == true && ct.ClosingTicket.IsActive == true)
+                //    .Where(t => t.ClosingTicket.ClosingAt.Value.Date >= request.Date_From.Value.Date && t.ClosingTicket.ClosingAt.Value.Date <= request.Date_To.Value.Date)
+                //    .Select(ct => new AllTicketExportResult
+                //    {
+                //        TicketConcernId = ct.ClosingTicket.TicketConcernId,
+                //        Request_Type = ct.ClosingTicket.TicketConcern.RequestConcern.RequestType,
+                //        BackJobId = ct.ClosingTicket.TicketConcern.RequestConcern.BackJobId,
+                //        Requestor_Name = ct.ClosingTicket.TicketConcern.RequestorByUser.Fullname,
+                //        Company_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Company.CompanyCode,
+                //        Company_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Company.CompanyName,
+                //        BusinessUnit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.BusinessUnit.BusinessCode,
+                //        BusinessUnit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.BusinessUnit.BusinessName,
+                //        Department_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Department.DepartmentCode,
+                //        Department_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Department.DepartmentName,
+                //        Unit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Unit.UnitCode,
+                //        Unit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Unit.UnitName,
+                //        SubUnit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.SubUnit.SubUnitCode,
+                //        SubUnit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.SubUnit.SubUnitCode,
+                //        Location_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Location.LocationCode,
+                //        Location_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Location.LocationName,
+                //        Personnel_Unit = ct.TechnicianByUser.UnitId,
+                //        Personnel_Id = ct.TechnicianBy,
+                //        Personnel = ct.TechnicianByUser.Fullname,
+                //        Concerns = ct.ClosingTicket.TicketConcern.RequestConcern.Concern,
+                //        Channel_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
+                //        TicketCategoryDescriptions = string.Join(", ", ct.ClosingTicket.TicketConcern.RequestConcern.TicketCategories
+                //           .Select(x => x.Category.CategoryDescription)),
+                //        TicketSubCategoryDescriptions = string.Join(", ", ct.ClosingTicket.TicketConcern.RequestConcern.TicketSubCategories
+                //            .Select(x => x.SubCategory.SubCategoryDescription)),
+                //        Date_Needed = ct.ClosingTicket.TicketConcern.RequestConcern.DateNeeded,
+                //        Contact_Number = ct.ClosingTicket.TicketConcern.RequestConcern.ContactNumber,
+                //        Notes = ct.ClosingTicket.Notes,
+                //        Transaction_Date = ct.ClosingTicket.ClosingAt.Value.Date,
+                //        Target_Date = ct.ClosingTicket.TicketConcern.TargetDate.Value.Date,
+                //        Ticket_Status = "Closed",
+                //        Remarks = ct.ClosingTicket.ClosingRemarks,
+                //        Aging_Days = EF.Functions.DateDiffDay(ct.ClosingTicket.TicketConcern.DateApprovedAt.Value.Date, ct.ClosingTicket.ClosingAt.Value.Date),
+                //        ChannelId = ct.ClosingTicket.TicketConcern.RequestConcern.ChannelId.Value,
+                //        StartDate = ct.ClosingTicket.TicketConcern.DateApprovedAt,
+                //        ClosedDate = ct.ClosingTicket.TicketConcern.Closed_At,
+                //        ServiceProvider = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId.Value,
+                //        AssignTo = ct.ClosingTicket.TicketConcern.RequestConcern.AssignToUser.Fullname,
+                //        ServiceProviderName = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
+                //    }).ToListAsync();
 
 
                 foreach (var list in openTicketQuery)
@@ -356,15 +391,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                     combineTicketReports.Add(list);
                 }
 
-                foreach (var list in closingTicketTechnicianQuery)
-                {
-                    combineTicketReports.Add(list);
-                }
+                //foreach (var list in closingTicketTechnicianQuery)
+                //{
+                //    combineTicketReports.Add(list);
+                //}
 
                 var results = combineTicketReports
                     .OrderBy(x => x.Transaction_Date.Value.Date)
                     .ThenBy(x => x.TicketConcernId)
-                    .Select(r => new AllTicketReportsResult
+                    .Select(r => new AllTicketExportResult
                     {
                         TicketConcernId = r.TicketConcernId,
                         Request_Type = r.Request_Type,
@@ -402,7 +437,16 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                         ServiceProvider = r.ServiceProvider,
                         ServiceProviderName = r.ServiceProviderName,
                         ClosingStatus = r.ClosingStatus,
-                        Personnel_Id = r.Personnel_Id
+                        Personnel_Id = r.Personnel_Id,
+                        Technician1 = r.Technician1,
+                        Technician2 = r.Technician2,
+                        Technician3 = r.Technician3,
+                        Resolution = r.Resolution,
+                        CreatedTime = r.CreatedTime,
+                        CompletedTime = r.CompletedTime,
+                        DateStarted = r.DateStarted,
+                        Severity = r.Severity,
+                        RequestConcernId = r.RequestConcernId,
 
                     }).ToList();
 
@@ -460,23 +504,42 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                     var worksheet = workbook.Worksheets.Add($"Closing Ticket Report");
                     var headers = new List<string>
                     {
-                        "Ticket Number",
-                        "Ticket Description",
+                        "Technician",
+                        "Technician 2",
+                        "Technician 3",
                         "Category",
-                        "Sub Catgory",
+                        "Subcategory",
+                        "Item",
+                        "Subject",
+                        "Description",
+                        "Asset Tag #",
                         "Service Provider",
-                        "Channel",
-                        "Start Date",
-                        "Target Date",
-                        "Requestor",
+                        "MIR #",
+                        "Material Cost",
+                        "Resolution",
+                        "Request Mode",
+                        "Request Type",
+                        "Request Status",
+                        "First Response OverDue Status",
+                        "Overdue Status",
+                        "Work Site",
+                        "Requester",
                         "Company",
-                        "Business Unit",
                         "Department",
-                        "Unit",
-                        "Sub Unit",
                         "Location",
-                        "Issue Handler",
-                        "Status"
+                        "Created Time",
+                        "Completed Time",
+                        "Time Elapsed",
+                        "Priority",
+                        "Date Created / Received",
+                        "Date Needed",
+                        "Date Started",
+                        "Date Finished",
+                        "Request ID",
+                        "Customer Satisfactionn",
+                        "Comment / Suggestions"
+
+
 
 
 
@@ -497,23 +560,42 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExpo
                     {
                         var row = worksheet.Row(index + 1);
 
-                        row.Cell(1).Value = results[index - 1].TicketConcernId;
-                        row.Cell(2).Value = results[index - 1].Concerns;
-                        row.Cell(3).Value = results[index - 1].TicketCategoryDescriptions;
-                        row.Cell(4).Value = results[index - 1].TicketSubCategoryDescriptions;
-                        row.Cell(5).Value = results[index - 1].ServiceProviderName;
-                        row.Cell(6).Value = results[index - 1].Channel_Name;
-                        row.Cell(7).Value = results[index - 1].StartDate;
-                        row.Cell(8).Value = results[index - 1].Target_Date;
-                        row.Cell(9).Value = results[index - 1].Requestor_Name;
-                        row.Cell(10).Value = $"{results[index - 1].Company_Code} - {results[index - 1].Company_Name}";
-                        row.Cell(11).Value = $"{results[index - 1].BusinessUnit_Code} - {results[index - 1].BusinessUnit_Name}";
-                        row.Cell(12).Value = $"{results[index - 1].Department_Code} - {results[index - 1].Department_Name}";
-                        row.Cell(13).Value = $"{results[index - 1].Unit_Code} - {results[index - 1].Unit_Name}";
-                        row.Cell(14).Value = $"{results[index - 1].SubUnit_Code} - {results[index - 1].SubUnit_Name}";
-                        row.Cell(15).Value = $"{results[index - 1].Location_Code} - {results[index - 1].Location_Name}";
-                        row.Cell(16).Value = results[index - 1].AssignTo;
-                        row.Cell(17).Value = results[index - 1].Ticket_Status;
+                        row.Cell(1).Value = results[index - 1].Technician1;
+                        row.Cell(2).Value = results[index - 1].Technician2;
+                        row.Cell(3).Value = results[index - 1].Technician3;
+                        row.Cell(4).Value = results[index - 1].TicketCategoryDescriptions;
+                        row.Cell(5).Value = results[index - 1].TicketSubCategoryDescriptions;
+                        //row.Cell(6).Value = results[index - 1].Item;
+                        //row.Cell(7).Value = results[index - 1].Subject;
+                        row.Cell(8).Value = results[index - 1].Concerns;
+                        //row.Cell(9).Value = results[index - 1].AssetTag;
+                        row.Cell(10).Value = results[index - 1].ServiceProviderName;
+                        //row.Cell(11).Value = results[index - 1]."MIR";
+                        //row.Cell(12).Value = results[index - 1].materialCost;
+                        row.Cell(13).Value = results[index - 1].Resolution;
+                        //row.Cell(14).Value = results[index - 1].RequestMode;
+                        row.Cell(15).Value = results[index - 1].Request_Type;
+                        row.Cell(16).Value = results[index - 1].Ticket_Status;
+                        //row.Cell(17).Value = results[index - 1].FirstResponse;
+                        //row.Cell(18).Value = results[index - 1].OverdueStatus;
+                        //row.Cell(19).Value = results[index - 1].WorkSite;
+                        row.Cell(20).Value = results[index - 1].Requestor_Name;
+                        row.Cell(21).Value = $"{results[index - 1].Company_Code} - {results[index - 1].Company_Name}";
+                        row.Cell(22).Value = $"{results[index - 1].Department_Code} - {results[index - 1].Department_Name}";
+                        row.Cell(23).Value = $"{results[index - 1].Location_Code} - {results[index - 1].Location_Name}";
+                        row.Cell(24).Value = results[index - 1].CreatedTime;
+                        row.Cell(25).Value = results[index - 1].CompletedTime;
+                        //row.Cell(26).Value = results[index - 1].TimeElapsed;
+                        row.Cell(27).Value = results[index - 1].Severity;
+                        row.Cell(28).Value = results[index - 1].CreatedTime;
+                        row.Cell(29).Value = results[index - 1].Date_Needed;
+
+                        row.Cell(30).Value = results[index - 1].DateStarted;
+                        row.Cell(31).Value = results[index - 1].CompletedTime;
+                        row.Cell(32).Value = results[index - 1].RequestConcernId;
+                        //row.Cell(33).Value = results[index - 1].Severity;
+                        //row.Cell(34).Value = results[index - 1].CreatedTime;
+
 
 
                     }

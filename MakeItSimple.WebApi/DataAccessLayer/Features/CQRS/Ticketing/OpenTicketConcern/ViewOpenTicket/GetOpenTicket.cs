@@ -1166,27 +1166,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                 }
 
           
-                if (request.Ascending is not null)
+                if (request.Ascending == false)
                 {
-                    ticketConcernQuery = request.Ascending.Value
-                        ? ticketConcernQuery.OrderBy(x => x.Id)
-                        : ticketConcernQuery.OrderByDescending(x => x.Id);
-                }
-                else
-                {
-                    ticketConcernQuery = ticketConcernQuery.OrderBy(x => x.Id);
+                    ticketConcernQuery = ticketConcernQuery.OrderByDescending(x => x.Id);
                 }
 
-                if (request.AscendingDate is not null)
+
+                if (request.AscendingDate == false)
                 {
-                    ticketConcernQuery = request.AscendingDate.Value
-                        ? ticketConcernQuery.OrderBy(x => x.TargetDate)
-                        : ticketConcernQuery.OrderByDescending(x => x.TargetDate);
+                    ticketConcernQuery = ticketConcernQuery.OrderByDescending(x => x.TargetDate);
+
                 }
-                else
-                {
-                    ticketConcernQuery = ticketConcernQuery.OrderBy(x => x.TargetDate);
-                }
+
 
                 
                 var totalCount = await ticketConcernQuery.CountAsync(cancellationToken);
@@ -1225,6 +1216,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         x.IsActive,
                         x.Remarks,
 
+                        TransferChannelId = x.RequestConcern.TransferChannelId,
+                        TransferChannelName = x.RequestConcern.TransferChannel.ChannelName,
                         IssueHandlerName = x.User.Fullname,
                         IssueHandlerSubUnit = x.User.SubUnit.SubUnitName,
                         RequestorName = x.RequestorByUser.Fullname,
@@ -1291,7 +1284,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
 
 
                 var results = ticketConcernQuery
-                    .OrderBy(x => x.TargetDate)
                     .Select(x => new GetOpenTicketResult
                     {
 
@@ -1300,8 +1292,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         //? TicketingConString.Delay : null,
                         Closed_Status = x.RequestConcern.Is_Confirm == null ? null :
                            x.IsClosedApprove == true ?
-                          (x.TargetDate.Value.Date == x.Closed_At.Value.Date && x.Closed_At.Value.TimeOfDay > TimeSpan.FromHours(16)) ?
-                          TicketingConString.Delay :
                            x.TargetDate.Value.Date >= x.Closed_At.Value.Date ?
                            TicketingConString.OnTime : 
                           TicketingConString.Delay : null,
@@ -1347,6 +1337,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         Back_Job_Concern = x.RequestConcern.BackJob.Concern,
                         ChannelId = x.RequestConcern.ChannelId,
                         Channel_Name = x.RequestConcern.Channel.ChannelName,
+                        TransferChannelId = x.RequestConcern.TransferChannelId,
+                        Transfer_Channel_Name = x.RequestConcern.TransferChannel.ChannelName,
                         UserId = x.UserId,
                         Issue_Handler = x.User.Fullname,
                         Target_Date = x.TargetDate,

@@ -139,6 +139,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                         Transfer_To = x.TransferToUser.Fullname,
                         ChannelId = x.TicketConcern.RequestConcern.ChannelId,
                         Channel_Name = x.TicketConcern.RequestConcern.Channel.ChannelName,
+                        TransferChannelId = x.TicketConcern.RequestConcern.TransferChannelId,
+                        Transfer_Channel_Name = x.TicketConcern.RequestConcern.TransferChannel.ChannelName,
                         UserId = x.TicketConcern.UserId,
                         Fullname = x.TicketConcern.User.Fullname,
                         Concern_Details = x.TicketConcern.RequestConcern.Concern,

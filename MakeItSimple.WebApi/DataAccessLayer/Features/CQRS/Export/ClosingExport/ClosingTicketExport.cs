@@ -46,7 +46,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                             x.ClosingTicket.TicketConcern.RequestConcern.ChannelId,
                             x.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
                             x.ClosingTicket.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
-                            x.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId
+                            x.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId,
+                            x.ClosingTicket.TicketConcern.DateApprovedAt,
+
                         });
 
                 var closingTicket =  _context.TicketConcerns
@@ -79,7 +81,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         x.RequestConcern.ChannelId,
                         x.RequestConcern.Channel.ChannelName,
                         x.RequestConcern.ServiceProvider.ServiceProviderName,
-                        x.RequestConcern.ServiceProviderId
+                        x.RequestConcern.ServiceProviderId,
+                        x.DateApprovedAt,
                     });
 
                 var combineTicket = closingTicket
@@ -104,10 +107,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         Status = TicketingConString.Closed,
                         Remarks = x.ClosedAt.Value.Date <= x.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
                         ChannelName = x.ChannelName,
-                        Aging_Days = EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.ClosedAt.Value.Date),
                         ServiceProvider = x.ServiceProviderId,
                         ServiceProviderName = x.ServiceProviderName,
-                        ChannelId = x.ChannelId
+                        ChannelId = x.ChannelId,
+                        OpenDate = x.DateApprovedAt
+                        
+
                         
                         
 
@@ -171,13 +176,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         "Personnel",
                         "Ticket Number",
                         "Description",
+                        "Open Date",
                         "Target Date",
                         "Actual",
-                        "Varience",
+                        "Variance",
                         "Efficiency",
                         "Remarks",
                         "Channel Name",
-                        "Aging Days",
                         "Service Provider"
 
                     };
@@ -204,13 +209,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         row.Cell(5).Value = closing[index - 1].Personnel;
                         row.Cell(6).Value = closing[index - 1].Ticket_Number;
                         row.Cell(7).Value = closing[index - 1].Description;
-                        row.Cell(8).Value = closing[index - 1].Target_Date;
-                        row.Cell(9).Value = closing[index - 1].Actual;
-                        row.Cell(10).Value = closing[index - 1].Varience;
-                        row.Cell(11).Value = closing[index - 1].Efficeincy;
-                        row.Cell(12).Value = closing[index - 1].Remarks;
-                        row.Cell(13).Value = closing[index - 1].ChannelName;
-                        row.Cell(14).Value = closing[index - 1].Aging_Days;
+                        row.Cell(8).Value = closing[index - 1].OpenDate;
+                        row.Cell(9).Value = closing[index - 1].Target_Date;
+                        row.Cell(10).Value = closing[index - 1].Actual;
+                        row.Cell(11).Value = closing[index - 1].Varience;
+                        row.Cell(12).Value = closing[index - 1].Efficeincy;
+                        row.Cell(13).Value = closing[index - 1].Remarks;
+                        row.Cell(14).Value = closing[index - 1].ChannelName;
                         row.Cell(15).Value = closing[index - 1].ServiceProviderName;
 
 

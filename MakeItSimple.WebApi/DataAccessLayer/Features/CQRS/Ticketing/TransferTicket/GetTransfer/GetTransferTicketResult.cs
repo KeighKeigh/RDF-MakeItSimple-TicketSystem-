@@ -9,6 +9,8 @@
             public int? TransferTicketId { get; set; }
             public int? ChannelId { get; set; }
             public string Channel_Name { get; set; }
+            public int? TransferChannelId { get; set; }
+            public string Transfer_Channel_Name { get; set; }
             public Guid? UserId { get; set; }
             public string Fullname { get; set; }
             public string Concern_Details { get; set; }

@@ -42,6 +42,16 @@
             public DateTime? ClosedDate { get; set; }
             public string AssignTo { get; set; }
             public string ClosingStatus { get; set; }
+            public string Technician1 { get; set; }
+            public string Technician2 { get; set; }
+            public string Technician3 { get; set; }
+            public string Resolution { get; set; }
+            public DateTime? CreatedTime { get; set; }
+            public DateTime? CompletedTime { get; set;}
+            public string Severity { get; set; }
+
+
+
 
 
         }
