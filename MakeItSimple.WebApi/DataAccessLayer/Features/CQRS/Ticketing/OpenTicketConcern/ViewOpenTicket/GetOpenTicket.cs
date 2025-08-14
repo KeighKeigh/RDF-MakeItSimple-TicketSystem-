@@ -970,15 +970,19 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     })
                     .ToListAsync(cancellationToken);
 
+                //var receiverPermissionList = allUserList
+                //     .Where(x => x.Permissions.Contains(TicketingConString.Receiver))
+                //     .Select(x => x.UserRoleName)
+                //     .ToList();
                 var receiverPermissionList = allUserList
                      .Where(x => x.Permissions.Contains(TicketingConString.Receiver))
                      .Select(x => x.UserRoleName)
                      .ToList();
 
-                var issueHandlerPermissionList = allUserList
-                    .Where(x => x.Permissions.Contains(TicketingConString.IssueHandler))
-                    .Select(x => x.UserRoleName)
-                    .ToList();
+                //var issueHandlerPermissionList = allUserList
+                //    .Where(x => x.Permissions.Contains(TicketingConString.IssueHandler))
+                //    .Select(x => x.UserRoleName)
+                //    .ToList();
 
                 // Pre-calculate receiver business units if needed
                 List<int> receiverBusinessUnits = new List<int>();
@@ -1003,12 +1007,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     }
                 }
 
-                // Build the base query with minimal includes
                 IQueryable<TicketConcern> ticketConcernQuery = _context.TicketConcerns
                     .AsNoTracking()
                     .Where(x => x.IsActive);
 
-                // Apply filters early to reduce dataset
                 if (!string.IsNullOrEmpty(request.Search))
                 {
                     ticketConcernQuery = ticketConcernQuery
@@ -1082,6 +1084,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         case TicketingConString.Closed:
                             ticketConcernQuery = ticketConcernQuery
                                 .Where(x => x.IsClosedApprove == true && x.RequestConcern.Is_Confirm == true && x.OnHold == null);
+                            break;
+
+
+                        case TicketingConString.DateRejected:
+                            ticketConcernQuery = ticketConcernQuery
+                                .Where(x => x.ConcernStatus == TicketingConString.DateRejected);
                             break;
 
                         default:
@@ -1188,102 +1196,102 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                 }
 
              
-                var pagedTicketIds = await ticketConcernQuery
-                    .Skip((request.PageNumber - 1) * request.PageSize)
-                    .Take(request.PageSize)
-                    .Select(x => x.Id)
-                    .ToListAsync(cancellationToken);
+                //var pagedTicketIds = await ticketConcernQuery
+                //    .Skip((request.PageNumber - 1) * request.PageSize)
+                //    .Take(request.PageSize)
+                //    .Select(x => x.Id)
+                //    .ToListAsync(cancellationToken);
 
-                var pagedTicketConcerns = await _context.TicketConcerns
-                    .AsNoTracking()
-                    .Where(x => pagedTicketIds.Contains(x.Id))
-                    .Select(x => new
-                    {
-                        x.Id,
-                        x.RequestConcernId,
-                        x.UserId,
-                        x.RequestorBy,
-                        x.TargetDate,
-                        x.IsApprove,
-                        x.OnHold,
-                        x.ConcernStatus,
-                        x.IsTransfer,
-                        x.IsClosedApprove,
-                        x.CreatedAt,
-                        x.UpdatedAt,
-                        x.Closed_At,
-                        x.TransferAt,
-                        x.IsActive,
-                        x.Remarks,
+                //var pagedTicketConcerns = await _context.TicketConcerns
+                //    .AsNoTracking()
+                //    .Where(x => pagedTicketIds.Contains(x.Id))
+                //    .Select(x => new
+                //    {
+                //        x.Id,
+                //        x.RequestConcernId,
+                //        x.UserId,
+                //        x.RequestorBy,
+                //        x.TargetDate,
+                //        x.IsApprove,
+                //        x.OnHold,
+                //        x.ConcernStatus,
+                //        x.IsTransfer,
+                //        x.IsClosedApprove,
+                //        x.CreatedAt,
+                //        x.UpdatedAt,
+                //        x.Closed_At,
+                //        x.TransferAt,
+                //        x.IsActive,
+                //        x.Remarks,
 
-                        TransferChannelId = x.RequestConcern.TransferChannelId,
-                        TransferChannelName = x.RequestConcern.TransferChannel.ChannelName,
-                        IssueHandlerName = x.User.Fullname,
-                        IssueHandlerSubUnit = x.User.SubUnit.SubUnitName,
-                        RequestorName = x.RequestorByUser.Fullname,
-                        RequestorDepartmentCode = x.RequestorByUser.Department.DepartmentCode,
-                        RequestorDepartmentName = x.RequestorByUser.Department.DepartmentName,
-                        RequestorSubUnitCode = x.RequestorByUser.SubUnit.SubUnitCode,
-                        RequestorBusinessUnitId = x.RequestorByUser.BusinessUnitId,
-                        ConcernDescription = x.RequestConcern.Concern,
-                        DateNeeded = x.RequestConcern.DateNeeded,
-                        Notes = x.RequestConcern.Notes,
-                        ContactNumber = x.RequestConcern.ContactNumber,
-                        RequestType = x.RequestConcern.RequestType,
-                        BackJobId = x.RequestConcern.BackJobId,
-                        BackJobConcern = x.RequestConcern.BackJob.Concern,
-                        ChannelId = x.RequestConcern.ChannelId,
-                        ChannelName = x.RequestConcern.Channel.ChannelName,
-                        IsConfirm = x.RequestConcern.Is_Confirm,        
-                        CompanyCode = x.RequestConcern.Company.CompanyCode,
-                        CompanyName = x.RequestConcern.Company.CompanyName,                 
-                        BusinessUnitCode = x.RequestConcern.BusinessUnit.BusinessCode,
-                        BusinessUnitName = x.RequestConcern.BusinessUnit.BusinessName,    
-                        UnitCode = x.RequestConcern.Unit.UnitCode,
-                        UnitName = x.RequestConcern.Unit.UnitName,
-                        LocationCode = x.RequestConcern.Location.LocationCode,
-                        LocationName = x.RequestConcern.Location.LocationName,
-                        AddedByName = x.AddedByUser.Fullname,
-                        ModifiedByName = x.ModifiedByUser.Fullname,    
-                        MaxTransactionDate = x.ticketHistories.Any() ? x.ticketHistories.Max(h => h.TransactionDate) : null
-                    })
-                    .ToListAsync(cancellationToken);
+                //        TransferChannelId = x.RequestConcern.TransferChannelId,
+                //        TransferChannelName = x.RequestConcern.TransferChannel.ChannelName,
+                //        IssueHandlerName = x.User.Fullname,
+                //        IssueHandlerSubUnit = x.User.SubUnit.SubUnitName,
+                //        RequestorName = x.RequestorByUser.Fullname,
+                //        RequestorDepartmentCode = x.RequestorByUser.Department.DepartmentCode,
+                //        RequestorDepartmentName = x.RequestorByUser.Department.DepartmentName,
+                //        RequestorSubUnitCode = x.RequestorByUser.SubUnit.SubUnitCode,
+                //        RequestorBusinessUnitId = x.RequestorByUser.BusinessUnitId,
+                //        ConcernDescription = x.RequestConcern.Concern,
+                //        DateNeeded = x.RequestConcern.DateNeeded,
+                //        Notes = x.RequestConcern.Notes,
+                //        ContactNumber = x.RequestConcern.ContactNumber,
+                //        RequestType = x.RequestConcern.RequestType,
+                //        BackJobId = x.RequestConcern.BackJobId,
+                //        BackJobConcern = x.RequestConcern.BackJob.Concern,
+                //        ChannelId = x.RequestConcern.ChannelId,
+                //        ChannelName = x.RequestConcern.Channel.ChannelName,
+                //        IsConfirm = x.RequestConcern.Is_Confirm,        
+                //        CompanyCode = x.RequestConcern.Company.CompanyCode,
+                //        CompanyName = x.RequestConcern.Company.CompanyName,                 
+                //        BusinessUnitCode = x.RequestConcern.BusinessUnit.BusinessCode,
+                //        BusinessUnitName = x.RequestConcern.BusinessUnit.BusinessName,    
+                //        UnitCode = x.RequestConcern.Unit.UnitCode,
+                //        UnitName = x.RequestConcern.Unit.UnitName,
+                //        LocationCode = x.RequestConcern.Location.LocationCode,
+                //        LocationName = x.RequestConcern.Location.LocationName,
+                //        AddedByName = x.AddedByUser.Fullname,
+                //        ModifiedByName = x.ModifiedByUser.Fullname,    
+                //        MaxTransactionDate = x.ticketHistories.Any() ? x.ticketHistories.Max(h => h.TransactionDate) : null
+                //    })
+                //    .ToListAsync(cancellationToken);
 
                 
-                var requestConcernIds = pagedTicketConcerns.Select(x => x.RequestConcernId).ToList();
+                //var requestConcernIds = pagedTicketConcerns.Select(x => x.RequestConcernId).ToList();
 
                
-                var ticketCategories = await _context.TicketCategories
-                    .AsNoTracking()
-                    .Where(tc => requestConcernIds.Contains(tc.RequestConcernId))
-                    .Select(tc => new
-                    {
-                        tc.RequestConcernId,
-                        tc.Id,
-                        tc.CategoryId,
-                        CategoryDescription = tc.Category.CategoryDescription
-                    }).Distinct()
-                    .ToListAsync(cancellationToken);
+                //var ticketCategories = await _context.TicketCategories
+                //    .AsNoTracking()
+                //    .Where(tc => requestConcernIds.Contains(tc.RequestConcernId))
+                //    .Select(tc => new
+                //    {
+                //        tc.RequestConcernId,
+                //        tc.Id,
+                //        tc.CategoryId,
+                //        CategoryDescription = tc.Category.CategoryDescription
+                //    }).Distinct()
+                //    .ToListAsync(cancellationToken);
 
-                var ticketSubCategories = await _context.TicketSubCategories
-                    .AsNoTracking()
-                    .Where(tsc => requestConcernIds.Contains(tsc.RequestConcernId))
-                    .Select(tsc => new
-                    {
-                        tsc.RequestConcernId,
-                        tsc.Id,
-                        tsc.SubCategoryId,
-                        SubCategoryDescription = tsc.SubCategory.SubCategoryDescription
-                    })
-                    .ToListAsync(cancellationToken);
+                //var ticketSubCategories = await _context.TicketSubCategories
+                //    .AsNoTracking()
+                //    .Where(tsc => requestConcernIds.Contains(tsc.RequestConcernId))
+                //    .Select(tsc => new
+                //    {
+                //        tsc.RequestConcernId,
+                //        tsc.Id,
+                //        tsc.SubCategoryId,
+                //        SubCategoryDescription = tsc.SubCategory.SubCategoryDescription
+                //    })
+                //    .ToListAsync(cancellationToken);
 
                
-                var closingTickets = new List<dynamic>(); 
-                var ticketOnHolds = new List<dynamic>();  
-                var transferTickets = new List<dynamic>(); 
+                //var closingTickets = new List<dynamic>(); 
+                //var ticketOnHolds = new List<dynamic>();  
+                //var transferTickets = new List<dynamic>(); 
 
 
-                var results = ticketConcernQuery
+                var results = await ticketConcernQuery
                     .Select(x => new GetOpenTicketResult
                     {
 
@@ -1297,6 +1305,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                           TicketingConString.Delay : null,
                         TicketConcernId = x.Id,
                         RequestConcernId = x.RequestConcernId,
+                        Severity = x.RequestConcern.Severity,
+                        CompanyId = x.RequestConcern.CompanyId,
+                        BusinessUnitId = x.RequestConcern.BusinessUnitId,
+                        DepartmentId = x.RequestConcern.DepartmentId,
+                        UnitId = x.RequestConcern.UnitId,
+                        SubUnitid = x.RequestConcern.SubUnitId,
+                        LocationId = x.RequestConcern.LocationId,
                         Concern_Description = x.RequestConcern.Concern,
                         Company_Code = x.RequestConcern.Company.CompanyCode,
                         Company_Name = x.RequestConcern.Company.CompanyName,
@@ -1337,6 +1352,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         Back_Job_Concern = x.RequestConcern.BackJob.Concern,
                         ChannelId = x.RequestConcern.ChannelId,
                         Channel_Name = x.RequestConcern.Channel.ChannelName,
+                        ServiceProviderId = x.RequestConcern.ServiceProviderId,
+                        ServiceProviderName = x.RequestConcern.ServiceProvider.ServiceProviderName,
                         TransferChannelId = x.RequestConcern.TransferChannelId,
                         Transfer_Channel_Name = x.RequestConcern.TransferChannel.ChannelName,
                         UserId = x.UserId,
@@ -1490,38 +1507,38 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                         
                         Aging_Days = x.RequestConcern.Is_Confirm == null ? null : EF.Functions.DateDiffDay(x.DateApprovedAt.Value.Date, x.Closed_At.Value.Date) <= 0 ? 0 : EF.Functions.DateDiffDay(x.DateApprovedAt.Value.Date, x.Closed_At.Value.Date )
 
-                    });
+                    }).ToListAsync();
 
-                return new PagedList<GetOpenTicketResult>(results.ToList(), totalCount, request.PageNumber, request.PageSize);
+                return new PagedList<GetOpenTicketResult>(results, totalCount, request.PageNumber, request.PageSize);
             }
 
-            private static string GetSimplifiedTicketStatus(dynamic x, Guid? userId)
-            {
-                if (x.IsApprove == false && x.OnHold == null)
-                    return TicketingConString.PendingRequest;
+            //private static string GetSimplifiedTicketStatus(dynamic x, Guid? userId)
+            //{
+            //    if (x.IsApprove == false && x.OnHold == null)
+            //        return TicketingConString.PendingRequest;
 
-                if (x.IsApprove == true && x.IsTransfer != false && x.IsClosedApprove == null && x.OnHold == null)
-                    return TicketingConString.OpenTicket;
+            //    if (x.IsApprove == true && x.IsTransfer != false && x.IsClosedApprove == null && x.OnHold == null)
+            //        return TicketingConString.OpenTicket;
 
-                if (x.OnHold == false)
-                    return TicketingConString.ForOnHold;
+            //    if (x.OnHold == false)
+            //        return TicketingConString.ForOnHold;
 
-                if (x.OnHold == true)
-                    return TicketingConString.OnHold;
+            //    if (x.OnHold == true)
+            //        return TicketingConString.OnHold;
 
-                if (x.IsClosedApprove == false && x.OnHold == null)
-                    return TicketingConString.ForClosing;
+            //    if (x.IsClosedApprove == false && x.OnHold == null)
+            //        return TicketingConString.ForClosing;
 
-                if (x.IsClosedApprove == true && x.IsConfirm == null && x.OnHold == null)
-                    return TicketingConString.NotConfirm;
+            //    if (x.IsClosedApprove == true && x.IsConfirm == null && x.OnHold == null)
+            //        return TicketingConString.NotConfirm;
 
-                if (x.IsClosedApprove == true && x.IsConfirm == true && x.OnHold == null)
-                    return TicketingConString.Closed;
+            //    if (x.IsClosedApprove == true && x.IsConfirm == true && x.OnHold == null)
+            //        return TicketingConString.Closed;
 
                 
 
-                return "Unknown";
-            }
+            //    return "Unknown";
+            //}
         }
     }
 }

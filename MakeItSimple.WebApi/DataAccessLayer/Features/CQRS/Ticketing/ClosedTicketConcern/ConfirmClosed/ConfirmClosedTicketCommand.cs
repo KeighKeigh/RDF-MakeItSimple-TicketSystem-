@@ -7,8 +7,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
     {
         public class ConfirmClosedTicketCommand : IRequest<Result>
         {
-            public int? RequestConcernId { get; set; }
-            public Guid? Transacted_By { get; set; }
+
+            public List<ConfirmTicketRequest> ConfirmTicketRequests { get; set; }
+            public class ConfirmTicketRequest
+            {
+                public int? RequestConcernId { get; set; }
+            }
+
+        public Guid? Transacted_By { get; set; }
 
         }
     }

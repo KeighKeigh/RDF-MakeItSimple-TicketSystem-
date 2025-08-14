@@ -63,12 +63,21 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
 
             public int? ChannelId { get; set; }
             public string Channel_Name { get; set; }
+            public int? ServiceProviderId { get; set; }
+            public string ServiceProviderName { get; set; }
             public int? TransferChannelId { get; set; }
             public string Transfer_Channel_Name { get; set; }
             public Guid? UserId { get; set; }
             public string Issue_Handler { get; set; }
             public DateTime? Target_Date { get; set; }
 
+            public string Severity { get; set; }
+            public int? CompanyId { get; set; }
+            public int? BusinessUnitId { get; set; }
+            public int? DepartmentId { get; set; }
+            public int? UnitId { get; set; }
+            public int? SubUnitid { get; set; }
+            public int? LocationId { get; set; }
             public string Ticket_Status { get; set; }
             public string Concern_Type { get; set; }
             public string Added_By { get; set; }

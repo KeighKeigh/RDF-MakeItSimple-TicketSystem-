@@ -25,6 +25,7 @@
             public int ListOfOpenTicketNotif { get; set; }
             public int ListOfDelayedTicketNotif { get; set; }
             public int ApprovalDateNotif { get; set;}
+            public int DateRejectedNotif { get; set; }
             
 
         }

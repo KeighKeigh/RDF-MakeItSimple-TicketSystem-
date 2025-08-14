@@ -62,20 +62,48 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                           TicketId = x.ClosingTicket.TicketConcernId,
                           ConcernDescription = x.ClosingTicket.TicketConcern.RequestConcern.Concern,
                           x.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
-                          StartDate = x.ClosingTicket.TicketConcern.DateApprovedAt
+                          StartDate = x.ClosingTicket.TicketConcern.DateApprovedAt,
+                          ServiceProviderId = x.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId,
+                          AssignTo = x.ClosingTicket.TicketConcern.AssignTo,
+                          ChannelId = x.ClosingTicket.TicketConcern.RequestConcern.ChannelId,
+                          ClosedAt = x.ClosingTicket.TicketConcern.Closed_At
                       });
+
+                
+
+                var closingTicket = ticketQuery
+                        .Select(x => new
+                        {
+                            x.TargetDate.Value.Year,
+                            x.TargetDate.Value.Month,
+                            x.TargetDate,
+                            ClosedDate = x.Closed_At,
+                            TechnicianName = x.User.Fullname,
+                            TicketId = x.Id,
+                            ConcernDescription = x.RequestConcern.Concern,
+                            x.RequestConcern.Channel.ChannelName,
+                            StartDate = x.DateApprovedAt,
+                            ServiceProviderId = x.RequestConcern.ServiceProviderId,
+                            AssignTo = x.AssignTo,
+                            ChannelId = x.RequestConcern.ChannelId,
+                            ClosedAt = x.Closed_At
+
+                        });
+
+                var combinedTickets = closingTicket
+                    .Concat(closingTicketTechnician);
 
                 if (request.ServiceProvider is not null)
                 {
-                    ticketQuery = ticketQuery.Where(x => x.RequestConcern.ServiceProviderId == request.ServiceProvider);
+                    combinedTickets = combinedTickets.Where(x => x.ServiceProviderId == request.ServiceProvider);
 
                     if (request.Channel is not null)
                     {
-                        ticketQuery = ticketQuery.Where(x => x.RequestConcern.ChannelId == request.Channel);
+                        combinedTickets = combinedTickets.Where(x => x.ChannelId == request.Channel);
 
                         if (request.UserId is not null)
                         {
-                            ticketQuery = ticketQuery.Where(x => x.UserId == request.UserId);
+                            combinedTickets = combinedTickets.Where(x => x.AssignTo == request.UserId);
                         }
                     }
                 }
@@ -85,14 +113,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                     switch (request.Remarks)
                     {
                         case TicketingConString.OnTime:
-                            ticketQuery = ticketQuery
-                                .Where(x => x.Closed_At != null && x.TargetDate.Value > x.Closed_At.Value);
+                            combinedTickets = combinedTickets
+                                .Where(x => x.ClosedAt != null && x.TargetDate.Value.Date > x.ClosedAt.Value.Date);
 
                             break;
 
                         case TicketingConString.Delay:
-                            ticketQuery = ticketQuery
-                                .Where(x => x.Closed_At != null && x.TargetDate.Value < x.Closed_At.Value);
+                            combinedTickets = combinedTickets
+                                .Where(x => x.ClosedAt != null && x.TargetDate.Value.Date < x.ClosedAt.Value.Date);
                             break;
 
                         default:
@@ -109,25 +137,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                         || x.RequestConcern.Concern.Contains(request.Search)
                         || x.RequestConcern.Channel.ChannelName.Contains(request.Search));
                 }
-
-                var closingTicket = ticketQuery
-                        .Select(x => new
-                        {
-                            x.TargetDate.Value.Year,
-                            x.TargetDate.Value.Month,
-                            x.TargetDate,
-                            ClosedDate = x.Closed_At,
-                            TechnicianName = x.User.Fullname,
-                            TicketId = x.Id,
-                            ConcernDescription = x.RequestConcern.Concern,
-                            x.RequestConcern.Channel.ChannelName,
-                            StartDate = x.DateApprovedAt,
-                            
-
-                        });
-
-                var combinedTickets = closingTicket
-                    .Concat(closingTicketTechnician);
 
                 var results = combinedTickets.Select(x => new Reports
                 {

@@ -15,6 +15,7 @@
             public string Channel_Name { get; set; }
             public Guid? UserId { get; set; }
             public string Fullname { get; set; }
+            public string TicketStatus { get; set; }
 
 
 

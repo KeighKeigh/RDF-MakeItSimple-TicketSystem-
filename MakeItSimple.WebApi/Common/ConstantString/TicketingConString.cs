@@ -103,6 +103,7 @@ namespace MakeItSimple.WebApi.Common.ConstantString
         public const string ReDate = "Re-Date";
         public const string Closed = "Closed";
         public const string Transfer = "Transfer";
+        public const string DateRejected = "Date Rejected";
         public const string Request = "Request Concern";
         public const string NotConfirm = "For Confirmation";
         public const string Approve = "Approved";

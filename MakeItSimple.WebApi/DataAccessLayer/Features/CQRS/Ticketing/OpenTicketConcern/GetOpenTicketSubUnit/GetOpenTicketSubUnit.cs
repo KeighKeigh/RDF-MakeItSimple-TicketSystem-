@@ -25,7 +25,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                 var dateToday = DateTime.Today;
 
                 IQueryable<TicketConcern> openTicketsQuery = _context.TicketConcerns
-                    .Where(x => x.ConcernStatus == TicketingConString.OnGoing && x.RequestConcern.IsDone != true)
+                    .Where(x => x.ConcernStatus == TicketingConString.OnGoing && x.RequestConcern.IsDone != true && x.OnHold != true)
                     .AsNoTrackingWithIdentityResolution()
                     .AsSplitQuery();
 
@@ -41,7 +41,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
 
                 }
 
-                
+                IQueryable<ClosingTicket> isClosingTIcket = _context.ClosingTickets.Where(x => x.IsClosing == false && x.IsRejectClosed == false).AsNoTrackingWithIdentityResolution().AsSplitQuery();
+
+                IQueryable<TicketOnHold> onHoldTicket = _context.TicketOnHolds.Where(x => x.IsHold == false && x.IsRejectOnHold == false).AsNoTrackingWithIdentityResolution().AsSplitQuery();
+
+                IQueryable<TransferTicketConcern> transferTIcket = _context.TransferTicketConcerns.Where(x => x.IsTransfer == false && x.IsRejectTransfer == false).AsNoTrackingWithIdentityResolution().AsSplitQuery();
+
 
                 if (openTicketsQuery.Any())
                 {
@@ -130,6 +135,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                         Channel_Name = x.RequestConcern.Channel.ChannelName,
                         UserId = x.UserId,
                         Fullname = x.User.Fullname,
+                        TicketStatus = isClosingTIcket.Any(closing => closing.TicketConcernId == x.Id ) ? TicketingConString.ForClosing
+                        : onHoldTicket.Any(hold => hold.TicketConcernId == x.Id) ? TicketingConString.ForOnHold
+                        : transferTIcket.Any(trans => trans.TicketConcernId == x.Id) ? TicketingConString .ForTransfer
+                        : x.ConcernStatus,
 
                         GetOpenTicketSubUnitCategories = x.RequestConcern.TicketCategories
                         .Select(t => new GetOpenTicketSubUnitResult.GetOpenTicketSubUnitCategory

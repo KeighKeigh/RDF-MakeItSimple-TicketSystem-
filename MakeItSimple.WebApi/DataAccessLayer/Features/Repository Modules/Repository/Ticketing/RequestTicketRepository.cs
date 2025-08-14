@@ -50,7 +50,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .TicketConcerns
                 .Include(x => x.User)
                 .Include(x => x.RequestorByUser)
-                .FirstOrDefaultAsync(x => x.RequestConcernId == id);   
+                .FirstOrDefaultAsync(x => x.Id == id);   
         }
 
         public async Task UpdateTicketConcerns(TicketConcern ticketConcern, CancellationToken cancellationToken)
@@ -311,16 +311,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 update.ConcernStatus = ticketConcern.ConcernStatus;
 
             }
-            if (update.IsAssigned != ticketConcern.IsAssigned)
-            {
-                update.IsAssigned = ticketConcern.IsAssigned;
 
-            }
-            if (update.AssignTo != ticketConcern.AssignTo)
-            {
-                update.AssignTo = ticketConcern.AssignTo;
-
-            }
             if (update.ConcernStatus != ticketConcern.ConcernStatus && ticketConcern.ConcernStatus is not null)
             {
                 update.ConcernStatus = ticketConcern.ConcernStatus;
@@ -378,14 +369,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
             if (update.TargetDate != requestConcern.TargetDate)
             {
                 update.TargetDate = requestConcern.TargetDate;
-            }
-            if (update.AssignTo != requestConcern.AssignTo)
-            {
-                update.AssignTo = requestConcern.AssignTo;
-            }
-            if (update.ChannelId != requestConcern.ChannelId)
-            {
-                update.ChannelId = requestConcern.ChannelId;
             }
 
             if (isChange)

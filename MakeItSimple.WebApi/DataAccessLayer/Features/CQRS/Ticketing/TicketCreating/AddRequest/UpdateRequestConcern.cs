@@ -134,7 +134,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                             ApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday : null,
                             ConcernStatus = command.TargetDate.Value.Date <= approvedDate.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
                             AssignTo = command.AssignTo,
-                            IsDateApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : null,
+                            IsDateApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
                             DateApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday : null,
                             ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.UserId : null,
                         };

@@ -24,41 +24,43 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
             public async Task<Result> Handle(ConfirmClosedTicketCommand command, CancellationToken cancellationToken)
             {
 
-                var requestConcernExist = await unitOfWork.RequestTicket
-                    .RequestConcernExist(command.RequestConcernId);
-
-                //var requestorConfirmation = await unitOfWork.ClosingTicket.RequestorConfirmation(command.RequestConcernId, command.Transacted_By);
-                if (requestConcernExist is null)
-                    return Result.Failure(TicketRequestError.RequestConcernIdNotExist());
-
-                if (requestConcernExist.TicketConcerns.First().IsClosedApprove is not true)
-                    return Result.Failure(TicketRequestError.TicketAlreadyReject());
-
-                if (requestConcernExist.Is_Confirm is true)
-                    return Result.Failure(TicketRequestError.ConfirmAlready());
-
-                var ticketConcernExist = await unitOfWork.RequestTicket
-                    .TicketConcernByRequest(command.RequestConcernId);
-
-                await unitOfWork.ClosingTicket.ConfirmClosingTicket(command.RequestConcernId);
-
-                await unitOfWork.ClosingTicket.ConfirmTicketHistory(ticketConcernExist.Id);
-
-                var addNewTicketTransactionNotification = new TicketTransactionNotification
+                foreach (var confirm in command.ConfirmTicketRequests)
                 {
+                    var requestConcernExist = await unitOfWork.RequestTicket
+                        .RequestConcernExist(confirm.RequestConcernId);
 
-                    Message = $"Ticket number {ticketConcernExist.Id} has been closed",
-                    AddedBy = command.Transacted_By.Value,
-                    Created_At = DateTime.Now,
-                    ReceiveBy = ticketConcernExist.UserId.Value,
-                    Modules = PathConString.IssueHandlerConcerns,
-                    Modules_Parameter = PathConString.Closed,
-                    PathId = ticketConcernExist.Id
+                    //var requestorConfirmation = await unitOfWork.ClosingTicket.RequestorConfirmation(command.RequestConcernId, command.Transacted_By);
+                    if (requestConcernExist is null)
+                        return Result.Failure(TicketRequestError.RequestConcernIdNotExist());
 
-                };
+                    if (requestConcernExist.TicketConcerns.First().IsClosedApprove is not true)
+                        return Result.Failure(TicketRequestError.TicketAlreadyReject());
 
-                await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification,cancellationToken);
-               
+                    if (requestConcernExist.Is_Confirm is true)
+                        return Result.Failure(TicketRequestError.ConfirmAlready());
+
+                    var ticketConcernExist = await unitOfWork.RequestTicket
+                        .TicketConcernByRequest(confirm.RequestConcernId);
+
+                    await unitOfWork.ClosingTicket.ConfirmClosingTicket(confirm.RequestConcernId);
+
+                    await unitOfWork.ClosingTicket.ConfirmTicketHistory(ticketConcernExist.Id);
+
+                    var addNewTicketTransactionNotification = new TicketTransactionNotification
+                    {
+
+                        Message = $"Ticket number {ticketConcernExist.Id} has been closed",
+                        AddedBy = command.Transacted_By.Value,
+                        Created_At = DateTime.Now,
+                        ReceiveBy = ticketConcernExist.UserId.Value,
+                        Modules = PathConString.IssueHandlerConcerns,
+                        Modules_Parameter = PathConString.Closed,
+                        PathId = ticketConcernExist.Id
+
+                    };
+
+                    await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification, cancellationToken);
+                }
                 await unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result.Success();
             }

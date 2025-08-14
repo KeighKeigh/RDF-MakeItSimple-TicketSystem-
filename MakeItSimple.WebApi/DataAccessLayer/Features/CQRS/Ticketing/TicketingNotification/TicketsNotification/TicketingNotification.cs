@@ -47,6 +47,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                 var forApprovalOnHoldNotif = new int();
                 var openTicketsForApproverNotif = new int();
                 var delayTicketsForApproverNotif = new int();
+                var dateRejectedNotif = new int();
 
 
                 var dateToday = DateTime.Today;
@@ -120,6 +121,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                         x.AssignTo,
                         x.IsDateApproved,
                         x.DateApprovedAt,
+                        x.ConcernStatus,
                         
                         
 
@@ -241,9 +243,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                          .Count();
 
                     ApprovedDateNotif = ticketConcernQuery
-                         .Where(x => x.IsDateApproved == null 
-                         && x.OnHold == null)
+                         .Where(x => x.IsDateApproved == false 
+                         && x.OnHold == null && x.ConcernStatus != TicketingConString.DateRejected)
                          .Count();
+
+                    dateRejectedNotif = ticketConcernQuery
+                        .Where(x => x.ConcernStatus == TicketingConString.DateRejected).Count();
 
                     forTransferNotif = transferQuery
                          .Where(x => x.TransferBy == request.UserId)
@@ -488,7 +493,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     ForApprovalTargetDate = ForApprovalTargetDate,
                     ApprovalDateNotif = ApprovedDateNotif,
                     ListOfOpenTicketNotif = openTicketsForApproverNotif,
-                    ListOfDelayedTicketNotif = delayTicketsForApproverNotif
+                    ListOfDelayedTicketNotif = delayTicketsForApproverNotif,
+                    DateRejectedNotif = dateRejectedNotif,
                 };
 
 

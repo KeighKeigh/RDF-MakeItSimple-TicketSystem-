@@ -245,13 +245,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         }
         //kk
 
-        //public async Task RequestorConfirmation(int? id, Guid? requestor)
-        //{
-        //    var requestApprover = await context.TicketConcerns
-        //        .Where(x => x.RequestConcernId == id && x.AddedBy == requestor).FirstOrDefaultAsync();
+        public async Task RequestorConfirmation(int? id, Guid? requestor)
+        {
+            var requestApprover = await context.TicketConcerns
+                .Where(x => x.RequestConcernId == id && x.AddedBy == requestor).FirstOrDefaultAsync();
 
-            
-        //}
+
+        }
 
         public async Task RejectClosingTicket(ClosingTicket closingTicket)
         {

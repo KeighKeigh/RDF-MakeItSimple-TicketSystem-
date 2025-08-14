@@ -101,7 +101,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         Ticket_Number = x.TicketId,
                         Description = x.ConcernDescription,
                         Target_Date = x.TargetDate.Value.ToString("MM-dd-yyyy"),
-                        Actual = x.ClosedAt.HasValue ? x.ClosedAt.Value.ToString("MM-dd-yyyy") : "N/A",
+                        Actual = x.ClosedAt.ToString(),
                         Varience = EF.Functions.DateDiffDay(x.TargetDate.Value, x.ClosedAt.Value),
                         Efficeincy = x.ClosedAt.Value.Date <= x.TargetDate.Value.Date ? "100 %" : "50 %",
                         Status = TicketingConString.Closed,
@@ -139,13 +139,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                     {
                         case TicketingConString.OnTime:
                             closing = closing
-                                .Where(x => x.Actual != null && x.Target_Date_DateTime > x.Actual_Date_DateTime)
+                                .Where(x => x.Actual != null && x.Target_Date_DateTime.Value.Date > x.Actual_Date_DateTime.Value.Date)
                                 .ToList();
                             break;
 
                         case TicketingConString.Delay:
                             closing = closing
-                                .Where(x => x.Actual != null && x.Target_Date_DateTime < x.Actual_Date_DateTime)
+                                .Where(x => x.Actual != null && x.Target_Date_DateTime.Value.Date < x.Actual_Date_DateTime.Value.Date)
                                 .ToList();
                             break;
 

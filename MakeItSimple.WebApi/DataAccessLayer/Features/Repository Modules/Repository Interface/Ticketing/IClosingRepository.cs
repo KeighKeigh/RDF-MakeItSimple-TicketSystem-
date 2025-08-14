@@ -35,8 +35,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         Task ApprovedRequestConcernByClosing(RequestConcern requestConcern, CancellationToken cancellation);
         Task ConfirmClosingTicket(int? id);
         Task ConfirmTicketHistory(int? id);
-        //Task RequestorConfirmation(int? id, Guid? requestor);
-        
+        Task RequestorConfirmation(int? id, Guid? requestor);
+
 
 
         Task NextApproverUser(int? id, Guid? userId);

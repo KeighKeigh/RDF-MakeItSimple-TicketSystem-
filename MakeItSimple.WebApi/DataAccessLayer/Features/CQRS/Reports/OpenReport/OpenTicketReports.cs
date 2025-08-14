@@ -73,6 +73,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
                         StartDate = t.DateApprovedAt,
                         ServiceProvider = t.RequestConcern.ServiceProviderId,
                         AssigTo = t.RequestConcern.AssignToUser.Fullname,
+                        AssignTo = t.AssignTo,
                         
 
                         
@@ -90,7 +91,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport
 
                         if (request.UserId is not null)
                         {
-                            results = results.Where(x => x.Personnel_Id == request.UserId);
+                            results = results.Where(x => x.AssignTo == request.UserId);
                         }
                     }
                 }

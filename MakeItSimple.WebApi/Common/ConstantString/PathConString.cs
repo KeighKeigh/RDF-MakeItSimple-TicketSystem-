@@ -28,6 +28,7 @@ namespace MakeItSimple.WebApi.Common.ConstantString
         public const string OnHold = "On-Hold";
         public const string ForClosingTicket = "For Closing Ticket";
         public const string Closed = "Closed";
+        public const string RejectDate = "Date Rejected";
 
         public const string ForDateApproval = "For Date Approval";
 

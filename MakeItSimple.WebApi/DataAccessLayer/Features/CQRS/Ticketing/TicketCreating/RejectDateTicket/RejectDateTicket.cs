@@ -51,11 +51,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                     {
                         Id = approvalDateExist.TicketConcern.RequestConcernId.Value,
                         TargetDate = null,
-                        ConcernStatus = TicketingConString.ForApprovalTicket,
+                        ConcernStatus = TicketingConString.DateRejected,
                         AssignTo = null,
-                        ChannelId = null
-                        
-                        
+
+
                     };
 
                     await unitOfWork.RequestTicket.UpdateRequestConcerns(removeChannel, cancellationToken);
@@ -65,9 +64,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                         Id = approvalDateExist.TicketConcernId,
                         AssignTo = null,
                         IsAssigned = false,
-                        ConcernStatus = TicketingConString.ForApprovalTicket,
+                        ConcernStatus = TicketingConString.DateRejected,
                         TargetDate = null,
-                        
+
                     };
 
                     await unitOfWork.RequestTicket.UpdateTicketConcernss(removeOpenTicket, cancellationToken);
