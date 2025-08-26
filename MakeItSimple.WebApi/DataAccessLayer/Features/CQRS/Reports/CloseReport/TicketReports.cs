@@ -32,7 +32,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                     .Include(x => x.ModifiedByUser)
                     .Include(x => x.RequestorByUser)
                     .Include(x => x.User)
-                    .ThenInclude(x => x.SubUnit)
                     .Include(x => x.ClosingTickets)
                     .ThenInclude(x => x.TicketAttachments)
                     .Include(x => x.TransferTicketConcerns)

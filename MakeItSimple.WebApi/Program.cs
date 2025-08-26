@@ -142,6 +142,7 @@ builder.Services.AddAuthentication(authOptions =>
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddLazyCache();
+builder.Services.AddHttpClient();
 //builder.Services.AddSignalR();
 
 

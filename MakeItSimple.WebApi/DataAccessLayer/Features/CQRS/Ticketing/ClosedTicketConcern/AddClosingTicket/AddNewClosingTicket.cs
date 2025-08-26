@@ -5,6 +5,7 @@ using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work;
+using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTicketConcern.AddClosingTicket
 {
@@ -12,10 +13,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
     public class Handler : IRequestHandler<AddNewClosingTicketCommand, Result>
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly MisDbContext _context;
 
-        public Handler(IUnitOfWork unitOfWork)
+        public Handler(IUnitOfWork unitOfWork, MisDbContext context)
         {
             this.unitOfWork = unitOfWork;
+            this._context = context;
         }
 
         public async Task<Result> Handle(AddNewClosingTicketCommand command, CancellationToken cancellationToken)
@@ -57,11 +60,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
             }
             else
             {
-                var approverList = await unitOfWork.ClosingTicket
-                    .ApproverBySubUnitList(ticketConcernExist.User.SubUnitId);
+                //var approverList = await unitOfWork.ClosingTicket
+                //    .ApproverBySubUnitList(ticketConcernExist.User.SubUnitId);
 
-                if (!approverList.Any())
-                    return Result.Failure(ClosingTicketError.NoApproverHasSetup());
+                //if (!approverList.Any())
+                //    return Result.Failure(ClosingTicketError.NoApproverHasSetup());
 
                 foreach (var category in command.ClosingTicketCategories)
                 {
@@ -82,15 +85,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
                         return Result.Failure(TicketRequestError.SubCategoryNotExist());
                 }
 
-                var approverUser = approverList
-                    .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
+                //var approverUser = approverList
+                //    .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
+
+                var approver = await _context.ApproverUsers.Where(x => x.UserId == ticketConcernExist.AssignTo).FirstOrDefaultAsync();
 
                 var addNewClosingConcern = new ClosingTicket
                 {
                     TicketConcernId = ticketConcernExist.Id,
                     Resolution = command.Resolution,
                     IsClosing = false,
-                    TicketApprover = approverUser.UserId,
+                    TicketApprover = approver.ApproverId,
                     AddedBy = command.Added_By,
                     Notes = command.Notes,
                 };
@@ -101,14 +106,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
 
                 closingTicketExist = addNewClosingConcern;
 
-                foreach (var approver in approverList)
-                {
+                //foreach (var approver in approverList)
+                //{
                     var addNewApprover = new ApproverTicketing
                     {
                         TicketConcernId = ticketConcernExist.Id,
                         ClosingTicketId = closingTicketExist.Id,
-                        UserId = approver.UserId,
-                        ApproverLevel = approver.ApproverLevel,
+                        UserId = approver.ApproverId,
                         AddedBy = command.Added_By,
                         CreatedAt = DateTime.Now,
                         Status = TicketingConString.CloseTicket,
@@ -116,7 +120,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
 
                     await unitOfWork.ClosingTicket.CreateApproval(addNewApprover, cancellationToken);
 
-                }
+                //}
 
                 var addTicketHistory = new TicketHistory
                 {
@@ -129,26 +133,25 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
 
                 await unitOfWork.RequestTicket.CreateTicketHistory(addTicketHistory, cancellationToken);
 
-                foreach (var approver in approverList)
-                {
-                    var approverLevel = approver.ApproverLevel == 1 ? $"{approver.ApproverLevel}st"
-                           : approver.ApproverLevel == 2 ? $"{approver.ApproverLevel}nd"
-                           : approver.ApproverLevel == 3 ? $"{approver.ApproverLevel}rd"
-                           : $"{approver.ApproverLevel}th";
+                //foreach (var approver in approverList)
+                //{
+                    //var approverLevel = approver.ApproverLevel == 1 ? $"{approver.ApproverLevel}st"
+                    //       : approver.ApproverLevel == 2 ? $"{approver.ApproverLevel}nd"
+                    //       : approver.ApproverLevel == 3 ? $"{approver.ApproverLevel}rd"
+                    //       : $"{approver.ApproverLevel}th";
 
                     var addApproverHistory = new TicketHistory
                     {
                         TicketConcernId = ticketConcernExist.Id,
-                        TransactedBy = approver.UserId,
+                        TransactedBy = approver.ApproverId,
                         TransactionDate = DateTime.Now,
                         Request = TicketingConString.Approval,
-                        Status = $"{TicketingConString.CloseForApproval} {approverLevel} Approver",
-                        Approver_Level = approver.ApproverLevel,
+                        Status = $"{TicketingConString.CloseForApproval}",
                     };
 
                     await unitOfWork.RequestTicket.CreateTicketHistory(addApproverHistory, cancellationToken);
 
-                }
+                //}
 
                 var businessUnitList = await unitOfWork.BusinessUnit
                          .BusinessUnitExist(ticketConcernExist.User.BusinessUnitId);

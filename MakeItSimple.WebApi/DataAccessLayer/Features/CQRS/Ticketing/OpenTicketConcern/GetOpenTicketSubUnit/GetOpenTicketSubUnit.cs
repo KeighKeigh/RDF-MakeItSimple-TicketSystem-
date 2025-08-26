@@ -59,11 +59,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                             x.Permissions
                         }).ToListAsync();
 
-                    var receiverPermissionList = allUserList
-                        .Where(x => x.Permissions
-                        .Contains(TicketingConString.Receiver))
-                        .Select(x => x.UserRoleName)
-                        .ToList();
 
                     var approverPermissionList = allUserList
                         .Where(x => x.Permissions
@@ -96,7 +91,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                                     .Where(x => x.IsApprove == true)
                                     .Select(x => new
                                     {
-                                        x.ApproverLevel,
+                                        //x.ApproverLevel,
                                         x.IsApprove,
                                         x.ApproverDateId,
                                         x.UserId,

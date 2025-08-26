@@ -122,7 +122,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                         };
                         await unitOfWork.RequestTicket.UpdateRequestConcern(updateRequest, cancellationToken);
 
-                        var handlerIds = await context.Approvers.Where(x => x.SubUnitId == updateRequest.SubUnitId).FirstOrDefaultAsync();
+                        var handlerIds = await context.ApproverUsers.Where(x => x.UserId == command.AssignTo).FirstOrDefaultAsync();
                         var updateTicketConcern = new TicketConcern
                         {
                             Id = ticketConcernIdExist.Id,
@@ -130,13 +130,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                             UserId = command.AssignTo,
                             IsApprove = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
                             IsAssigned = true,
-                            ApprovedBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.UserId : null,
+                            ApprovedBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.ApproverId : null,
                             ApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday : null,
                             ConcernStatus = command.TargetDate.Value.Date <= approvedDate.Date ? TicketingConString.OnGoing : TicketingConString.ForApprovalTicket,
                             AssignTo = command.AssignTo,
                             IsDateApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
                             DateApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday : null,
-                            ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.UserId : null,
+                            ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.ApproverId : null,
                         };
 
                         await unitOfWork.RequestTicket.UpdateTicketConcerns(updateTicketConcern, cancellationToken);
@@ -152,28 +152,34 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                     var ticketConcernExists = await unitOfWork.RequestTicket
                                .TicketConcernExist(command.TicketConcernId);
 
-                    var approverList = await unitOfWork.RequestTicket
-                    .ApproverBySubUnitList(ticketConcernExists.User.SubUnitId);
+                //    var approverList = await unitOfWork.RequestTicket
+                //    .ApproverBySubUnitList(ticketConcernExists.User.SubUnitId);
 
-                    if (!approverList.Any())
+                //    if (!approverList.Any())
+                //        return Result.Failure(ClosingTicketError.NoApproverHasSetup());
+
+                //    if (!approverList.Any())
+                //        return Result.Failure(ClosingTicketError.NoApproverHasSetup());
+
+                //    var approverUser = approverList
+                //.First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
+
+                    
+
+                    var handlerId = await context.ApproverUsers.Where(x => x.UserId == command.AssignTo).FirstOrDefaultAsync();
+                    if (handlerId == null)
+                    {
                         return Result.Failure(ClosingTicketError.NoApproverHasSetup());
-
-                    if (!approverList.Any())
-                        return Result.Failure(ClosingTicketError.NoApproverHasSetup());
-
-                    var approverUser = approverList
-                .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
-
-                    var handlerId = await context.Approvers.Where(x => x.SubUnitId == requestConcernIdExist.SubUnitId).FirstOrDefaultAsync();
-                    var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
+                    }
+                    //var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
                     var addNewDateApproveConcern = new ApproverDate
                     {
                         TicketConcernId = ticketConcernExists.Id,
                         IsApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
-                        TicketApprover = approverUser.UserId,
+                        TicketApprover = handlerId.ApproverId,
                         AddedBy = command.Added_By,
                         Notes = command.Notes,
-                        ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerId.UserId : null,
+                        ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerId.ApproverId : null,
                     };
 
                     await unitOfWork.RequestTicket.ApproveDateTicket(addNewDateApproveConcern, cancellationToken);
@@ -181,14 +187,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                     await unitOfWork.SaveChangesAsync(cancellationToken);
 
                     
-                        foreach (var approver in approverList)
-                        {
+                        
                             var addNewApprover = new ApproverTicketing
                             {
                                 TicketConcernId = ticketConcernExists.Id,
                                 ApproverDateId = addNewDateApproveConcern.Id,
-                                UserId = approver.UserId,
-                                ApproverLevel = approver.ApproverLevel,
+                                UserId = handlerId.ApproverId,
                                 AddedBy = command.Added_By,
                                 CreatedAt = DateTime.Now,
                                 Status = TicketingConString.ApprovalDate,
@@ -197,7 +201,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
                             await unitOfWork.RequestTicket.CreateApproval(addNewApprover, cancellationToken);
 
-                        }
+                        
                     
 
                     var assignedTicketHistory = new TicketHistory

@@ -50,9 +50,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
 
                     var approverUserList = await _context.ApproverTicketings
                         .Where(x => x.TransferTicketConcernId == transferTicketExist.Id)
-                        .ToListAsync();
+                        .FirstOrDefaultAsync();
 
-                    if (!approverUserList.Any())
+                    if (approverUserList == null)
                     {
                         return Result.Failure(TransferTicketError.NoApproverExist());
                     }
@@ -75,7 +75,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
             }
 
 
-            private async Task UpdateRejectConcernStatus(List<ApproverTicketing> approverTicketing,TransferTicketConcern transferTicketConcern, RejectTransferTicketCommand command,CancellationToken cancellationToken)
+            private async Task UpdateRejectConcernStatus(ApproverTicketing approverTicketing,TransferTicketConcern transferTicketConcern, RejectTransferTicketCommand command,CancellationToken cancellationToken)
             {
                 transferTicketConcern.IsActive = false;
                 transferTicketConcern.IsRejectTransfer = true;
@@ -89,10 +89,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                 ticketConcernExist.IsTransfer = null;
                 ticketConcernExist.Remarks = command.Reject_Remarks;
 
-                foreach (var approverUserId in approverTicketing)
-                {
-                    _context.Remove(approverUserId);
-                }
+                //foreach (var approverUserId in approverTicketing)
+                //{
+                    _context.Remove(approverTicketing);
+                //}
 
                 var ticketHistory = await _context.TicketHistories
                     .Where(x => x.TicketConcernId == ticketConcernExist.Id

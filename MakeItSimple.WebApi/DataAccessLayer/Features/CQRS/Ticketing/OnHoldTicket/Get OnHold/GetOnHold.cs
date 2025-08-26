@@ -94,7 +94,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Ge
                                     .Where(x => x.IsApprove == null)
                                     .Select(x => new
                                     {
-                                        x.ApproverLevel,
+                                        //x.ApproverLevel,
                                         x.IsApprove,
                                         x.TicketOnHoldId,
                                         x.UserId,

@@ -99,12 +99,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Authentication
 
 
                 var user = await _context.Users.Include(x => x.UserRole)
-                    .Include(x => x.Company)
-                    .Include(x => x.BusinessUnit)
-                    .Include(x => x.Department)
-                    .Include(x => x.Units)
-                    .Include(x => x.SubUnit)
-                    .Include(x => x.Location)
                     .Include(x => x.Channels)
                     .Include(x => x.SeviceProviders)//kk
                     .SingleOrDefaultAsync(x => x.Username == command.UsernameOrEmail);

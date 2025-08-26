@@ -32,6 +32,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
             public string UserName { get; set; }
             public int? UnitId { get; set; }
 
+            public string OneChargingCode { get; set; }
+            public string OneChargingName { get; set; }
             public Guid? Modified_By { get; set; }
             public DateTime? Updated_At { get; set; }
 
@@ -53,6 +55,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
 
             public int? BusinessUnitId { get; set; }
 
+            public string OneChargingCode { get; set; }
+            public string OneChargingName { get; set; }
             public Guid? Modified_By { get; set; }
         }
 
@@ -84,45 +88,52 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                     return Result.Failure(UserError.UserRoleNotExist());
                 }
 
-                var CompanyNotExist = await _context.Companies.FirstOrDefaultAsync(x => x.Id == command.CompanyId, cancellationToken);
+                var CompanyNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.company_id == command.CompanyId, cancellationToken);
 
                 if (CompanyNotExist == null)
                 {
                     return Result.Failure(UserError.CompanyNotExist());
                 }
 
-                var BusinessUnitNotExist = await _context.BusinessUnits.FirstOrDefaultAsync(x => x.Id == command.BusinessUnitId, cancellationToken);
+                var BusinessUnitNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.business_unit_id == command.BusinessUnitId, cancellationToken);
 
                 if (BusinessUnitNotExist == null)
                 {
                     return Result.Failure(UserError.BusinessUnitNotExist());
                 }
 
-                var departmentNotExist = await _context.Departments.FirstOrDefaultAsync(x => x.Id == command.DepartmentId, cancellationToken);
+                var departmentNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.department_id == command.DepartmentId, cancellationToken);
 
                 if (departmentNotExist == null)
                 {
                     return Result.Failure(UserError.DepartmentNotExist());
                 }
 
-                var UnitNotExist = await _context.Units.FirstOrDefaultAsync(x => x.Id == command.UnitId, cancellationToken);
+                var UnitNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.department_unit_id == command.UnitId, cancellationToken);
                 if (UnitNotExist == null)
                 {
                     return Result.Failure(UserError.UnitNotExist());
                 }
 
-                var subUnitNotExist = await _context.SubUnits.FirstOrDefaultAsync(x => x.Id == command.SubUnitId, cancellationToken);
+                var subUnitNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.sub_unit_id == command.SubUnitId, cancellationToken);
 
                 if (subUnitNotExist == null)
                 {
                     return Result.Failure(UserError.SubUnitNotExist());
                 }
 
-                var LocationNotExist = await _context.Locations.FirstOrDefaultAsync(x => x.LocationCode == command.LocationCode, cancellationToken);
+                var LocationNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.location_code == command.LocationCode, cancellationToken);
 
                 if (LocationNotExist == null)
                 {
                     return Result.Failure(UserError.LocationNotExist());
+                }
+
+                var OneChrgingNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.code == command.OneChargingCode, cancellationToken);
+
+                if (OneChrgingNotExist == null)
+                {
+                    return Result.Failure(UserError.OneCharginNotExist());
                 }
 
                 //if (command.TeamId != null)
@@ -167,6 +178,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                 user.UpdatedAt = DateTime.Now;
                 user.ModifiedBy = command.Modified_By;
                 user.Username = command.UserName;
+                user.OneChargingCode = command.OneChargingCode;
+                user.OneChargingName = command.OneChargingName;
                 //user.ReceiverId = receiverExist.Id;
 
 
@@ -184,18 +197,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                         .Select(x => x.Id.ToString());
 
 
-                    if (!approverList.Any(x => x.Contains(command.UserRoleId.ToString())))
-                    {
-                        var userApproverList = await _context.Approvers
-                            .Where(x => x.UserId == command.Id)
-                            .ToListAsync();
+                    //if (!approverList.Any(x => x.Contains(command.UserRoleId.ToString())))
+                    //{
+                    //    var userApproverList = await _context.Approvers
+                    //        .Where(x => x.UserId == command.Id)
+                    //        .ToListAsync();
 
-                        foreach (var approver in userApproverList)
-                        {
-                            _context.Approvers.Remove(approver);
-                        }
+                    //    foreach (var approver in userApproverList)
+                    //    {
+                    //        _context.Approvers.Remove(approver);
+                    //    }
 
-                    }
+                    //}
 
                     if (!receiverList.Any(x => x.Contains(command.UserRoleId.ToString())))
                     {
@@ -229,6 +242,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                     UnitId = command.UnitId,
                     Updated_At = user.UpdatedAt,
                     Modified_By = user.ModifiedBy,
+                    OneChargingCode = command.OneChargingCode,
+                    OneChargingName = command.OneChargingName,
                 };
 
                 return Result.Success(result);

@@ -8,9 +8,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         Task<ClosingTicket>ClosingTicketExist(int? id);
         Task<ApproverTicketing> ApproverThatNotNullByClosingTicket(int? id);
         Task<List<ApproverTicketing>> ApproverThatNullByClosingTicketList(int? id);
-        Task<List<ApproverTicketing>> ApproverByClosingTicketList(int? id);
+        Task<ApproverTicketing> ApproverByClosingTicketList(int? id);
         Task<ApproverTicketing> ApproverByMinLevel(int? id);
-        Task<ApproverTicketing> ApproverPlusOne(int? id, int level);
+        Task<ApproverTicketing> ApproverPlusOne(int? id);
         Task<TicketTechnician> TicketTechnicianExist(int? id);  
 
         Task<List<Approver>> ApproverBySubUnitList(int? id);

@@ -5,6 +5,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Errors.Ticketing;
 using MakeItSimple.WebApi.Models;
 using MakeItSimple.WebApi.Models.Setup.ApproverSetup;
+using MakeItSimple.WebApi.Models.Setup.Phase_One.ApproverUsersSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -56,27 +57,26 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                 else
                 {
 
-                    var approverList = await _context.Approvers
-                        .Include(x => x.User)
-                        .Where(x => x.SubUnitId == transferToDetails.SubUnitId)
-                        .ToListAsync();
+                    var approver = await _context.ApproverUsers.Where(x => x.UserId == transferToDetails.Id).FirstOrDefaultAsync();
+                    //var approverList = await _context.Approvers
+                    //    .Include(x => x.User)
+                    //    .Where(x => x.SubUnitId == transferToDetails.SubUnitId)
+                    //    .ToListAsync();
 
-                    if (!approverList.Any())
-                        return Result.Failure(ClosingTicketError.NoApproverHasSetup());
+                    //if (!approverList.Any())
+                    //    return Result.Failure(ClosingTicketError.NoApproverHasSetup());
 
-                    var approverUser = approverList
-                        .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
+                    //var approverUser = approverList
+                    //    .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
 
-                    var addTransferTicket = await CreateTransferTicket(approverUser,transferTicketExist,ticketConcernExist, command, cancellationToken);
+                    var addTransferTicket = await CreateTransferTicket(approver, transferTicketExist,ticketConcernExist, command, cancellationToken);
 
                     transferTicketExist = addTransferTicket;
 
-                    foreach(var approver in approverList)
-                    {
-                        await CreateApprover(approver,ticketConcernExist, transferTicketExist, command, cancellationToken);
-                    }
+                        await CreateApprover(approver, ticketConcernExist, transferTicketExist, command, cancellationToken);
+                    
 
-                    await CreateHistory(approverList, ticketConcernExist, command, cancellationToken);
+                    await CreateHistory(approver, ticketConcernExist, command, cancellationToken);
 
                     await CreateTransactionNotification(addTransferTicket,ticketConcernExist,userDetails,command,cancellationToken);
 
@@ -134,7 +134,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
 
             }
 
-            private async Task<TransferTicketConcern> CreateTransferTicket(Approver approver,TransferTicketConcern transferTicketConcern,TicketConcern ticketConcern, AddNewTransferTicketCommand command, CancellationToken cancellationToken)
+            private async Task<TransferTicketConcern> CreateTransferTicket(ApproverUser approver,TransferTicketConcern transferTicketConcern,TicketConcern ticketConcern, AddNewTransferTicketCommand command, CancellationToken cancellationToken)
             {
                 ticketConcern.IsTransfer = false;
 
@@ -147,7 +147,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                     IsTransfer = false,
                     AddedBy = command.Added_By,
                     Current_Target_Date = ticketConcern.TargetDate,
-                    TicketApprover = approver.UserId,
+                    TicketApprover = approver.ApproverId,
                 };
 
                 await _context.TransferTicketConcerns.AddAsync(addTransferTicket);
@@ -164,14 +164,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
 
             }
 
-            private async Task CreateApprover(Approver approver, TicketConcern ticketConcern,TransferTicketConcern transferTicketConcern, AddNewTransferTicketCommand command,CancellationToken cancellationToken)
+            private async Task CreateApprover(ApproverUser approver, TicketConcern ticketConcern,TransferTicketConcern transferTicketConcern, AddNewTransferTicketCommand command,CancellationToken cancellationToken)
             {
                 var addApprover = new ApproverTicketing
                 {
                     TicketConcernId = ticketConcern.Id,
                     TransferTicketConcernId = transferTicketConcern.Id,
-                    UserId = approver.UserId,
-                    ApproverLevel = approver.ApproverLevel,
+                    UserId = approver.ApproverId,
                     AddedBy = command.Added_By,
                     CreatedAt = DateTime.Now,
                     Status = TicketingConString.Transfer,
@@ -182,7 +181,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
 
             }
 
-            private async Task CreateHistory(List<Approver> approverList,TicketConcern ticketConcern, AddNewTransferTicketCommand command, CancellationToken cancellationToken)
+            private async Task CreateHistory(ApproverUser approver,TicketConcern ticketConcern, AddNewTransferTicketCommand command, CancellationToken cancellationToken)
             {
                 var addTicketHistory = new TicketHistory
                 {
@@ -197,27 +196,20 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
 
                 await _context.TicketHistories.AddAsync(addTicketHistory, cancellationToken);
 
-                foreach(var approver in approverList)
-                {
-                    var approverLevel = approver.ApproverLevel == 1 ? $"{approver.ApproverLevel}st"
-                        : approver.ApproverLevel == 2 ? $"{approver.ApproverLevel}nd"
-                        : approver.ApproverLevel == 3 ? $"{approver.ApproverLevel}rd"
-                        : $"{approver.ApproverLevel}th";
-
+                
                     var addApproverHistory = new TicketHistory
                     {
                         TicketConcernId = ticketConcern.Id,
-                        TransactedBy = approver.UserId,
+                        TransactedBy = approver.ApproverId,
                         TransactionDate = DateTime.Now,
                         Request = TicketingConString.Approval,
-                        Status = $"{TicketingConString.TransferForApproval} {approver.User.Fullname}",
-                        Approver_Level = approver.ApproverLevel,
+                        Status = $"{TicketingConString.TransferForApproval}",
 
                     };
 
                     await _context.TicketHistories.AddAsync(addApproverHistory, cancellationToken);
 
-                }
+                
 
             }
 

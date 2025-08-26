@@ -40,7 +40,7 @@ namespace MakeItSimple.WebApi.Common.ConstantString
         //Close History
 
         public const string CloseRequest = "Ticket closure requested";
-        public const string CloseForApproval = "Ticket closure pending approval from";
+        public const string CloseForApproval = "Ticket closure pending approval";
         public const string CloseCancel = "Ticket closure request canceled";
         public const string CloseReject = "Ticket closure request rejected by";
         public const string CloseApprove = "Ticket closure request approved by";
@@ -53,7 +53,7 @@ namespace MakeItSimple.WebApi.Common.ConstantString
 
         public const string TransferRequest = "Ticket transfer requested";
 
-        public const string TransferForApproval = "Ticket transfer pending approval from";
+        public const string TransferForApproval = "Ticket transfer pending approval";
 
         public const string TransferCancel = "Ticket transfer request canceled";
         public const string TransferReject = "Ticket transfer request rejected by";
@@ -65,7 +65,7 @@ namespace MakeItSimple.WebApi.Common.ConstantString
 
         public const string OnHoldRequest = "Ticket was on-hold";
 
-        public const string OnHoldForApproval = "Ticket on-hold pending approval from";
+        public const string OnHoldForApproval = "Ticket on-hold pending approval";
         public const string OnHoldApproved = "Ticket on-hold request approved by";
         public const string OnHoldCancel = "Ticket on-hold request canceled";
         public const string OnHoldReject = "Ticket on-hold request rejected by";

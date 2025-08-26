@@ -55,8 +55,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                         var userApprovalList = await unitOfWork.ApproverDate
                             .ApproverByDateApprovalTicketList(selectNonDateApproveRequestId.ApproverDateId);
 
-                        var validateUserApprover = await unitOfWork.ApproverDate
-                            .ApproverPlusOne(selectNonDateApproveRequestId.ApproverDateId, selectNonDateApproveRequestId.ApproverLevel.Value);
+                        //var validateUserApprover = await unitOfWork.ApproverDate
+                        //    .ApproverPlusOne(selectNonDateApproveRequestId.ApproverDateId, selectNonDateApproveRequestId.ApproverLevel.Value);
 
                         await unitOfWork.ApproverDate.ApprovedApproval(selectNonDateApproveRequestId.Id);
 
@@ -73,44 +73,44 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
                         await unitOfWork.RequestTicket.UpdateTicketHistory(updateHistoryApproval, cancellationToken);
 
-                        if (validateUserApprover is not null)
-                        {
+                        //if (validateUserApprover is not null)
+                        //{
 
-                            await unitOfWork.ApproverDate.NextApproverUser(dateApproveTicketExist.Id, validateUserApprover.UserId);
+                        //    await unitOfWork.ApproverDate.NextApproverUser(dateApproveTicketExist.Id, validateUserApprover.UserId);
 
-                            var addNewTicketTransactionNotification = new TicketTransactionNotification
-                            {
+                        //    var addNewTicketTransactionNotification = new TicketTransactionNotification
+                        //    {
 
-                                Message = $"Ticket number {dateApproveTicketExist.TicketConcernId} is pending for Target Date approval",
-                                AddedBy = command.Transacted_By.Value,
-                                Created_At = DateTime.Now,
-                                ReceiveBy = validateUserApprover.UserId.Value,
-                                Modules = PathConString.Approval,
-                                Modules_Parameter = PathConString.ForDateApproval,
-                                PathId = dateApproveTicketExist.TicketConcernId
+                        //        Message = $"Ticket number {dateApproveTicketExist.TicketConcernId} is pending for Target Date approval",
+                        //        AddedBy = command.Transacted_By.Value,
+                        //        Created_At = DateTime.Now,
+                        //        ReceiveBy = validateUserApprover.UserId.Value,
+                        //        Modules = PathConString.Approval,
+                        //        Modules_Parameter = PathConString.ForDateApproval,
+                        //        PathId = dateApproveTicketExist.TicketConcernId
 
-                            };
+                        //    };
 
-                            await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification, cancellationToken);
+                        //    await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionNotification, cancellationToken);
 
-                            var addTicketApproveNotification = new TicketTransactionNotification
-                            {
+                        //    var addTicketApproveNotification = new TicketTransactionNotification
+                        //    {
 
-                                Message = $"Ticket number {dateApproveTicketExist.TicketConcernId} was approved by {userDetails.Fullname}",
-                                AddedBy = command.Transacted_By.Value,
-                                Created_At = DateTime.Now,
-                                ReceiveBy = dateApproveTicketExist.TicketConcern.UserId.Value,
-                                Modules = PathConString.IssueHandlerConcerns,
-                                Modules_Parameter = PathConString.ForDateApproval,
-                                PathId = dateApproveTicketExist.TicketConcernId
+                        //        Message = $"Ticket number {dateApproveTicketExist.TicketConcernId} was approved by {userDetails.Fullname}",
+                        //        AddedBy = command.Transacted_By.Value,
+                        //        Created_At = DateTime.Now,
+                        //        ReceiveBy = dateApproveTicketExist.TicketConcern.UserId.Value,
+                        //        Modules = PathConString.IssueHandlerConcerns,
+                        //        Modules_Parameter = PathConString.ForDateApproval,
+                        //        PathId = dateApproveTicketExist.TicketConcernId
 
-                            };
+                        //    };
 
-                            await unitOfWork.RequestTicket.CreateTicketNotification(addTicketApproveNotification, cancellationToken);
+                        //    await unitOfWork.RequestTicket.CreateTicketNotification(addTicketApproveNotification, cancellationToken);
 
-                        }
-                        else
-                        {
+                        //}
+                        //else
+                        //{
 
                             var approvedClosingTicket = new ApproverDate
                             {
@@ -189,7 +189,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
                             await unitOfWork.RequestTicket.CreateTicketNotification(addNewTicketTransactionOngoing, cancellationToken);
 
-                        }
+                        //}
                     }
                     else
                     {

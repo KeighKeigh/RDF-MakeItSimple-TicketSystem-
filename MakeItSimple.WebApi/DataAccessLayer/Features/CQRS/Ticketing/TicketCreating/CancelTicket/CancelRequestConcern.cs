@@ -34,7 +34,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                 await unitOfWork.RequestTicket.CancelledRequestConcern(command.RequestConcernId);
 
                 var ticketConcernExist = await unitOfWork.RequestTicket
-                         .TicketConcernExist(requestTransactionExist.Id);
+                         .TicketConcernByRequest(requestTransactionExist.Id);
 
                 await unitOfWork.RequestTicket.CancelledTicketConcern(ticketConcernExist.Id);
 

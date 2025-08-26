@@ -27,6 +27,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Errors.UserManagement.UserAccount
         new("User.CompanyNotExist", "Company not exist!");
         public static Error LocationNotExist() =>
         new("User.LocationNotExist", "Location not exist!");
+        public static Error OneCharginNotExist() =>
+        new("User.OneChargingNotExist", "OneCharging not exist!");
         public static Error BusinessUnitNotExist() =>
         new("User.BusinessUnitNotExist", "Business unit not exist!");
 

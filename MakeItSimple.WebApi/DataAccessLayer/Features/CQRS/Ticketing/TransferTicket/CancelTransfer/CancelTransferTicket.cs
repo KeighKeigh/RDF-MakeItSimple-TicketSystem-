@@ -44,12 +44,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket
 
                 var approverList = await _context.ApproverTicketings
                     .Where(x =>  x.TransferTicketConcernId == command.TransferTicketId)
-                    .ToListAsync();
+                    .FirstOrDefaultAsync();
 
-                foreach(var transferTicket in approverList)
-                {
-                    _context.Remove(transferTicket);
-                }
+                //foreach(var transferTicket in approverList)
+                //{
+                    _context.Remove(approverList);
+                //}
 
                 var ticketHistory = await _context.TicketHistories
                     .Where(x => (x.TicketConcernId == ticketConcernExist.Id

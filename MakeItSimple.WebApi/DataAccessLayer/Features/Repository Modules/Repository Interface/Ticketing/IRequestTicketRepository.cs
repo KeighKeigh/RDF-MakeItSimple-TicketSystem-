@@ -52,6 +52,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
 
         Task<TicketConcern> TicketConcernExistByRequestConcernId(int? id);
         Task<TicketConcern> TicketConcernExist(int? id);
+
+        //Task<TicketConcern> TicketConcernExistByRequestConcern(int? id);
         Task<TicketConcern> TicketConcernByRequest(int? id);
         Task<TicketCategory> TicketCategoryExist(int? id);
         Task<TicketCategory> TicketCategoryExist(int? id, int? requestConcernId);

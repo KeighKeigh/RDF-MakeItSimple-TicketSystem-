@@ -47,11 +47,20 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         public async Task<TicketConcern> TicketConcernExist(int? id)
         {
            return await context
-                .TicketConcerns
+                .TicketConcerns 
                 .Include(x => x.User)
                 .Include(x => x.RequestorByUser)
                 .FirstOrDefaultAsync(x => x.Id == id);   
         }
+
+        //public async Task<TicketConcern> TicketConcernExistByRequestConcern(int? id)
+        //{
+        //    return await context
+        //         .TicketConcerns
+        //         .Include(x => x.User)
+        //         .Include(x => x.RequestorByUser)
+        //         .FirstOrDefaultAsync(x => x.RequestConcernId == id);
+        //}
 
         public async Task UpdateTicketConcerns(TicketConcern ticketConcern, CancellationToken cancellationToken)
         {
@@ -633,9 +642,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
         {
             var historyList = await context.TicketHistories
                   .Where(x => x.TicketConcernId == id && x.IsApprove == null && x.Request.Contains(TicketingConString.Approval))
-                  .ToListAsync();
+                  .FirstOrDefaultAsync();
 
-            return historyList.FirstOrDefault();
+            return historyList;
 
         }
 

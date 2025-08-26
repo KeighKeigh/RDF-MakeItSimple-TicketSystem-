@@ -108,7 +108,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
                                     .Where(x => x.IsApprove == null)
                                     .Select(x => new
                                     {
-                                        x.ApproverLevel,
+                                        //x.ApproverLevel,
                                         x.IsApprove,
                                         x.ClosingTicketId,
                                         x.UserId,

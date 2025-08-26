@@ -58,42 +58,39 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Ap
 
                     var onHoldApprover = await _context.ApproverTicketings
                         .Where(x => x.TicketOnHoldId == onHoldTicketExist.Id && x.IsApprove == null)
-                        .ToListAsync();
+                        .FirstOrDefaultAsync();
 
                     var ticketHistoryList = await _context.TicketHistories
                         .Where(x => x.TicketConcernId == onHoldTicketExist.TicketConcernId
                          && x.IsApprove == null && x.Request.Contains(TicketingConString.Approval))
-                        .ToListAsync();
+                        .FirstOrDefaultAsync();
 
-                    var selectOnHoldRequestId = onHoldApprover
-                        .FirstOrDefault(x => x.ApproverLevel == onHoldApprover.Min(x => x.ApproverLevel));
+                    //var selectOnHoldRequestId = onHoldApprover
+                    //    .FirstOrDefault(x => x.ApproverLevel == onHoldApprover.Min(x => x.ApproverLevel));
 
-                    if (selectOnHoldRequestId is not null)
+                    if (ticketHistoryList is not null)
                     {
                         if (onHoldTicketExist.TicketApprover != command.Users
                           || !approverPermissionList.Any(x => x.Contains(command.Role)))
                             return Result.Failure(TransferTicketError.ApproverUnAuthorized());
 
-                        selectOnHoldRequestId.IsApprove = true;
+                        onHoldApprover.IsApprove = true;
 
                         var userApprovalId = await _context.ApproverTicketings
-                            .Where(x => x.TicketOnHoldId == selectOnHoldRequestId.TicketOnHoldId)
-                            .ToListAsync();
+                            .Where(x => x.TicketOnHoldId == onHoldApprover.TicketOnHoldId)
+                            .FirstOrDefaultAsync();
 
-                        var validateUserApprover = userApprovalId
-                            .FirstOrDefault(x => x.ApproverLevel == selectOnHoldRequestId.ApproverLevel + 1);
+                        //var validateUserApprover = userApprovalId
+                        //    .FirstOrDefault(x => x.ApproverLevel == onHoldApprover.ApproverLevel + 1);
 
                         await ApprovalTicketHistory(ticketHistoryList, userDetails, command, cancellationToken);
 
-                        if (validateUserApprover is not null)
-                        {
-                            await ApprovalTransferNotification(onHoldTicketExist, userDetails, validateUserApprover, command, cancellationToken);
-
-                        }
-                        else
-                        {
+                        //if (userApprovalId is not null)
+                        //{
+                        //    await ApprovalTransferNotification(onHoldTicketExist, userDetails, userApprovalId, command, cancellationToken);
                             await UpdateTransferTicket(onHoldTicketExist, userDetails, command, cancellationToken);
-                        }
+                        //}
+                        
 
                     }
                     else
@@ -106,18 +103,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Ap
                 return Result.Success();
 
             }
-            private async Task ApprovalTicketHistory(List<TicketHistory> ticketHistory, User user, ApprovalOnHoldCommand command, CancellationToken cancellationToken)
+            private async Task ApprovalTicketHistory(TicketHistory ticketHistory, User user, ApprovalOnHoldCommand command, CancellationToken cancellationToken)
             {
 
-                var ticketHistoryApproval = ticketHistory
-                    .FirstOrDefault(x => x.Approver_Level != null
-                    && x.Approver_Level == ticketHistory.Min(x => x.Approver_Level));
+                //var ticketHistoryApproval = ticketHistory
+                //    .FirstOrDefault(x => x.Approver_Level != null
+                //    && x.Approver_Level == ticketHistory.Min(x => x.Approver_Level));
 
-                ticketHistoryApproval.TransactedBy = command.Transacted_By;
-                ticketHistoryApproval.TransactionDate = DateTime.Now;
-                ticketHistoryApproval.Request = TicketingConString.Approve;
-                ticketHistoryApproval.Status = $"{TicketingConString.OnHoldApproved} {user.Fullname}";
-                ticketHistoryApproval.IsApprove = true;
+                ticketHistory.TransactedBy = command.Transacted_By;
+                ticketHistory.TransactionDate = DateTime.Now;
+                ticketHistory.Request = TicketingConString.Approve;
+                ticketHistory.Status = $"{TicketingConString.OnHoldApproved} {user.Fullname}";
+                ticketHistory.IsApprove = true;
                 
             }
 
@@ -128,7 +125,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Ap
                 var addNewTicketTransactionNotification = new TicketTransactionNotification
                 {
 
-                    Message = $"Ticket number {ticketOnHold.TicketConcernId} was approved by {user.Fullname}",
+                    Message = $"On-hold request for Ticket number {ticketOnHold.TicketConcernId} was approved by {user.Fullname}",
                     AddedBy = user.Id,
                     Created_At = DateTime.Now,
                     ReceiveBy = approverTicketing.UserId.Value,
@@ -143,7 +140,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Ap
                 var addTicketApproveNotification = new TicketTransactionNotification
                 {
 
-                    Message = $"Ticket number {ticketOnHold.TicketConcernId} was approved by {user.Fullname}",
+                    Message = $"On-hold request for Ticket number {ticketOnHold.TicketConcernId} was approved by {user.Fullname}",
                     AddedBy = user.Id,
                     Created_At = DateTime.Now,
                     ReceiveBy = ticketOnHold.AddedBy.Value,

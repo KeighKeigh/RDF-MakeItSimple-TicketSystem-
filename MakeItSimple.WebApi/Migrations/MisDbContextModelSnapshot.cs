@@ -22,6 +22,403 @@ namespace MakeItSimple.WebApi.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.OneCharging.OneBusinessUnit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_added");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("business_unit_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("business_unit_code");
+
+                    b.Property<int?>("business_unit_id")
+                        .HasColumnType("int")
+                        .HasColumnName("business_unit_id");
+
+                    b.Property<string>("business_unit_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("business_unit_name");
+
+                    b.Property<DateTime?>("deleted_at")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<int?>("sync_id")
+                        .HasColumnType("int")
+                        .HasColumnName("sync_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_one_business_units");
+
+                    b.ToTable("one_business_units", (string)null);
+                });
+
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.OneCharging.OneChargingMIS", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_added");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("business_unit_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("business_unit_code");
+
+                    b.Property<int?>("business_unit_id")
+                        .HasColumnType("int")
+                        .HasColumnName("business_unit_id");
+
+                    b.Property<string>("business_unit_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("business_unit_name");
+
+                    b.Property<string>("code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("company_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("company_code");
+
+                    b.Property<int?>("company_id")
+                        .HasColumnType("int")
+                        .HasColumnName("company_id");
+
+                    b.Property<string>("company_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("company_name");
+
+                    b.Property<DateTime?>("deleted_at")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("department_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("department_code");
+
+                    b.Property<int?>("department_id")
+                        .HasColumnType("int")
+                        .HasColumnName("department_id");
+
+                    b.Property<string>("department_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("department_name");
+
+                    b.Property<string>("department_unit_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("department_unit_code");
+
+                    b.Property<int?>("department_unit_id")
+                        .HasColumnType("int")
+                        .HasColumnName("department_unit_id");
+
+                    b.Property<string>("department_unit_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("department_unit_name");
+
+                    b.Property<string>("location_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("location_code");
+
+                    b.Property<int?>("location_id")
+                        .HasColumnType("int")
+                        .HasColumnName("location_id");
+
+                    b.Property<string>("location_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("location_name");
+
+                    b.Property<string>("name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("sub_unit_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sub_unit_code");
+
+                    b.Property<int?>("sub_unit_id")
+                        .HasColumnType("int")
+                        .HasColumnName("sub_unit_id");
+
+                    b.Property<string>("sub_unit_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sub_unit_name");
+
+                    b.Property<int?>("sync_id")
+                        .HasColumnType("int")
+                        .HasColumnName("sync_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_one_chargings");
+
+                    b.ToTable("one_chargings", (string)null);
+                });
+
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.OneCharging.OneCompany", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_added");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("company_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("company_code");
+
+                    b.Property<int?>("company_id")
+                        .HasColumnType("int")
+                        .HasColumnName("company_id");
+
+                    b.Property<string>("company_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("company_name");
+
+                    b.Property<DateTime?>("deleted_at")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<int?>("sync_id")
+                        .HasColumnType("int")
+                        .HasColumnName("sync_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_one_companies");
+
+                    b.ToTable("one_companies", (string)null);
+                });
+
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.OneCharging.OneDepartment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_added");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<DateTime?>("deleted_at")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("department_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("department_code");
+
+                    b.Property<string>("department_id")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("department_id");
+
+                    b.Property<string>("department_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("department_name");
+
+                    b.Property<int?>("sync_id")
+                        .HasColumnType("int")
+                        .HasColumnName("sync_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_one_departments");
+
+                    b.ToTable("one_departments", (string)null);
+                });
+
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.OneCharging.OneLocation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_added");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<DateTime?>("deleted_at")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("location_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("location_code");
+
+                    b.Property<int?>("location_id")
+                        .HasColumnType("int")
+                        .HasColumnName("location_id");
+
+                    b.Property<string>("location_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("location_name");
+
+                    b.Property<int?>("sync_id")
+                        .HasColumnType("int")
+                        .HasColumnName("sync_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_one_locations");
+
+                    b.ToTable("one_locations", (string)null);
+                });
+
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.OneCharging.OneSubUnit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_added");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<DateTime?>("deleted_at")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("sub_unit_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sub_unit_code");
+
+                    b.Property<int?>("sub_unit_id")
+                        .HasColumnType("int")
+                        .HasColumnName("sub_unit_id");
+
+                    b.Property<string>("sub_unit_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sub_unit_name");
+
+                    b.Property<int?>("sync_id")
+                        .HasColumnType("int")
+                        .HasColumnName("sync_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_one_sub_units");
+
+                    b.ToTable("one_sub_units", (string)null);
+                });
+
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.OneCharging.OneUnit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_added");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<DateTime?>("deleted_at")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<int?>("sync_id")
+                        .HasColumnType("int")
+                        .HasColumnName("sync_id");
+
+                    b.Property<string>("unit_code")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("unit_code");
+
+                    b.Property<int?>("unit_id")
+                        .HasColumnType("int")
+                        .HasColumnName("unit_id");
+
+                    b.Property<string>("unit_name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("unit_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_one_units");
+
+                    b.ToTable("one_units", (string)null);
+                });
+
             modelBuilder.Entity("MakeItSimple.WebApi.Models.PmsDetail", b =>
                 {
                     b.Property<int>("Id")
@@ -1081,6 +1478,43 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasDatabaseName("ix_locations_sub_unit_id");
 
                     b.ToTable("locations", (string)null);
+                });
+
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.Setup.Phase_One.ApproverUsersSetup.ApproverUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid?>("ApproverId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("approver_id");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_approver_users");
+
+                    b.HasIndex("ApproverId")
+                        .HasDatabaseName("ix_approver_users_approver_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_approver_users_user_id");
+
+                    b.ToTable("approver_users", (string)null);
                 });
 
             modelBuilder.Entity("MakeItSimple.WebApi.Models.Setup.Phase_One.ServiceProviderSetup.ServiceProviderChannel", b =>
@@ -3167,6 +3601,14 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("modified_by");
 
+                    b.Property<string>("OneChargingCode")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("one_charging_code");
+
+                    b.Property<string>("OneChargingName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("one_charging_name");
+
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("password");
@@ -3788,6 +4230,25 @@ namespace MakeItSimple.WebApi.Migrations
                     b.Navigation("ModifiedByUser");
 
                     b.Navigation("SubUnit");
+                });
+
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.Setup.Phase_One.ApproverUsersSetup.ApproverUser", b =>
+                {
+                    b.HasOne("MakeItSimple.WebApi.Models.User", "Approver")
+                        .WithMany("ApproverUsers")
+                        .HasForeignKey("ApproverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_approver_users_users_approver_id");
+
+                    b.HasOne("MakeItSimple.WebApi.Models.User", "User")
+                        .WithMany("IssueHandlerUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_approver_users_users_user_id");
+
+                    b.Navigation("Approver");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MakeItSimple.WebApi.Models.Setup.Phase_One.ServiceProviderSetup.ServiceProviderChannel", b =>
@@ -5023,11 +5484,15 @@ namespace MakeItSimple.WebApi.Migrations
 
             modelBuilder.Entity("MakeItSimple.WebApi.Models.User", b =>
                 {
+                    b.Navigation("ApproverUsers");
+
                     b.Navigation("Approvers");
 
                     b.Navigation("ApproversTickets");
 
                     b.Navigation("Channels");
+
+                    b.Navigation("IssueHandlerUsers");
 
                     b.Navigation("Receivers");
 

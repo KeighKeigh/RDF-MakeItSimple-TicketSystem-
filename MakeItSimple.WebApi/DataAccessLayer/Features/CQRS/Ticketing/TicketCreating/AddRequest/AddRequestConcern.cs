@@ -544,7 +544,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                         requestConcernId = addRequestConcern.Id;
 
-                        var handlerIds = await context.Approvers.Where(x => x.SubUnitId == addRequestConcern.User.SubUnitId).FirstOrDefaultAsync();
+                        var handlerIds = await context.ApproverUsers.Where(x => x.UserId == addRequestConcern.AssignTo).FirstOrDefaultAsync();
                         var addTicketConcern = new TicketConcern
                         {
                             RequestConcernId = requestConcernId,
@@ -558,9 +558,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             AssignTo = command.AssignTo.ToString() == "" ? null : command.AssignTo,
                             IsDateApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
                             DateApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday : null,
-                            ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.UserId : null,
+                            ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.ApproverId : null,
                             ApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday.Date : null,
-                            ApprovedBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.UserId : null,
+                            ApprovedBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.ApproverId : null,
 
                         };
 
@@ -583,29 +583,28 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                         ticketConcernExist = addTicketConcern;
 
-                        var approverList = await unitOfWork.RequestTicket
-                    .ApproverBySubUnitList(addTicketConcern.User.SubUnitId);
+                    //    var approverList = await unitOfWork.RequestTicket
+                    //.ApproverBySubUnitList(addTicketConcern.User.SubUnitId);
 
-                        if (!approverList.Any())
-                            return Result.Failure(ClosingTicketError.NoApproverHasSetup());
+                    //    if (!approverList.Any())
+                    //        return Result.Failure(ClosingTicketError.NoApproverHasSetup());
 
-                        if (!approverList.Any())
-                            return Result.Failure(ClosingTicketError.NoApproverHasSetup());
+                    //    if (!approverList.Any())
+                    //        return Result.Failure(ClosingTicketError.NoApproverHasSetup());
 
-                        var approverUser = approverList
-                    .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
+                    //    var approverUser = approverList
+                    //.First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
 
 
-                        var handlerId = await context.Approvers.Where(x => x.SubUnitId == addTicketConcern.User.SubUnitId).FirstOrDefaultAsync();
-                        var handlerName = await context.Users.Where(x => x.Id == handlerId.UserId).Select(x => x.Fullname).FirstOrDefaultAsync();
+                        //var handlerId = await context.Approvers.Where(x => x.SubUnitId == addTicketConcern.User.SubUnitId).FirstOrDefaultAsync();
                         var addNewDateApproveConcern = new ApproverDate
                         {
                             TicketConcernId = addTicketConcern.Id,
                             IsApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
-                            TicketApprover = approverUser.UserId,
+                            TicketApprover = handlerIds.ApproverId,
                             AddedBy = command.Added_By,
                             Notes = command.Notes,
-                            ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? approverUser.UserId : null,
+                            ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.ApproverId : null,
                             ApprovedDateAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday : null,
 
 
@@ -616,24 +615,40 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-                       
-                            foreach (var approver in approverList)
+
+                        //foreach (var approver in approverList)
+                        //{
+                        //    var addNewApprover = new ApproverTicketing
+                        //    {
+                        //        TicketConcernId = ticketConcernExist.Id,
+                        //        ApproverDateId = addNewDateApproveConcern.Id,
+                        //        UserId = approver.UserId,
+                        //        ApproverLevel = approver.ApproverLevel,
+                        //        AddedBy = command.Added_By,
+                        //        CreatedAt = DateTime.Now,
+                        //        Status = TicketingConString.ApprovalDate,
+                        //        IsApprove = command.TargetDate.Value.Date <= approvedDate.Date ?  true : null,
+                        //    };
+
+                        //    await unitOfWork.RequestTicket.CreateApproval(addNewApprover, cancellationToken);
+
+                        //}
+
+                        
+                            var addNewApprover = new ApproverTicketing
                             {
-                                var addNewApprover = new ApproverTicketing
-                                {
-                                    TicketConcernId = ticketConcernExist.Id,
-                                    ApproverDateId = addNewDateApproveConcern.Id,
-                                    UserId = approver.UserId,
-                                    ApproverLevel = approver.ApproverLevel,
-                                    AddedBy = command.Added_By,
-                                    CreatedAt = DateTime.Now,
-                                    Status = TicketingConString.ApprovalDate,
-                                    IsApprove = command.TargetDate.Value.Date <= approvedDate.Date ?  true : null,
-                                };
+                                TicketConcernId = ticketConcernExist.Id,
+                                ApproverDateId = addNewDateApproveConcern.Id,
+                                UserId = handlerIds.ApproverId,
+                                AddedBy = command.Added_By,
+                                CreatedAt = DateTime.Now,
+                                Status = TicketingConString.ApprovalDate,
+                                IsApprove = command.TargetDate.Value.Date <= approvedDate.Date ? true : null,
+                            };
 
-                                await unitOfWork.RequestTicket.CreateApproval(addNewApprover, cancellationToken);
+                            await unitOfWork.RequestTicket.CreateApproval(addNewApprover, cancellationToken);
 
-                            }
+                        
 
                         var addRequestTicketHistory = new TicketHistory
                         {
@@ -664,7 +679,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             var approveTicketDateHistory = new TicketHistory
                             {
                                 TicketConcernId = ticketConcernExist.Id,
-                                TransactedBy = handlerId.UserId,
+                                TransactedBy = handlerIds.UserId,
                                 TransactionDate = DateTime.Now,
                                 Request = TicketingConString.ForApprovalTicket,
                                 Status = $"{TicketingConString.ForApprovalDate}"
@@ -693,7 +708,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             {
 
                                 Message = $"Ticket number {ticketConcernExist.Id}, Target Date is approved",
-                                AddedBy = handlerId.UserId,
+                                AddedBy = ticketConcernExist.UserId,
                                 Created_At = DateTime.Now,
                                 ReceiveBy = addRequestConcern.UserId.Value,
                                 Modules = PathConString.ConcernTickets,
@@ -708,7 +723,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             {
 
                                 Message = $"Ticket number {ticketConcernExist.Id}, Target Date is approved",
-                                AddedBy = handlerId.UserId,
+                                AddedBy = ticketConcernExist.UserId,
                                 Created_At = DateTime.Now,
                                 ReceiveBy = ticketConcernExist.UserId.Value,
                                 Modules = PathConString.IssueHandlerConcerns,
@@ -723,7 +738,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             {
 
                                 Message = $"Ticket number {ticketConcernExist.Id} is now ongoing",
-                                AddedBy = handlerId.UserId,
+                                AddedBy = ticketConcernExist.UserId,
                                 Created_At = DateTime.Now,
                                 ReceiveBy = addRequestConcern.UserId.Value,
                                 Modules = PathConString.ConcernTickets,

@@ -98,7 +98,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                                     .Where(x => x.IsApprove == null)
                                     .Select(x => new
                                     {
-                                        x.ApproverLevel,
+                                        //x.ApproverLevel,
                                         x.IsApprove,
                                         x.TransferTicketConcernId,
                                         x.UserId,

@@ -30,8 +30,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Errors.Setup
        public static Error ApproverNotExist() =>
        new Error("Approver.ApproverNotExist", "Approver not Exist!");
 
-       // public static Error ListError(List<SyncLocationCommand> AvailableSync ) =>
-       //new Error("Approver.ApproverNotExist", $"{AvailableSync}");
+        public static Error AddingApproverUserError() =>
+       new Error("Approver.AddingApproverUserError", "Error in Adding Users!");
+
+        // public static Error ListError(List<SyncLocationCommand> AvailableSync ) =>
+        //new Error("Approver.ApproverNotExist", $"{AvailableSync}");
 
     }
 }

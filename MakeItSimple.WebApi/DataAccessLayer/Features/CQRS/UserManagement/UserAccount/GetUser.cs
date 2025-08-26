@@ -59,6 +59,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
             public int? SubUnitId { get; set; }
             public string SubUnit_Code { get; set; }
             public string SubUnit_Name { get; set; }
+            
+            public string OneChargingCode { get; set; }
+            public string OneChargingName { get; set; }
             public ICollection<string> Permission { get; set; }
 
             //public string PermissionJson { get; set; }
@@ -176,6 +179,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                     .Include(x => x.ModifiedByUser)
                     .Include(x => x.UserRole);
 
+                
+
                 if (!string.IsNullOrEmpty(request.Search))
                 {
                     userQuery = userQuery.Where(x => x.Fullname.Contains(request.Search)
@@ -218,14 +223,16 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                     Company_Code = x.Company.CompanyCode,
                     Company_Name = x.Company.CompanyName,
                     LocationId = x.LocationId,
-                    Location_Code = x.Location.LocationCode,
-                    Location_Name = x.Location.LocationName,
+                    Location_Code = x.LocationCode,
+                    Location_Name = x.LocationName,
                     BusinessUnitId = x.BusinessUnitId,
                     BusinessUnit_Code = x.BusinessUnit.BusinessCode,
                     BusinessUnit_Name = x.BusinessUnit.BusinessName,
                     UnitId = x.UnitId,
                     Unit_Code = x.Units.UnitCode,
                     Unit_Name = x.Units.UnitName,
+                    OneChargingCode = x.OneChargingCode,
+                    OneChargingName = x.OneChargingName,
                     Permission = x.UserRole.Permissions != null ? x.UserRole.Permissions : userPermissions,
                     Is_Use = x.Approvers.Any() || x.Receivers.Any() ||
                     x.ApproversTickets.Any(x => x.IsApprove == null) ||

@@ -3,6 +3,7 @@ using MakeItSimple.WebApi.Common.ConstantString;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Errors.Ticketing;
 using MakeItSimple.WebApi.Models.Setup.ApproverSetup;
+using MakeItSimple.WebApi.Models.Setup.Phase_One.ApproverUsersSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -52,27 +53,28 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Cr
                 }
                 else
                 {
-                    var approverList = await _context.Approvers
-                        .Include(x => x.User)
-                        .Where(x => x.SubUnitId == userDetails.SubUnitId)
-                        .ToListAsync();
+                    //var approverList = await _context.Approvers
+                    //    .Include(x => x.User)
+                    //    .Where(x => x.SubUnitId == userDetails.SubUnitId)
+                    //    .ToListAsync();
 
-                    if (!approverList.Any())
-                        return Result.Failure(ClosingTicketError.NoApproverHasSetup());
+                    //if (!approverList.Any())
+                    //    return Result.Failure(ClosingTicketError.NoApproverHasSetup());
 
-                    var approverUser = approverList
-                        .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
+                    //var approverUser = approverList
+                    //    .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
 
-                    var addOnHold = await CreateOnHold(approverUser,ticketConcernExist,command, cancellationToken);
+                    var approver = await _context.ApproverUsers.Where(x => x.UserId == ticketConcernExist.AssignTo).FirstOrDefaultAsync();
+
+                    var addOnHold = await CreateOnHold(approver, ticketConcernExist,command, cancellationToken);
                     onHoldConcern.Add(addOnHold);
                     onHoldExist = addOnHold;
 
-                    foreach( var approver in approverList)
-                    {
+                    
                         await CreateApprover(approver, ticketConcernExist, onHoldExist, command, cancellationToken);
-                    }
+                    
 
-                    await OnHoldTicketHistory(approverList,ticketConcernExist,command, cancellationToken);
+                    await OnHoldTicketHistory(approver, ticketConcernExist,command, cancellationToken);
                     await TransactionNotification(onHoldExist,ticketConcernExist, command, cancellationToken);
 
                 }
@@ -94,14 +96,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Cr
                 return Result.Success();
             }
 
-            private async Task CreateApprover(Approver approver, TicketConcern ticketConcern, TicketOnHold ticketOnHold, CreateOnHoldTicketCommand command, CancellationToken cancellationToken)
+            private async Task CreateApprover(ApproverUser approver, TicketConcern ticketConcern, TicketOnHold ticketOnHold, CreateOnHoldTicketCommand command, CancellationToken cancellationToken)
             {
                 var addApprover = new ApproverTicketing
                 {
                     TicketConcernId = command.TicketConcernId,
                     TicketOnHoldId = ticketOnHold.Id,
-                    UserId = approver.UserId,
-                    ApproverLevel = approver.ApproverLevel,
+                    UserId = approver.ApproverId,
                     AddedBy = command.Added_By,
                     CreatedAt = DateTime.Now,
                     Status = TicketingConString.OnHold,
@@ -112,7 +113,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Cr
 
             }
 
-            private async Task<TicketOnHold> CreateOnHold(Approver approver,TicketConcern ticketConcern, CreateOnHoldTicketCommand command , CancellationToken cancellationToken)
+            private async Task<TicketOnHold> CreateOnHold(ApproverUser approver,TicketConcern ticketConcern, CreateOnHoldTicketCommand command , CancellationToken cancellationToken)
             {
                 ticketConcern.OnHold = false;
 
@@ -122,7 +123,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Cr
                    Reason = command.Reason,
                    AddedBy = command.Added_By,
                    IsHold = false, 
-                   TicketApprover = approver.UserId,
+                   TicketApprover = approver.ApproverId,
 
                 };
 
@@ -133,7 +134,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Cr
 
             }
 
-            private async Task OnHoldTicketHistory(List<Approver> approverList, TicketConcern ticketConcern, CreateOnHoldTicketCommand command , CancellationToken cancellationToken)
+            private async Task OnHoldTicketHistory(ApproverUser approver, TicketConcern ticketConcern, CreateOnHoldTicketCommand command , CancellationToken cancellationToken)
             {
                 var addTicketHistory = new TicketHistory
                 {
@@ -148,27 +149,21 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OnHoldTicket.Cr
                 await _context.TicketHistories.AddAsync(addTicketHistory,cancellationToken);
 
 
-                foreach(var approver in approverList)
-                {
-                    var approverLevel = approver.ApproverLevel == 1 ? $"{approver.ApproverLevel}st"
-                        : approver.ApproverLevel == 2 ? $"{approver.ApproverLevel}nd"
-                        : approver.ApproverLevel == 3 ? $"{approver.ApproverLevel}rd"
-                        : $"{approver.ApproverLevel}th";
 
                     var addApproverHistory = new TicketHistory
                     {
                         TicketConcernId = ticketConcern.Id,
-                        TransactedBy = approver.UserId,
+                        TransactedBy = approver.ApproverId,
                         TransactionDate = DateTime.Now,
                         Request = TicketingConString.Approval,
-                        Status = $"{TicketingConString.OnHoldForApproval} {approverLevel} Approver",
-                        Approver_Level = approver.ApproverLevel,
+                        Status = $"{TicketingConString.OnHoldForApproval}",
+
 
                     };
 
                     await _context.TicketHistories.AddAsync(addApproverHistory, cancellationToken);
 
-                }
+                
 
             }
 

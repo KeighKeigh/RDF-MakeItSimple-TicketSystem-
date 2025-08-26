@@ -24,6 +24,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
             public string LocationCode { get; set; }
 
             public int? BusinessUnitId { get; set; }
+            public string OneChargingCode { get; set; }
+            public string OneChargingName { get; set; }
 
             //public int ? TeamId { get; set; }
 
@@ -54,6 +56,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
             public bool? Is_Store { get; set; }
 
             public Guid? Added_By { get; set; }
+            public string OneChargingCode { get; set; }
+            public string OneChargingName { get; set; }
 
 
         }
@@ -93,21 +97,21 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                 }
 
 
-                var CompanyNotExist = await _context.Companies.FirstOrDefaultAsync(x => x.Id == command.CompanyId, cancellationToken);
+                var CompanyNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.company_id == command.CompanyId, cancellationToken);
 
                 if (CompanyNotExist == null)
                 {
                     return Result.Failure(UserError.CompanyNotExist());
                 }
 
-                var BusinessUnitNotExist = await _context.BusinessUnits.FirstOrDefaultAsync(x => x.Id == command.BusinessUnitId, cancellationToken);
+                var BusinessUnitNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.business_unit_id == command.BusinessUnitId, cancellationToken);
 
                 if (BusinessUnitNotExist == null)
                 {
                     return Result.Failure(UserError.BusinessUnitNotExist());
                 }
 
-                var DepartmentNotExist = await _context.Departments.FirstOrDefaultAsync(x => x.Id == command.DepartmentId, cancellationToken);
+                var DepartmentNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.department_id == command.DepartmentId, cancellationToken);
 
                 if (DepartmentNotExist == null)
                 {
@@ -115,24 +119,31 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                 }
 
 
-                var UnitNotExist = await _context.Units.FirstOrDefaultAsync(x => x.Id == command.UnitId, cancellationToken);
+                var UnitNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.department_unit_id == command.UnitId, cancellationToken);
                 if (UnitNotExist == null)
                 {
                     return Result.Failure(UserError.UnitNotExist());
                 }
 
-                var SubUnitNotExist = await _context.SubUnits.FirstOrDefaultAsync(x => x.Id == command.SubUnitId, cancellationToken);
+                var SubUnitNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.sub_unit_id == command.SubUnitId, cancellationToken);
 
                 if (SubUnitNotExist == null)
                 {
                     return Result.Failure(UserError.SubUnitNotExist());
                 }
 
-                var LocationNotExist = await _context.Locations.FirstOrDefaultAsync(x => x.LocationCode == command.LocationCode, cancellationToken);
+                var LocationNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.location_code == command.LocationCode, cancellationToken);
 
                 if (LocationNotExist == null)
                 {
                     return Result.Failure(UserError.LocationNotExist());
+                }
+
+                var OneChrgingNotExist = await _context.OneChargings.FirstOrDefaultAsync(x => x.code == command.OneChargingCode, cancellationToken);
+
+                if (OneChrgingNotExist == null)
+                {
+                    return Result.Failure(UserError.OneCharginNotExist());
                 }
 
 
@@ -155,6 +166,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                     UnitId = command.UnitId,
                     AddedBy = command.Added_By,
                     IsStore = command.Is_Store,
+                    OneChargingCode = command.OneChargingCode,
+                    OneChargingName = command.OneChargingName,
 
                 };
 
@@ -175,7 +188,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserA
                     LocationCode = command.LocationCode,
                     BusinessUnitId = users.BusinessUnitId,
                     UnitId = users.UnitId,
-                    Added_By = users.AddedBy
+                    Added_By = users.AddedBy,
+                    OneChargingCode = users.OneChargingCode,
+                    OneChargingName = users.OneChargingName,
+                    
                 };
 
                 return Result.Success(result);

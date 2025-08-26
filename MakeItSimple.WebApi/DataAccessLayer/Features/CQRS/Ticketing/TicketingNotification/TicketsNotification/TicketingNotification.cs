@@ -4,6 +4,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotification.TicketsNotification
 {
@@ -295,10 +296,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                         }).FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
 
 
-                    var approverSubUnitIds = await _context.Approvers
+                    var approverSubUnitIds = await _context.ApproverUsers
                    .AsNoTracking()
-                   .Where(x => x.UserId == userApprover.Id && x.IsActive == true)
-                  .Select(x => x.SubUnitId)
+                   .Where(x => x.ApproverId == userApprover.Id)
+                  .Select(x => x.UserId)
                   .ToListAsync();
 
 
@@ -308,11 +309,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                             .AsNoTracking()
                             .Where(x => x.IsActive == true
                                 && x.ConcernStatus == TicketingConString.OnGoing
-                                && approverSubUnitIds.Contains(x.SubUnitId))
+                                && approverSubUnitIds.Contains(x.AssignTo))
                             .Select(x => new
                             {
                                 x.Id,
-                                x.SubUnitId,
                                 x.ConcernStatus,
                                 x.UserId,
                                 x.TargetDate
@@ -324,7 +324,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                             .Select(x => new
                             {
                                 x.Id,
-                                x.SubUnitId,
                                 x.ConcernStatus,
                                 x.UserId
                             }).ToList();
@@ -501,15 +500,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                 var ticketConcernList = await _context.TicketConcerns
                     .AsNoTrackingWithIdentityResolution()
-                    .AsSplitQuery()
+                    .Where(x => x.RequestConcern.Is_Confirm == null
+                    && x.RequestConcern.ConcernStatus == TicketingConString.NotConfirm && x.AssignTo == request.UserId)
                     .Select(x => new
                     {
                         x.Id,
-                        RequestConcern = new
-                        {
-                            x.RequestConcern.Is_Confirm,
-                            x.RequestConcern.ConcernStatus
-                        },
                         x.RequestConcernId,
                         x.User,
                         x.UserId,
@@ -518,12 +513,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                     }).ToListAsync();
 
-                var confirmList = ticketConcernList
-                    .Where(x => x.RequestConcern.Is_Confirm == null
-                    && (x.RequestConcern.ConcernStatus == TicketingConString.NotConfirm  || x.RequestConcern.ConcernStatus == TicketingConString.NotConfirm))
-                    .ToList();
-
-                foreach (var confirm in confirmList)
+                foreach (var confirm in ticketConcernList)
                 {
 
                     int hoursDifference = 24;
@@ -543,7 +533,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     DayOfWeek exceptSat = DayOfWeek.Saturday;
                     DayOfWeek exceptSun = DayOfWeek.Sunday;
 
-                    if (hourConvert >= hoursDifference && todayWeek != exceptSat &&  todayWeek != exceptSun)
+                    if (hourConvert >= hoursDifference && todayWeek != exceptSat && todayWeek != exceptSun)
                     {
                         var requestConcern = await _context.RequestConcerns
                             .FirstOrDefaultAsync(x => x.Id == confirm.RequestConcernId);
@@ -583,6 +573,97 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     }
 
                 }
+
+
+                // Get filtered data from database
+                //var ticketConcernList = await _context.TicketConcerns
+                //    .AsNoTrackingWithIdentityResolution()
+                //    .Where(x => x.RequestConcern.Is_Confirm == null
+                //                && x.RequestConcern.ConcernStatus == TicketingConString.NotConfirm
+                //                && x.AssignTo == request.UserId)
+                //    .Select(x => new
+                //    {
+                //        x.Id,
+                //        x.RequestConcernId,
+                //        x.User,
+                //        x.UserId,
+                //        x.IsActive,
+                //        x.Closed_At,
+                //    })
+                //    .ToListAsync();
+
+                //// Pre-calculate values and check if it's a weekday
+                //var now = DateTime.Now;
+                //var today = DateTime.Today;
+                //var isWeekday = now.DayOfWeek != DayOfWeek.Saturday && now.DayOfWeek != DayOfWeek.Sunday;
+
+                //if (!isWeekday)
+                //{
+                //    return Result.Success(); // Exit early if it's weekend
+                //}
+
+                //// Filter records that need updating based on 24-hour rule
+                //var recordsToUpdate = ticketConcernList
+                //    .Where(x => x.Closed_At.HasValue && (now - x.Closed_At.Value).TotalHours >= 24)
+                //    .ToList();
+
+                //if (!recordsToUpdate.Any())
+                //{
+                //    return Result.Success(); // Exit early if no records need updating
+                //}
+
+                //// Get all RequestConcerns that need updating in one query
+                //var requestConcernIds = recordsToUpdate.Select(x => x.RequestConcernId).ToList();
+                //var requestConcerns = await _context.RequestConcerns
+                //    .Where(x => requestConcernIds.Contains(x.Id))
+                //    .ToListAsync();
+
+                //// Update RequestConcerns
+                //foreach (var requestConcern in requestConcerns)
+                //{
+                //    requestConcern.Is_Confirm = true;
+                //    requestConcern.Confirm_At = today;
+                //    requestConcern.ConcernStatus = TicketingConString.Done;
+                //}
+
+                //// Get all TicketHistories that need updating in one query
+                //var ticketIds = recordsToUpdate.Select(x => x.Id).ToList();
+                //var ticketHistories = await _context.TicketHistories
+                //    .Where(x => ticketIds.Contains(x.TicketConcernId.Value)
+                //                && x.IsApprove == null
+                //                && x.Request.Contains(TicketingConString.NotConfirm))
+                //    .ToListAsync();
+
+                //// Update TicketHistories
+                //foreach (var ticketHistory in ticketHistories)
+                //{
+                //    ticketHistory.TransactedBy = request.UserId;
+                //    ticketHistory.TransactionDate = now;
+                //    ticketHistory.Request = TicketingConString.Confirm;
+                //    ticketHistory.Status = TicketingConString.CloseConfirm;
+                //}
+
+                //// Create notifications for all records that need them
+                //var notifications = recordsToUpdate
+                //    .Where(x => x.UserId.HasValue)
+                //    .Select(x => new TicketTransactionNotification
+                //    {
+                //        Message = $"Ticket number {x.Id} has been closed",
+                //        AddedBy = request.UserId,
+                //        Created_At = now,
+                //        ReceiveBy = x.UserId.Value,
+                //        Modules = PathConString.IssueHandlerConcerns,
+                //        Modules_Parameter = PathConString.Closed,
+                //    })
+                //    .ToList();
+
+                //// Add all notifications at once
+                //if (notifications.Any())
+                //{
+                //    await _context.TicketTransactionNotifications.AddRangeAsync(notifications);
+                //}
+
+
 
                 await _context.SaveChangesAsync(cancellationToken);
                 return Result.Success(notification);

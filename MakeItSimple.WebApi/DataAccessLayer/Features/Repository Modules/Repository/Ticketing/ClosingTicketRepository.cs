@@ -114,29 +114,28 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
             }
         }
 
-        public async Task<List<ApproverTicketing>> ApproverByClosingTicketList(int? id)
+        public async Task<ApproverTicketing> ApproverByClosingTicketList(int? id)
         {
             return await context.ApproverTicketings
                  .Where(x => x.ClosingTicketId == id)
-                 .ToListAsync();
+                 .FirstOrDefaultAsync();
         }
 
         public async Task<ApproverTicketing> ApproverByMinLevel(int? id)
         {
             var approverList = await context.ApproverTicketings
                   .Where(x => x.ClosingTicketId == id && x.IsApprove == null)
-                  .ToListAsync();
+                  .FirstOrDefaultAsync();
 
-            return approverList
-                .FirstOrDefault(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
+            return approverList;
         }
 
-        public async Task<ApproverTicketing> ApproverPlusOne(int? id, int level)
+        public async Task<ApproverTicketing> ApproverPlusOne(int? id)
         {
             return await context.ApproverTicketings
                 .Include(x => x.User)
                 .Where(x => x.ClosingTicketId == id)
-                .FirstOrDefaultAsync(x => x.ApproverLevel == level + 1);
+                .FirstOrDefaultAsync();
         }
 
         public async Task ApprovedApproval(int? id)
@@ -165,7 +164,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
             await context.TicketConcerns
                 .Where(x => x.Id == ticketConcern.Id)
                 .ExecuteUpdateAsync(update => update
-                .SetProperty(u => u.IsClosedApprove, u => true)
+                .SetProperty(u => u.IsClosedApprove, u => ticketConcern.IsClosedApprove)
                 .SetProperty(u => u.Closed_At, u => DateTime.Now)
                 .SetProperty(u => u.ClosedApproveBy, u => ticketConcern.ClosedApproveBy)
                 .SetProperty(u => u.IsDone, u => true)

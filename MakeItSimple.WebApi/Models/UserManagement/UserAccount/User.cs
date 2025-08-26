@@ -1,9 +1,11 @@
-﻿using MakeItSimple.WebApi.Models.Setup.ApproverSetup;
+﻿using MakeItSimple.WebApi.Models.OneCharging;
+using MakeItSimple.WebApi.Models.Setup.ApproverSetup;
 using MakeItSimple.WebApi.Models.Setup.BusinessUnitSetup;
 using MakeItSimple.WebApi.Models.Setup.ChannelSetup;
 using MakeItSimple.WebApi.Models.Setup.CompanySetup;
 using MakeItSimple.WebApi.Models.Setup.DepartmentSetup;
 using MakeItSimple.WebApi.Models.Setup.LocationSetup;
+using MakeItSimple.WebApi.Models.Setup.Phase_One.ApproverUsersSetup;
 using MakeItSimple.WebApi.Models.Setup.Phase_One.ServiceProviderSetup;
 using MakeItSimple.WebApi.Models.Setup.ReceiverSetup;
 using MakeItSimple.WebApi.Models.Setup.SubUnitSetup;
@@ -41,30 +43,30 @@ namespace MakeItSimple.WebApi.Models
         public virtual UserRole UserRole { get; set; }
 
         public int? CompanyId { get; set; }
-        public virtual Company Company { get; set; }
+        public virtual OneCompany Company { get; set; }
 
         public int BusinessUnitId { get; set; }
-        public virtual BusinessUnit BusinessUnit { get; set; }
+        public virtual OneBusinessUnit BusinessUnit { get; set; }
 
         public int ? DepartmentId { get; set; }
-        public virtual Department Department { get; set; }
+        public virtual OneDepartment Department { get; set; }
 
         public int? UnitId { get; set; }
-        public virtual Unit Units { get; set; }
+        public virtual OneUnit Units { get; set; }
 
         public int ? SubUnitId { get; set; }
-        public virtual SubUnit SubUnit { get; set; }
+        public virtual OneSubUnit SubUnit { get; set; }
 
         public int? LocationId { get; set; }
-        public virtual Location Location { get; set; }
+        public virtual OneLocation Location { get; set; }
 
 
         public string ProfilePic { get; set; }
         public string FileName { get; set; }
         public decimal? FileSize { get; set; }
-
         public bool? IsStore { get; set; }
-
+        public string OneChargingCode { get; set; }
+        public string OneChargingName { get; set; }
         public ICollection<TicketConcern> TicketConcerns { get; set;}
         public ICollection<Channel> Channels { get; set; }
         public ICollection<Approver> Approvers { get; set; }
@@ -72,6 +74,11 @@ namespace MakeItSimple.WebApi.Models
         public ICollection<RequestConcern> RequestConcerns { get; set;}
         public ICollection<ServiceProviders> SeviceProviders { get; set; }
         public ICollection<Receiver> Receivers { get; set; }
+        public ICollection<ApproverUser> ApproverUsers { get; set; }
+        public ICollection<ApproverUser> IssueHandlerUsers { get; set; }
+
+
+
 
 
 
