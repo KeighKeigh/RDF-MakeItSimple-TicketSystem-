@@ -1,4 +1,5 @@
 ﻿using MakeItSimple.WebApi.Common;
+using MakeItSimple.WebApi.Models.OneCharging;
 using MakeItSimple.WebApi.Models.Setup.BusinessUnitSetup;
 using MakeItSimple.WebApi.Models.Setup.CategorySetup;
 using MakeItSimple.WebApi.Models.Setup.ChannelSetup;
@@ -9,6 +10,7 @@ using MakeItSimple.WebApi.Models.Setup.Phase_One.ServiceProviderSetup;
 using MakeItSimple.WebApi.Models.Setup.SubCategorySetup;
 using MakeItSimple.WebApi.Models.Setup.SubUnitSetup;
 using MakeItSimple.WebApi.Models.Setup.UnitSetup;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MakeItSimple.WebApi.Models.Ticketing
 {
@@ -46,27 +48,22 @@ namespace MakeItSimple.WebApi.Models.Ticketing
         public DateTime? Confirm_At { get; set; }
 
         public int? CompanyId { get; set; }
-        public virtual Company Company { get; set; }
-
         public int? BusinessUnitId { get; set; }
-        public virtual BusinessUnit BusinessUnit { get; set; }
 
         public int? DepartmentId { get; set; }
-        public virtual Department Department { get; set; }
 
         public int? UnitId { get; set; }
-        public virtual Unit Unit { get; set; }
 
         public int? SubUnitId { get; set; }
-        public virtual SubUnit SubUnit { get; set; }
+
 
 
         //requestor 
         public int? ReqUnitId { get; set; }
-        public virtual Unit ReqUnit { get; set; }
+
 
         public int? ReqSubUnitId { get; set; }
-        public virtual SubUnit ReqSubUnit { get; set; }
+
 
 
         public int? ChannelId { get; set; }
@@ -77,7 +74,6 @@ namespace MakeItSimple.WebApi.Models.Ticketing
         public int? SubCategoryId { get; set; }
         public virtual SubCategory SubCategory { get; set; }
         public int? LocationId { get; set; }
-        public virtual Location Location { get; set; }
         public DateTime? DateNeeded { get; set; }
         public string Notes { get; set; }
         public string ContactNumber { get; set; }
@@ -92,6 +88,15 @@ namespace MakeItSimple.WebApi.Models.Ticketing
         public virtual ServiceProviders ServiceProvider { get; set; }
         public int? TransferChannelId { get; set; }
         public virtual Channel TransferChannel { get; set; }
+
+
+        [ForeignKey("OneChargingMIS")]
+        public string OneChargingCode { get; set; }
+        public virtual OneChargingMIS OneChargingMIS { get; set; }
+        public string OneChargingName { get; set; }
+
+        public string CategoryConcernName { get; set; }
+
 
         public ICollection<TicketConcern> TicketConcerns { get; set; }
         public ICollection<TicketCategory> TicketCategories { get; set; }

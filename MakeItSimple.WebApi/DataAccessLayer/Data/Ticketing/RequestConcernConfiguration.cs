@@ -34,6 +34,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Data.Ticketing
            .WithMany()
            .HasForeignKey(u => u.AssignTo)
            .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(u => u.OneChargingMIS)
+            .WithMany()
+            .HasForeignKey(u => u.OneChargingCode)
+            .HasPrincipalKey(o => o.code)
+            .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

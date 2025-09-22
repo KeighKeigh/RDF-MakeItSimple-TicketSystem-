@@ -11,6 +11,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.FormDropdownSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.FormQuestionSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.FormSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.LocationSetup;
+using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.OneChargingSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.Phase_One.ApproverUserSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.Phase_One.ServiceProviderSetup;
 using MakeItSimple.WebApi.DataAccessLayer.Data.Setup.Phase_Two;
@@ -39,6 +40,7 @@ using MakeItSimple.WebApi.Models.Setup.FormSetup;
 using MakeItSimple.WebApi.Models.Setup.FormsQuestionSetup;
 using MakeItSimple.WebApi.Models.Setup.LocationSetup;
 using MakeItSimple.WebApi.Models.Setup.Phase_One.ApproverUsersSetup;
+using MakeItSimple.WebApi.Models.Setup.Phase_One.CategoryConcernSetup;
 using MakeItSimple.WebApi.Models.Setup.Phase_One.ServiceProviderSetup;
 using MakeItSimple.WebApi.Models.Setup.Phase_Two;
 using MakeItSimple.WebApi.Models.Setup.Phase_Two.Pms_Form_Setup;
@@ -88,6 +90,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Data.DataContext
         public virtual DbSet<OneSubUnit> OneSubUnits { get; set; }
         public virtual DbSet<OneUnit> OneUnits { get; set; }
         public virtual DbSet<ApproverUser> ApproverUsers { get; set; }
+        public virtual DbSet<CategoryConcern> CategoryConcerns { get; set; }
+
 
 
 
@@ -173,6 +177,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Data.DataContext
             modelBuilder.ApplyConfiguration(new TicketTechnicianConfiguration());
             modelBuilder.ApplyConfiguration(new ServiceProviderConfiguration());
             modelBuilder.ApplyConfiguration(new ApproverUserConfiguration());
+            //modelBuilder.ApplyConfiguration(new OneChargingMISConfiguration());
 
             //Phase 2
 

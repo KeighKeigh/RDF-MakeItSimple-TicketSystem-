@@ -11,7 +11,7 @@ using System.Security.Claims;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserAccount.AddNewUser;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserAccount.GetUser;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserAccount.GetUserByPermission;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserAccount.UpdateProfilePic;
+//using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserAccount.UpdateProfilePic;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserAccount.UpdateUser;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserAccount.UpdateUserStatus;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.UserManagement.UserAccount.UserChangePassword;
@@ -250,30 +250,30 @@ namespace MakeItSimple.WebApi.Controllers.UserManagement.UserAccount
             }
         }
 
-        [HttpPut("update-profile")]
-        public async Task<IActionResult> UpdateProfilePic([FromForm] UpdateProfilePicCommand command)
-        {
-            try
-            {
+        //[HttpPut("update-profile")]
+        //public async Task<IActionResult> UpdateProfilePic([FromForm] UpdateProfilePicCommand command)
+        //{
+        //    try
+        //    {
 
-                if (User.Identity is ClaimsIdentity identity && Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
-                {
-                    command.UserId = userId;
-                }
+        //        if (User.Identity is ClaimsIdentity identity && Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
+        //        {
+        //            command.UserId = userId;
+        //        }
 
-                var result = await _mediator.Send(command);
-                if (result.IsFailure)
-                {
-                    return BadRequest(result);
-                }
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return Conflict(ex.Message);
-            }
+        //        var result = await _mediator.Send(command);
+        //        if (result.IsFailure)
+        //        {
+        //            return BadRequest(result);
+        //        }
+        //        return Ok(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Conflict(ex.Message);
+        //    }
 
-        }
+        //}
 
         [HttpGet("GetUserByPermission")]
         public async Task<IActionResult> GetUserByPermission([FromQuery] GetUserByPermissionQuery query)

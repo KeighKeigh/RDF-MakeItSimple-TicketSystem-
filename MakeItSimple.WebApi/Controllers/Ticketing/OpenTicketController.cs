@@ -6,9 +6,9 @@ using System.Security.Claims;
 using MediatR;
 using MakeItSimple.WebApi.Common;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConcern.ViewTicketHistory.GetTicketHistory;
-using Microsoft.AspNetCore.SignalR;
-using MakeItSimple.WebApi.Common.SignalR;
-using MakeItSimple.WebApi.Common.Caching;
+//using Microsoft.AspNetCore.SignalR;
+//using MakeItSimple.WebApi.Common.SignalR;
+//using MakeItSimple.WebApi.Common.Caching;
 using MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketConcern;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketConcern.GetClosing.GetClosingTicket;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.NewFolder.DateApproval;
@@ -27,12 +27,12 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
     {
 
         private readonly IMediator _mediator;
-        private readonly TimerControl _timerControl;
+        //private readonly TimerControl _timerControl;
 
-        public OpenTicketController(IMediator mediator, TimerControl timerControl)
+        public OpenTicketController(IMediator mediator)
         {
             _mediator = mediator;
-            _timerControl = timerControl;
+            //_timerControl = timerControl;
         }
 
         [HttpGet("page")]

@@ -58,22 +58,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                 {
 
                     var approver = await _context.ApproverUsers.Where(x => x.UserId == transferToDetails.Id).FirstOrDefaultAsync();
-                    //var approverList = await _context.Approvers
-                    //    .Include(x => x.User)
-                    //    .Where(x => x.SubUnitId == transferToDetails.SubUnitId)
-                    //    .ToListAsync();
-
-                    //if (!approverList.Any())
-                    //    return Result.Failure(ClosingTicketError.NoApproverHasSetup());
-
-                    //var approverUser = approverList
-                    //    .First(x => x.ApproverLevel == approverList.Min(x => x.ApproverLevel));
 
                     var addTransferTicket = await CreateTransferTicket(approver, transferTicketExist,ticketConcernExist, command, cancellationToken);
 
                     transferTicketExist = addTransferTicket;
 
-                        await CreateApprover(approver, ticketConcernExist, transferTicketExist, command, cancellationToken);
+                    await CreateApprover(approver, ticketConcernExist, transferTicketExist, command, cancellationToken);
                     
 
                     await CreateHistory(approver, ticketConcernExist, command, cancellationToken);

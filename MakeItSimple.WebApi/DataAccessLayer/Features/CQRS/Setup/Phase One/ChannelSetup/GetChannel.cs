@@ -20,6 +20,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.ChannelSetup
             public DateTime Created_At { get; set; }
             public string Modified_By { get; set; }
             public DateTime? Updated_At { get; set; }
+            public bool? Request { get; set; }
 
             public List<ChannelUser> channelUsers { get; set; }
 
@@ -78,7 +79,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.ChannelSetup
                     .Include(x => x.ModifiedByUser)
                     .Include(x => x.ChannelUsers)
                     .Include(x => x.User)
-                    .ThenInclude(x => x.Department);
+                    .ThenInclude(x => x.OneChargingMIS);
 
                 if (!string.IsNullOrEmpty(request.Search))
                 {
@@ -100,13 +101,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.ChannelSetup
                     Modified_By = x.ModifiedByUser.Fullname,
                     No_Of_Members = x.ChannelUsers.Count(),
                     Is_Active = x.IsActive,
+                    Request = x.Request,
                     channelUsers = x.ChannelUsers.Where(x => x.IsActive == true).Select(x => new GetChannelResult.ChannelUser
                     {
                         ChannelId = x.ChannelId,
                         ChannelUserId = x.Id,
                         DepartmentId = x.Id,
-                        Department_Code = x.User.Department.DepartmentCode,
-                        Department_Name = x.User.Department.DepartmentName,
+                        Department_Code = x.User.OneChargingMIS.department_code,
+                        Department_Name = x.User.OneChargingMIS.department_name,
                         UserId = x.UserId,
                         Fullname = x.User.Fullname,
                         UserRole = x.User.UserRole.UserRoleName

@@ -26,7 +26,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
             return await context.RequestConcerns
                 .Include(x => x.TicketConcerns)
                 .Include(x => x.User)
-                .ThenInclude(x => x.Department)
+                .ThenInclude(x => x.OneChargingMIS)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
@@ -51,6 +51,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .Include(x => x.User)
                 .Include(x => x.RequestorByUser)
                 .FirstOrDefaultAsync(x => x.Id == id);   
+        }
+
+        public async Task<TicketConcern> TicketConcernExistAndRequestConcern(int? id, int? reqId)
+        {
+            return await context
+                 .TicketConcerns
+                 .Include(x => x.User)
+                 .Include(x => x.RequestorByUser).Where(x => x.RequestConcernId == reqId)
+                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         //public async Task<TicketConcern> TicketConcernExistByRequestConcern(int? id)

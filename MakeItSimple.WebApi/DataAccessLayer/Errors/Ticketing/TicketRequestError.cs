@@ -122,5 +122,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Errors.Ticketing
         public static Error TicketAlreadyReject() =>
        new Error("TicketRequest.TicketAlreadyReject", "Ticket concern already rejected!");
 
+        public static Error ErrorInRequestConcern() =>
+       new Error("TicketRequest.ErrorInRequestConcern", "Request Ticket Id Error!");
+
     }
 }

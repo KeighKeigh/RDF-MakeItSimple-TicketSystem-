@@ -2,6 +2,7 @@
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.Models.OneCharging;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.OneCharging.GetOneCompany;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.OneCharging
@@ -37,7 +38,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.OneCharging
 
             public async Task<PagedList<GetOneDepartmentResult>> Handle(GetOneDepartmentQuery request, CancellationToken cancellationToken)
             {
-                IQueryable<OneChargingMIS> oneChargingList = _context.OneChargings;
+                IQueryable<OneChargingMIS> oneChargingList = _context.OneChargings.AsNoTracking();
 
                 if (!string.IsNullOrEmpty(request.Search))
                 {

@@ -11,30 +11,33 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
             public int? RequestConcernId { get; set; }
             public string Concern_Description { get; set; }
 
-            public string Company_Code { get; set; }
-            public string Company_Name { get; set; }
+            //public string Company_Code { get; set; }
+            //public string Company_Name { get; set; }
 
-            public string BusinessUnit_Code { get; set; }
-            public string BusinessUnit_Name { get; set; }
+            //public string BusinessUnit_Code { get; set; }
+            //public string BusinessUnit_Name { get; set; }
 
             public string Department_Code { get; set; }
             public string Department_Name { get; set; }
 
-            public string Unit_Code { get; set; }
-            public string Unit_Name { get; set; }
+            //public string Unit_Code { get; set; }
+            //public string Unit_Name { get; set; }
 
-            public string SubUnit_Code { get; set; }
-            public string SubUnit_Name { get; set; }
+            //public string SubUnit_Code { get; set; }
+            //public string SubUnit_Name { get; set; }
 
             public string Location_Code { get; set; }
             public string Location_Name { get; set; }
 
             public Guid? Requestor_By { get; set; }
             public string Requestor_Name { get; set; }
+            public bool? IsStore { get; set; }
+
+            public DateTime? DateStarted { get; set; }
 
 
 
-            public List<GetOpenTicketCategory> GetOpenTicketCategories { get; set; }
+            public IEnumerable<GetOpenTicketCategory> GetOpenTicketCategories { get; set; }
 
             public class GetOpenTicketCategory
             {
@@ -44,7 +47,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
 
             }
 
-            public List<GetOpenTicketSubCategory> GetOpenTicketSubCategories { get; set; }
+            public IEnumerable<GetOpenTicketSubCategory> GetOpenTicketSubCategories { get; set; }
 
             public class GetOpenTicketSubCategory
             {
@@ -73,20 +76,20 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
 
             public string Severity { get; set; }
             public int? CompanyId { get; set; }
-            public int? BusinessUnitId { get; set; }
+            //public int? BusinessUnitId { get; set; }
             public int? DepartmentId { get; set; }
-            public int? UnitId { get; set; }
-            public int? SubUnitid { get; set; }
+            //public int? UnitId { get; set; }
+            //public int? SubUnitid { get; set; }
             public int? LocationId { get; set; }
             public string Ticket_Status { get; set; }
-            public string Concern_Type { get; set; }
+            //public string Concern_Type { get; set; }
             public string Added_By { get; set; }
             public DateTime Created_At { get; set; }
             public string Modified_By { get; set; }
             public DateTime? Updated_At { get; set; }
             public bool IsActive { get; set; }
             public string Remarks { get; set; }
-            public bool? Done { get; set; }
+            //public bool? Done { get; set; }
 
             public bool? Is_Transfer { get; set; }
             public DateTime? Transfer_At { get; set; }
@@ -95,19 +98,26 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
 
             public string Closed_Status { get; set; }
 
-            public List<GetForClosingTicket> GetForClosingTickets { get; set; }
-            public List<GetForTransferTicket> GetForTransferTickets { get; set; }
+            public DateTime? Transaction_Date { get; set; }
+
+            public int? Aging_Days { get; set; }
+
+            public IEnumerable<GetForClosingTicket> GetForClosingTickets { get; set; }
+            public IEnumerable<GetForTransferTicket> GetForTransferTickets { get; set; }
 
             //public List<TransferApprovalTicket> TransferApprovalTickets { get; set; }
 
-            public List<GetForOnHold> GetForOnHolds { get; set; }
-            public List<GetOnHold> GetOnHolds { get; set; }
+            public IEnumerable<GetForOnHold> GetForOnHolds { get; set; }
+            public IEnumerable<GetOnHold> GetOnHolds { get; set; }
 
             public class GetForClosingTicket
             {
                 public int? ClosingTicketId { get; set; }
                 public string Resolution { get; set; }
-                public List<ForClosingTicketTechnician> ForClosingTicketTechnicians { get; set; }
+                public int? CategoryConcernId { get; set; }
+                public string CategoryConcernName { get; set; }
+                public string Notes { get; set; }
+                public IEnumerable<ForClosingTicketTechnician> ForClosingTicketTechnicians { get; set; }
                 public class ForClosingTicketTechnician
                 {
                     public int? TicketTechnicianId { get; set; }
@@ -115,31 +125,30 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     public string Fullname { get; set; }
                 }
 
-                public List<GetForClosingTicketCategory> GetForClosingTicketCategories { get; set; }
+                //public IEnumerable<GetForClosingTicketCategory> GetForClosingTicketCategories { get; set; }
 
-                public class GetForClosingTicketCategory
-                {
-                    public int? TicketCategoryId { get; set; }
-                    public int? CategoryId { get; set; }
-                    public string Category_Description { get; set; }
+                //public class GetForClosingTicketCategory
+                //{
+                //    public int? TicketCategoryId { get; set; }
+                //    public int? CategoryId { get; set; }
+                //    public string Category_Description { get; set; }
 
-                }
+                //}
 
-                public List<GetForClosingTicketSubCategory> GetForClosingTicketSubCategories { get; set; }
+                //public IEnumerable<GetForClosingTicketSubCategory> GetForClosingTicketSubCategories { get; set; }
 
-                public class GetForClosingTicketSubCategory
-                {
-                    public int? TicketSubCategoryId { get; set; }
-                    public int? SubCategoryId { get; set; }
-                    public string SubCategory_Description { get; set; }
-                }
+                //public class GetForClosingTicketSubCategory
+                //{
+                //    public int? TicketSubCategoryId { get; set; }
+                //    public int? SubCategoryId { get; set; }
+                //    public string SubCategory_Description { get; set; }
+                //}
 
-                public string Notes { get; set; }
                 public string Remarks { get; set; }
                 public bool? IsApprove { get; set; }
-                public string Approver { get; set; }
+                //public string Approver { get; set; }
 
-                public List<ApproverList> ApproverLists { get; set; }
+                public IEnumerable<ApproverList> ApproverLists { get; set; }
 
                 public class ApproverList
                 {
@@ -147,7 +156,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     public int? Approver_Level { get; set; }
                 }
 
-                public List<GetAttachmentForClosingTicket> GetAttachmentForClosingTickets { get; set; }
+                public IEnumerable<GetAttachmentForClosingTicket> GetAttachmentForClosingTickets { get; set; }
                 public class GetAttachmentForClosingTicket
                 {
                     public int? TicketAttachmentId { get; set; }
@@ -174,7 +183,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
 
                 public DateTime ? Current_Target_Date { get; set; }
 
-                public List<GetAttachmentForTransferTicket> GetAttachmentForTransferTickets { get; set; }
+                public IEnumerable<GetAttachmentForTransferTicket> GetAttachmentForTransferTickets { get; set; }
                 public class GetAttachmentForTransferTicket
                 {
                     public int? TicketAttachmentId { get; set; }
@@ -216,7 +225,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                 public DateTime? ResumeAt { get; set; }
                 public bool? IsApprove { get; set; }
 
-                public List<GetAttachmentForOnHoldOpenTicket> GetAttachmentForOnHoldOpenTickets { get; set; }
+                public IEnumerable<GetAttachmentForOnHoldOpenTicket> GetAttachmentForOnHoldOpenTickets { get; set; }
                 public class GetAttachmentForOnHoldOpenTicket
                 {
                     public int? TicketAttachmentId { get; set; }
@@ -238,7 +247,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                 public DateTime? ResumeAt { get; set; }
                 public bool? IsApprove { get; set; }
 
-                public List<GetAttachmentOnHoldOpenTicket> GetAttachmentOnHoldOpenTickets { get; set; }
+                public IEnumerable<GetAttachmentOnHoldOpenTicket> GetAttachmentOnHoldOpenTickets { get; set; }
                 public class GetAttachmentOnHoldOpenTicket
                 {
                     public int? TicketAttachmentId { get; set; }
@@ -253,9 +262,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
            
 
 
-            public DateTime ? Transaction_Date { get; set; }
+            
 
-            public int? Aging_Days { get; set; }
 
 
             //public List<GetApprovalTargetDate> GetApprovalTargetDates { get; set; }

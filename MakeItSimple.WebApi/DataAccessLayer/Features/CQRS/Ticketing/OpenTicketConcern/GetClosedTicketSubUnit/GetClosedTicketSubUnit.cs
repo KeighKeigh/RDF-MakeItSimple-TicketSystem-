@@ -121,7 +121,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                         Concern_Details = x.RequestConcern.Concern,
                         Notes = x.RequestConcern.Notes,
                         DepartmentId = x.User.DepartmentId,
-                        Department_Name = x.User.Department.DepartmentName,
+                        Department_Name = x.User.OneChargingMIS.department_name,
                         ChannelId = x.RequestConcern.ChannelId,
                         Channel_Name = x.RequestConcern.Channel.ChannelName,
                         UserId = x.UserId,

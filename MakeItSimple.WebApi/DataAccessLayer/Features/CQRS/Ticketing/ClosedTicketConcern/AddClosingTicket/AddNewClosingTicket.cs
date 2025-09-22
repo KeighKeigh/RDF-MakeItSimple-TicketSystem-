@@ -27,8 +27,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
             var ticketSubCategoryList = new List<int?>();
             var ticketTechnicianList = new List<int>();
 
-            var userDetails = await unitOfWork.User
-                .UserExist(command.Added_By);
+            //var userDetails = await unitOfWork.User
+            //    .UserExist(command.Added_By);
 
             var ticketConcernExist = await unitOfWork.RequestTicket
                 .TicketConcernExist(command.TicketConcernId);
@@ -52,6 +52,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
                     Id = closingTicketExist.Id,
                     Resolution = command.Resolution,
                     Notes = command.Notes,
+                    CategoryConcernId = command.CategoryConcernId,
+                    CategoryConcernName = command.CategoryConcern,
 
                 };
 
@@ -97,7 +99,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
                     IsClosing = false,
                     TicketApprover = approver.ApproverId,
                     AddedBy = command.Added_By,
-                    Notes = command.Notes,
+                    Notes = command.Notes == null ? null : command.Notes,
+                    CategoryConcernId = command.CategoryConcernId,
+                    CategoryConcernName = command.CategoryConcern,
+                    ForClosingAt = DateTime.Now,
                 };
 
                 await unitOfWork.ClosingTicket.CreateClosingTicket(addNewClosingConcern,cancellationToken);
@@ -106,9 +111,16 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
 
                 closingTicketExist = addNewClosingConcern;
 
+                //var forClosingDate = new TicketConcern
+                //{
+                //    Id = ticketConcernExist.Id,
+                //    ForClosingDate = DateTime.Now,
+                //};
+
+                //await unitOfWork.ClosingTicket.AddForClosingDate(forClosingDate, cancellationToken);
                 //foreach (var approver in approverList)
                 //{
-                    var addNewApprover = new ApproverTicketing
+                var addNewApprover = new ApproverTicketing
                     {
                         TicketConcernId = ticketConcernExist.Id,
                         ClosingTicketId = closingTicketExist.Id,
@@ -153,11 +165,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
 
                 //}
 
-                var businessUnitList = await unitOfWork.BusinessUnit
-                         .BusinessUnitExist(ticketConcernExist.User.BusinessUnitId);
+                //var businessUnitList = await unitOfWork.BusinessUnit
+                //         .BusinessUnitExist(ticketConcernExist.User.BusinessUnitId);
 
-                var receiverList = await unitOfWork.Receiver
-                    .ReceiverExistByBusinessUnitId(businessUnitList.Id);
+                //var receiverList = await unitOfWork.Receiver
+                //    .ReceiverExistByBusinessUnitId(businessUnitList.Id);
 
                 var addForConfirmationHistory = new TicketHistory
                 {

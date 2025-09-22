@@ -20,6 +20,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
             public bool? Ascending { get; set; }
             public string ServiceProviderName { get; set; }
             public string ChannelName { get; set; }
+
+            public int? LocationId { get; set; }
+            public int? DepartmentId { get; set; }
+
+            public DateTime? DateFrom { get; set; }
+            public DateTime? DateTo { get; set; }
         }
     }
 }

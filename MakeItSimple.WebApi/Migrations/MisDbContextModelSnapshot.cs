@@ -103,7 +103,8 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasColumnName("business_unit_name");
 
                     b.Property<string>("code")
-                        .HasColumnType("nvarchar(max)")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("code");
 
                     b.Property<string>("company_code")
@@ -180,6 +181,9 @@ namespace MakeItSimple.WebApi.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_one_chargings");
+
+                    b.HasAlternateKey("code")
+                        .HasName("ak_one_chargings_code");
 
                     b.ToTable("one_chargings", (string)null);
                 });
@@ -753,6 +757,10 @@ namespace MakeItSimple.WebApi.Migrations
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("modified_by");
+
+                    b.Property<bool?>("Request")
+                        .HasColumnType("bit")
+                        .HasColumnName("request");
 
                     b.Property<int?>("SubUnitId")
                         .HasColumnType("int")
@@ -1515,6 +1523,37 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasDatabaseName("ix_approver_users_user_id");
 
                     b.ToTable("approver_users", (string)null);
+                });
+
+            modelBuilder.Entity("MakeItSimple.WebApi.Models.Setup.Phase_One.CategoryConcernSetup.CategoryConcern", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CategoryConcernName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("category_concern_name");
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_added");
+
+                    b.Property<DateTime?>("DateUpdated")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_updated");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.HasKey("Id")
+                        .HasName("pk_category_concerns");
+
+                    b.ToTable("category_concerns", (string)null);
                 });
 
             modelBuilder.Entity("MakeItSimple.WebApi.Models.Setup.Phase_One.ServiceProviderSetup.ServiceProviderChannel", b =>
@@ -2452,6 +2491,14 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("added_by");
 
+                    b.Property<int?>("CategoryConcernId")
+                        .HasColumnType("int")
+                        .HasColumnName("category_concern_id");
+
+                    b.Property<string>("CategoryConcernName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("category_concern_name");
+
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int")
                         .HasColumnName("category_id");
@@ -2471,6 +2518,10 @@ namespace MakeItSimple.WebApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("ForClosingAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("for_closing_at");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")
@@ -2580,6 +2631,10 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasColumnType("int")
                         .HasColumnName("business_unit_id");
 
+                    b.Property<string>("CategoryConcernName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("category_concern_name");
+
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int")
                         .HasColumnName("category_id");
@@ -2647,6 +2702,14 @@ namespace MakeItSimple.WebApi.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("notes");
+
+                    b.Property<string>("OneChargingCode")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("one_charging_code");
+
+                    b.Property<string>("OneChargingName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("one_charging_name");
 
                     b.Property<Guid?>("RejectBy")
                         .HasColumnType("uniqueidentifier")
@@ -2720,35 +2783,20 @@ namespace MakeItSimple.WebApi.Migrations
                     b.HasIndex("BackJobId")
                         .HasDatabaseName("ix_request_concerns_back_job_id");
 
-                    b.HasIndex("BusinessUnitId")
-                        .HasDatabaseName("ix_request_concerns_business_unit_id");
-
                     b.HasIndex("CategoryId")
                         .HasDatabaseName("ix_request_concerns_category_id");
 
                     b.HasIndex("ChannelId")
                         .HasDatabaseName("ix_request_concerns_channel_id");
 
-                    b.HasIndex("CompanyId")
-                        .HasDatabaseName("ix_request_concerns_company_id");
-
-                    b.HasIndex("DepartmentId")
-                        .HasDatabaseName("ix_request_concerns_department_id");
-
-                    b.HasIndex("LocationId")
-                        .HasDatabaseName("ix_request_concerns_location_id");
-
                     b.HasIndex("ModifiedBy")
                         .HasDatabaseName("ix_request_concerns_modified_by");
 
+                    b.HasIndex("OneChargingCode")
+                        .HasDatabaseName("ix_request_concerns_one_charging_code");
+
                     b.HasIndex("RejectBy")
                         .HasDatabaseName("ix_request_concerns_reject_by");
-
-                    b.HasIndex("ReqSubUnitId")
-                        .HasDatabaseName("ix_request_concerns_req_sub_unit_id");
-
-                    b.HasIndex("ReqUnitId")
-                        .HasDatabaseName("ix_request_concerns_req_unit_id");
 
                     b.HasIndex("ServiceProviderId")
                         .HasDatabaseName("ix_request_concerns_service_provider_id");
@@ -2756,14 +2804,8 @@ namespace MakeItSimple.WebApi.Migrations
                     b.HasIndex("SubCategoryId")
                         .HasDatabaseName("ix_request_concerns_sub_category_id");
 
-                    b.HasIndex("SubUnitId")
-                        .HasDatabaseName("ix_request_concerns_sub_unit_id");
-
                     b.HasIndex("TransferChannelId")
                         .HasDatabaseName("ix_request_concerns_transfer_channel_id");
-
-                    b.HasIndex("UnitId")
-                        .HasDatabaseName("ix_request_concerns_unit_id");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_request_concerns_user_id");
@@ -3602,7 +3644,7 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<string>("OneChargingCode")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("one_charging_code");
 
                     b.Property<string>("OneChargingName")
@@ -3643,20 +3685,14 @@ namespace MakeItSimple.WebApi.Migrations
                     b.HasIndex("AddedBy")
                         .HasDatabaseName("ix_users_added_by");
 
-                    b.HasIndex("BusinessUnitId")
-                        .HasDatabaseName("ix_users_business_unit_id");
-
-                    b.HasIndex("CompanyId")
-                        .HasDatabaseName("ix_users_company_id");
-
                     b.HasIndex("DepartmentId")
                         .HasDatabaseName("ix_users_department_id");
 
-                    b.HasIndex("LocationId")
-                        .HasDatabaseName("ix_users_location_id");
-
                     b.HasIndex("ModifiedBy")
                         .HasDatabaseName("ix_users_modified_by");
+
+                    b.HasIndex("OneChargingCode")
+                        .HasDatabaseName("ix_users_one_charging_code");
 
                     b.HasIndex("SubUnitId")
                         .HasDatabaseName("ix_users_sub_unit_id");
@@ -4757,11 +4793,6 @@ namespace MakeItSimple.WebApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_request_concerns_request_concerns_back_job_id");
 
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.BusinessUnitSetup.BusinessUnit", "BusinessUnit")
-                        .WithMany()
-                        .HasForeignKey("BusinessUnitId")
-                        .HasConstraintName("fk_request_concerns_business_units_business_unit_id");
-
                     b.HasOne("MakeItSimple.WebApi.Models.Setup.CategorySetup.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
@@ -4772,42 +4803,24 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasForeignKey("ChannelId")
                         .HasConstraintName("fk_request_concerns_channels_channel_id");
 
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.CompanySetup.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .HasConstraintName("fk_request_concerns_companies_company_id");
-
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.DepartmentSetup.Department", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .HasConstraintName("fk_request_concerns_departments_department_id");
-
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.LocationSetup.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .HasConstraintName("fk_request_concerns_locations_location_id");
-
                     b.HasOne("MakeItSimple.WebApi.Models.User", "ModifiedByUser")
                         .WithMany()
                         .HasForeignKey("ModifiedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_request_concerns_users_user_id2");
 
+                    b.HasOne("MakeItSimple.WebApi.Models.OneCharging.OneChargingMIS", "OneChargingMIS")
+                        .WithMany()
+                        .HasForeignKey("OneChargingCode")
+                        .HasPrincipalKey("code")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_request_concerns_one_chargings_one_charging_code");
+
                     b.HasOne("MakeItSimple.WebApi.Models.User", "RejectByUser")
                         .WithMany()
                         .HasForeignKey("RejectBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_request_concerns_users_user_id3");
-
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.SubUnitSetup.SubUnit", "ReqSubUnit")
-                        .WithMany()
-                        .HasForeignKey("ReqSubUnitId")
-                        .HasConstraintName("fk_request_concerns_sub_units_req_sub_unit_id");
-
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.UnitSetup.Unit", "ReqUnit")
-                        .WithMany()
-                        .HasForeignKey("ReqUnitId")
-                        .HasConstraintName("fk_request_concerns_units_req_unit_id");
 
                     b.HasOne("MakeItSimple.WebApi.Models.Setup.Phase_One.ServiceProviderSetup.ServiceProviders", "ServiceProvider")
                         .WithMany("RequestConcerns")
@@ -4819,20 +4832,10 @@ namespace MakeItSimple.WebApi.Migrations
                         .HasForeignKey("SubCategoryId")
                         .HasConstraintName("fk_request_concerns_sub_categories_sub_category_id");
 
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.SubUnitSetup.SubUnit", "SubUnit")
-                        .WithMany()
-                        .HasForeignKey("SubUnitId")
-                        .HasConstraintName("fk_request_concerns_sub_units_sub_unit_id");
-
                     b.HasOne("MakeItSimple.WebApi.Models.Setup.ChannelSetup.Channel", "TransferChannel")
                         .WithMany()
                         .HasForeignKey("TransferChannelId")
                         .HasConstraintName("fk_request_concerns_channels_transfer_channel_id");
-
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.UnitSetup.Unit", "Unit")
-                        .WithMany()
-                        .HasForeignKey("UnitId")
-                        .HasConstraintName("fk_request_concerns_units_unit_id");
 
                     b.HasOne("MakeItSimple.WebApi.Models.User", "User")
                         .WithMany("RequestConcerns")
@@ -4845,35 +4848,21 @@ namespace MakeItSimple.WebApi.Migrations
 
                     b.Navigation("BackJob");
 
-                    b.Navigation("BusinessUnit");
-
                     b.Navigation("Category");
 
                     b.Navigation("Channel");
 
-                    b.Navigation("Company");
-
-                    b.Navigation("Department");
-
-                    b.Navigation("Location");
-
                     b.Navigation("ModifiedByUser");
 
+                    b.Navigation("OneChargingMIS");
+
                     b.Navigation("RejectByUser");
-
-                    b.Navigation("ReqSubUnit");
-
-                    b.Navigation("ReqUnit");
 
                     b.Navigation("ServiceProvider");
 
                     b.Navigation("SubCategory");
 
-                    b.Navigation("SubUnit");
-
                     b.Navigation("TransferChannel");
-
-                    b.Navigation("Unit");
 
                     b.Navigation("User");
                 });
@@ -5237,27 +5226,10 @@ namespace MakeItSimple.WebApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_users_users_added_by");
 
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.BusinessUnitSetup.BusinessUnit", "BusinessUnit")
-                        .WithMany()
-                        .HasForeignKey("BusinessUnitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_users_business_units_business_unit_id");
-
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.CompanySetup.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .HasConstraintName("fk_users_companies_company_id");
-
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.DepartmentSetup.Department", "Department")
+                    b.HasOne("MakeItSimple.WebApi.Models.Setup.DepartmentSetup.Department", null)
                         .WithMany("Users")
                         .HasForeignKey("DepartmentId")
                         .HasConstraintName("fk_users_departments_department_id");
-
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.LocationSetup.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .HasConstraintName("fk_users_locations_location_id");
 
                     b.HasOne("MakeItSimple.WebApi.Models.User", "ModifiedByUser")
                         .WithMany()
@@ -5265,12 +5237,19 @@ namespace MakeItSimple.WebApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_users_users_modified_by");
 
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.SubUnitSetup.SubUnit", "SubUnit")
+                    b.HasOne("MakeItSimple.WebApi.Models.OneCharging.OneChargingMIS", "OneChargingMIS")
+                        .WithMany()
+                        .HasForeignKey("OneChargingCode")
+                        .HasPrincipalKey("code")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_users_one_chargings_one_charging_code");
+
+                    b.HasOne("MakeItSimple.WebApi.Models.Setup.SubUnitSetup.SubUnit", null)
                         .WithMany("Users")
                         .HasForeignKey("SubUnitId")
                         .HasConstraintName("fk_users_sub_units_sub_unit_id");
 
-                    b.HasOne("MakeItSimple.WebApi.Models.Setup.UnitSetup.Unit", "Units")
+                    b.HasOne("MakeItSimple.WebApi.Models.Setup.UnitSetup.Unit", null)
                         .WithMany("Users")
                         .HasForeignKey("UnitId")
                         .HasConstraintName("fk_users_units_unit_id");
@@ -5284,19 +5263,9 @@ namespace MakeItSimple.WebApi.Migrations
 
                     b.Navigation("AddedByUser");
 
-                    b.Navigation("BusinessUnit");
-
-                    b.Navigation("Company");
-
-                    b.Navigation("Department");
-
-                    b.Navigation("Location");
-
                     b.Navigation("ModifiedByUser");
 
-                    b.Navigation("SubUnit");
-
-                    b.Navigation("Units");
+                    b.Navigation("OneChargingMIS");
 
                     b.Navigation("UserRole");
                 });

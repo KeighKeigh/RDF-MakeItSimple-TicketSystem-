@@ -13,6 +13,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTick
         public int? ClosingTicketId { get; set; }
         public string Resolution { get; set; }
         public string Notes { get; set; }
+        public int? CategoryConcernId { get; set; }
+        public string CategoryConcern {  get; set; }
 
         public List<AddClosingTicketTechnician> AddClosingTicketTechnicians { get; set; }
         public class AddClosingTicketTechnician

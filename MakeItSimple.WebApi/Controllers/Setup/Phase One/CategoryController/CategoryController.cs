@@ -17,12 +17,12 @@ namespace MakeItSimple.WebApi.Controllers.Setup.CategoryController
     public class CategoryController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ValidatorHandler _validatorHandler;
 
-        public CategoryController(IMediator mediator , ValidatorHandler validatorHandler)
+
+        public CategoryController(IMediator mediator)
         {
             _mediator = mediator;
-            _validatorHandler = validatorHandler;
+
         }
 
         [HttpPost]

@@ -1,6 +1,6 @@
 ﻿using MakeItSimple.WebApi.Common;
 using MakeItSimple.WebApi.Common.Extension;
-using MakeItSimple.WebApi.Common.SignalR;
+//using MakeItSimple.WebApi.Common.SignalR;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.ClosedTicketConcern.AddClosingTicket;
 using MediatR;
@@ -23,13 +23,13 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
     public class ClosingTicketController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly TimerControl _timerControl;
+        //private readonly TimerControl _timerControl;
         private readonly MisDbContext context;
 
-        public ClosingTicketController(IMediator mediator, TimerControl timerControl, MisDbContext context)
+        public ClosingTicketController(IMediator mediator, MisDbContext context)
         {
             _mediator = mediator;
-            _timerControl = timerControl;
+            //_timerControl = timerControl;
             this.context = context;
         }
 

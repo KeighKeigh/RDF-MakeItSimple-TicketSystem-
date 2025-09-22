@@ -4,9 +4,9 @@
     {
         public record AllTicketReportsResult
         {
-            public int? TicketConcernId { get; set; }
+            public string TicketConcernId { get; set; }
             public string Request_Type { get; set; }
-            public int? BackJobId { get; set; }
+            public string BackJobId { get; set; }
             public string Requestor_Name { get; set; }
             public string Company_Code { get; set; }
             public string Company_Name { get; set; }
@@ -27,28 +27,31 @@
             public string Channel_Name { get; set; }
             public string TicketCategoryDescriptions { get; set; }
             public string TicketSubCategoryDescriptions { get; set; }
-            public DateTime? Date_Needed { get; set; }
+            public string Date_Needed { get; set; }
             public string Contact_Number { get; set; }
             public string Notes { get; set; }
-            public DateTime? Transaction_Date { get; set; }
-            public DateTime? Target_Date { get; set; }
+            public string Transaction_Date { get; set; }
+            public string Target_Date { get; set; }
             public string Ticket_Status { get; set; }
             public string Remarks { get; set; }
             public int? Aging_Days {  get; set; }     
             public int? ChannelId { get; set; }
             public int? ServiceProvider { get; set; }
             public string ServiceProviderName { get; set; }
-            public DateTime? StartDate { get; set; }
-            public DateTime? ClosedDate { get; set; }
+            public string StartDate { get; set; }
+            public string ClosedDate { get; set; }
+            public string ForClosedDate { get; set; }
             public string AssignTo { get; set; }
             public string ClosingStatus { get; set; }
             public string Technician1 { get; set; }
             public string Technician2 { get; set; }
             public string Technician3 { get; set; }
             public string Resolution { get; set; }
-            public DateTime? CreatedTime { get; set; }
-            public DateTime? CompletedTime { get; set;}
+            public string CreatedTime { get; set; }
+            public string CompletedTime { get; set;}
             public string Severity { get; set; }
+            public string Technicians { get; set; }
+            public string CategoryConcern { get; set; }
 
 
 

@@ -1,31 +1,32 @@
-﻿using MakeItSimple.WebApi.Common;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using MakeItSimple.WebApi.Common;
 using MakeItSimple.WebApi.Common.Extension;
+//using MakeItSimple.WebApi.Common.SignalR;
+using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
+using MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddRequest;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+//using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddCommentNotificationValidator;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddRequest.UpdateRequestConcern;
+//using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddTicketComment;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AssignAndApprovalTicket.AssignAndApprovalConcern;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.CherryPicking.TakeCherryPicking;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.DownloadImageTicketing;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.GetTicketComment;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.RemoveTicketComment;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.ViewMultipleSubCategories.ViewMultipleSubCategory;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.AddRequest.AddRequestConcern;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.ApprovalTicket.RequestApprovalReceiver;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.AssignTicket.AddRequestConcernReceiver;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddTicketComment;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.BackJob.TicketBackJob;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.CancelTicket.CancelRequestConcern;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.GetAttachment.GetRequestAttachment;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.GetConcernTicket.GetRequestorTicketConcern;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.GetTicketComment;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.RemoveTicketAttachment.RemoveTicketAttachment;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.RemoveTicketComment;
-using Microsoft.AspNetCore.SignalR;
-using MakeItSimple.WebApi.Common.SignalR;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.DownloadImageTicketing;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.ViewImage.ViewTicketImage;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.ApprovalTicket.RequestApprovalReceiver;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.BackJob.TicketBackJob;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.ViewMultipleSubCategories.ViewMultipleSubCategory;
-using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
-using Microsoft.AspNetCore.Authorization;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AssignAndApprovalTicket.AssignAndApprovalConcern;
-using MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddRequest;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCreating.AddRequest.UpdateRequestConcern;
-using DocumentFormat.OpenXml.Bibliography;
 
 
 
@@ -36,13 +37,13 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
     public class RequestConcernController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly TimerControl _timerControl;
+        //private readonly TimerControl _timerControl;
         private readonly MisDbContext context; 
 
-        public RequestConcernController(IMediator mediator, TimerControl timerControl, MisDbContext context)
+        public RequestConcernController(IMediator mediator, MisDbContext context)
         {
             _mediator = mediator;
-            _timerControl = timerControl;
+
             this.context = context;
 
         }
@@ -345,30 +346,30 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
         //    }
         //}
 
-        [HttpPost("add-comment")]
-        public async Task<IActionResult> AddTicketComment([FromForm] AddTicketCommentCommand command)
-        {
-            try
-            {
-                if (User.Identity is ClaimsIdentity identity && Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
-                {
-                    command.Modified_By = userId;
-                    command.Added_By = userId;
-                    command.UserId = userId;
+        //[HttpPost("add-comment")]
+        //public async Task<IActionResult> AddTicketComment([FromForm] AddTicketCommentCommand command)
+        //{
+        //    try
+        //    {
+        //        if (User.Identity is ClaimsIdentity identity && Guid.TryParse(identity.FindFirst("id")?.Value, out var userId))
+        //        {
+        //            command.Modified_By = userId;
+        //            command.Added_By = userId;
+        //            command.UserId = userId;
 
-                }
-                var result = await _mediator.Send(command);
-                if (result.IsFailure)
-                {
-                    return BadRequest(result);
-                }
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return Conflict(ex.Message);
-            }
-        }
+        //        }
+        //        var result = await _mediator.Send(command);
+        //        if (result.IsFailure)
+        //        {
+        //            return BadRequest(result);
+        //        }
+        //        return Ok(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Conflict(ex.Message);
+        //    }
+        //}
 
         [HttpPut("remove-comment")]
         public async Task<IActionResult> RemoveTicketComment([FromBody] RemoveTicketCommentCommand command)
@@ -527,6 +528,28 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
             }
         }
 
+
+        [HttpPost("cherry-pick-concern")]
+        public async Task<IActionResult> CherryPickConcern([FromBody] TakeCherryPickingCommand command)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var result = await _mediator.Send(command);
+                if (result.IsFailure)
+                {
+                    await transaction.RollbackAsync();
+                    return BadRequest(result);
+                }
+                await transaction.CommitAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return Conflict(ex.Message);
+            }
+        }
 
     }
 }

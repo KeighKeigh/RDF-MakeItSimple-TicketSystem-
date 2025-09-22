@@ -43,29 +43,29 @@ namespace MakeItSimple.WebApi.Models
         public virtual UserRole UserRole { get; set; }
 
         public int? CompanyId { get; set; }
-        public virtual OneCompany Company { get; set; }
 
         public int BusinessUnitId { get; set; }
-        public virtual OneBusinessUnit BusinessUnit { get; set; }
 
         public int ? DepartmentId { get; set; }
-        public virtual OneDepartment Department { get; set; }
 
         public int? UnitId { get; set; }
-        public virtual OneUnit Units { get; set; }
 
         public int ? SubUnitId { get; set; }
-        public virtual OneSubUnit SubUnit { get; set; }
 
         public int? LocationId { get; set; }
-        public virtual OneLocation Location { get; set; }
+
 
 
         public string ProfilePic { get; set; }
         public string FileName { get; set; }
         public decimal? FileSize { get; set; }
         public bool? IsStore { get; set; }
+
+        [ForeignKey("OneChargingMIS")]
         public string OneChargingCode { get; set; }
+        public virtual OneChargingMIS OneChargingMIS { get; set; }
+
+
         public string OneChargingName { get; set; }
         public ICollection<TicketConcern> TicketConcerns { get; set;}
         public ICollection<Channel> Channels { get; set; }

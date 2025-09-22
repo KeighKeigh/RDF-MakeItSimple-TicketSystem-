@@ -23,6 +23,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
             public Guid? AssignTo { get; set; }
     
             public Guid? RequestorBy { get; set; }
+            public string OneChargingCode { get; set; }
+            public string OneChargingName { get; set; }
 
             
 

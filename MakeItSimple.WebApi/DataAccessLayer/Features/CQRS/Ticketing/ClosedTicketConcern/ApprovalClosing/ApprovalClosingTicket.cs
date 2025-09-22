@@ -101,7 +101,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
                             {
                                 Id = closingTicketExist.Id,
                                 ClosedBy = command.Closed_By,
-
+                                IsClosing = true
                             };
 
                             await unitOfWork.ClosingTicket.ApprovedClosingTicket(approvedClosingTicket,cancellationToken);
@@ -122,6 +122,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
                                 Id = closingTicketExist.TicketConcern.RequestConcernId.Value,
                                 Resolution = closingTicketExist.Resolution,
                                 ConcernStatus = TicketingConString.NotConfirm,
+                                CategoryConcernName = closingTicketExist.CategoryConcernName,
 
                             };
 

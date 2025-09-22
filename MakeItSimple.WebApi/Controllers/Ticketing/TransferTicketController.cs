@@ -8,7 +8,7 @@ using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTick
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.GetTransfer.GetTransferTicket;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.RejectTransfer.RejectTransferTicket;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.CreateTransfer.AddNewTransferTicket;
-using MakeItSimple.WebApi.Common.SignalR;
+//using MakeItSimple.WebApi.Common.SignalR;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.TransferUser.TransferTicketUser;
 
 namespace MakeItSimple.WebApi.Controllers.Ticketing
@@ -18,12 +18,12 @@ namespace MakeItSimple.WebApi.Controllers.Ticketing
     public class TransferTicketController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly TimerControl _timerControl;
 
-        public TransferTicketController(IMediator mediator, TimerControl timerControl)
+
+        public TransferTicketController(IMediator mediator)
         {
             _mediator = mediator;
-            _timerControl = timerControl;
+            
         }
 
         [HttpPost("add-transfer")]

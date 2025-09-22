@@ -36,7 +36,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                     {
 
                         openTicketsQuery = openTicketsQuery
-                            .Where(x => x.TargetDate.Value.Date < dateToday && x.Closed_At == null);
+                            .Where(x => x.TargetDate.Value.Date < dateToday);
                     }
 
                 }
@@ -125,7 +125,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                         Concern_Details = x.RequestConcern.Concern,
                         Notes = x.RequestConcern.Notes,
                         DepartmentId = x.User.DepartmentId,
-                        Department_Name = x.User.Department.DepartmentName,
+                        Department_Name = x.User.OneChargingMIS.department_name,
                         ChannelId = x.RequestConcern.ChannelId,
                         Channel_Name = x.RequestConcern.Channel.ChannelName,
                         UserId = x.UserId,
@@ -158,8 +158,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.OpenTicket
                         Created_At = x.CreatedAt,
                         Updated_At = x.UpdatedAt,
                         Modified_By = x.ModifiedByUser.Fullname,
-                        Delay_Days = x.TargetDate < dateToday && x.Closed_At == null ? EF.Functions.DateDiffDay(x.TargetDate, dateToday)
-                            : x.TargetDate < x.Closed_At && x.Closed_At != null ? EF.Functions.DateDiffDay(x.TargetDate, x.Closed_At) : 0,
+                        Delay_Days = x.TargetDate < dateToday  ? EF.Functions.DateDiffDay(x.TargetDate, dateToday) : 0,
 
                         OpenTicketSubCategoryAttachments = x.TicketAttachments.Select(x => new GetOpenTicketSubUnitResult.OpenTicketSubCategoryAttachment
                         {

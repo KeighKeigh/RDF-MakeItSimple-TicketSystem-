@@ -52,7 +52,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                         Id = approvalDateExist.TicketConcern.RequestConcernId.Value,
                         TargetDate = null,
                         ConcernStatus = TicketingConString.DateRejected,
-                        AssignTo = null,
 
 
                     };
@@ -62,7 +61,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                     var removeOpenTicket = new TicketConcern
                     {
                         Id = approvalDateExist.TicketConcernId,
-                        AssignTo = null,
                         IsAssigned = false,
                         ConcernStatus = TicketingConString.DateRejected,
                         TargetDate = null,

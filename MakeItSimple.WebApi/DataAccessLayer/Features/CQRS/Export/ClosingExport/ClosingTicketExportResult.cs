@@ -26,7 +26,8 @@
             public int Aging_Days { get; set; }
             public int? ServiceProvider { get; set; }
             public string ServiceProviderName { get; set; }
-            public DateTime? OpenDate { get; set; }
+            public string OpenDate { get; set; }
+            public string ForClosedDate { get; set; }
         }
     }
 }

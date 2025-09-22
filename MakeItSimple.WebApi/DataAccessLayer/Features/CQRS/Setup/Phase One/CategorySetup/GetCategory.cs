@@ -54,7 +54,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.CategorySetup
 
             public async Task<PagedList<GetCategoryResult>> Handle(GetCategoryQuery request, CancellationToken cancellationToken)
             {
-                IQueryable<Category> categoriesQuery = _context.Categories.Include(x => x.SubCategories)
+                IQueryable<Category> categoriesQuery = _context.Categories
+                    .AsNoTracking()
+                    .Include(x => x.SubCategories)
                     .Include(x => x.Channel)
                     .Include(x => x.AddedByUser).Include(x => x.ModifiedByUser);
 

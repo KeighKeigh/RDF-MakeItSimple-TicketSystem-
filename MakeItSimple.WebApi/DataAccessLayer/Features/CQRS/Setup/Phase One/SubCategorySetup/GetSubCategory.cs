@@ -40,7 +40,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.SubCategorySet
 
             public async Task<PagedList<GetSubCategoryResult>> Handle(GetSubCategoryQuery request, CancellationToken cancellationToken)
             {
-                IQueryable<SubCategory> subCategoriesQuery = _context.SubCategories.Include(x => x.AddedByUser)
+                IQueryable<SubCategory> subCategoriesQuery = _context.SubCategories
+                    .AsNoTracking()
+                    .Include(x => x.AddedByUser)
                     .Include(x => x.ModifiedByUser).Include(x => x.Category);
 
                 if (!string.IsNullOrEmpty(request.Search))

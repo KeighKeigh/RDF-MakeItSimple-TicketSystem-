@@ -107,6 +107,18 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 IsChanged = true;
             }
 
+            if (update.CategoryConcernId != closingTicket.CategoryConcernId)
+            {
+                update.CategoryConcernId = closingTicket.CategoryConcernId;
+                IsChanged = true;
+            }
+
+            if (update.CategoryConcernName != closingTicket.CategoryConcernName)
+            {
+                update.CategoryConcernName = closingTicket.CategoryConcernName;
+                IsChanged = true;
+            }
+            //update.IsClosing = true;
             if (IsChanged)
             {
                 update.ModifiedBy = closingTicket.ModifiedBy;
@@ -153,8 +165,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .Where(x => x.Id == closingTicket.Id)
                 .ExecuteUpdateAsync(update => update
                 .SetProperty(u => u.TicketApprover, u => null)
-                .SetProperty(u => u.IsClosing, u => true)
                 .SetProperty(u => u.ClosingAt, u => DateTime.Now)
+                .SetProperty(u => u.IsClosing, u => closingTicket.IsClosing)
                 .SetProperty(u => u.ClosedBy, u => closingTicket.ClosedBy));
         }
 
@@ -178,9 +190,19 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .ExecuteUpdateAsync(update => update
                 .SetProperty(u => u.IsDone, u => true)
                 .SetProperty(u => u.Resolution, u => requestConcern.Resolution)
-                .SetProperty(u => u.ConcernStatus, u => requestConcern.ConcernStatus));
+                .SetProperty(u => u.ConcernStatus, u => requestConcern.ConcernStatus)
+                .SetProperty(u => u.CategoryConcernName, u => requestConcern.CategoryConcernName));
 
         }
+
+        //public async Task AddForClosingDate(TicketConcern ticketConcern, CancellationToken cancellationToken)
+        //{
+
+        //    await context.TicketConcerns
+        //        .Where(x => x.Id == ticketConcern.Id)
+        //        .ExecuteUpdateAsync(update => update
+        //        .SetProperty(u => u.ForClosingDate, u => ticketConcern.ForClosingDate));
+        //}
 
         public async Task NextApproverUser(int? id, Guid? userId)
         {
@@ -265,7 +287,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 .SetProperty(u => u.IsRejectClosed, u => true)
                 .SetProperty(u => u.RejectClosedBy, u => closingTicket.RejectClosedBy)
                 .SetProperty(u => u.RejectRemarks, u => closingTicket.RejectRemarks)
-                .SetProperty(u => u.Remarks, u => closingTicket.RejectRemarks));
+                .SetProperty(u => u.Remarks, u => closingTicket.RejectRemarks)
+                .SetProperty(u => u.ForClosingAt, u => null));
+
 
             await context.TicketConcerns
                 .Where(x => x.Id == rejectClosing.TicketConcernId)

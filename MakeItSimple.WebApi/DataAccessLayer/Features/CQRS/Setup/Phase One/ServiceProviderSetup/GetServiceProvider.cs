@@ -46,6 +46,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.Phase_One.Serv
         {
             public string Search { get; set; }
             public bool? Status { get; set; }
+            public bool? Request {  get; set; }
         }
 
         public class Handler : IRequestHandler<GetServiceProviderQuery, PagedList<GetServiceProviderResult>>
@@ -81,6 +82,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.Phase_One.Serv
                     serviceQuery = serviceQuery.Where(x => x.IsActive == request.Status);
                 }
 
+                //if (request.Request != null)
+                //{
+                //    serviceQuery = serviceQuery.Where(x => x.ServiceProviderChannels == request.Status);
+                //}
+
+
 
                 var results = serviceQuery.Select(x => new GetServiceProviderResult
                 {
@@ -92,7 +99,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.Phase_One.Serv
                     Modified_By = x.ModifiedByUser.Fullname,
                     noOfChannels = x.ServiceProviderChannels.Count(),
                     isActive = x.IsActive,
-                    serviceChannel = x.ServiceProviderChannels.Where(x => x.IsActive == true).Select(x => new GetServiceProviderResult.ServiceProviderChannel
+                    serviceChannel = x.ServiceProviderChannels.Where(x => x.IsActive == true && x.Channel.Request == request.Request).Select(x => new GetServiceProviderResult.ServiceProviderChannel
                     {
                         
                         serviceProviderId = x.ServiceProviderId,

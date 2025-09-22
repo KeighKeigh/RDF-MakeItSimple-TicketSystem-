@@ -34,23 +34,23 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                     .Select(o => new AllTicketReportsResult
                     {
 
-                        TicketConcernId = o.Id,
+                        TicketConcernId = o.Id.ToString(),
 
                         Request_Type = o.RequestConcern.RequestType,
-                        BackJobId = o.RequestConcern.BackJobId,
+                        BackJobId = o.RequestConcern.BackJobId.ToString(),
                         Requestor_Name = o.RequestorByUser.Fullname,
-                        Company_Code = o.RequestConcern.Company.CompanyCode,
-                        Company_Name = o.RequestConcern.Company.CompanyName,
-                        BusinessUnit_Code = o.RequestConcern.BusinessUnit.BusinessCode,
-                        BusinessUnit_Name = o.RequestConcern.BusinessUnit.BusinessName,
-                        Department_Code = o.RequestConcern.Department.DepartmentCode,
-                        Department_Name = o.RequestConcern.Department.DepartmentName,
-                        Unit_Code = o.RequestConcern.Unit.UnitCode,
-                        Unit_Name = o.RequestConcern.Unit.UnitName,
-                        SubUnit_Code = o.RequestConcern.SubUnit.SubUnitCode,
-                        SubUnit_Name = o.RequestConcern.SubUnit.SubUnitName,
-                        Location_Code = o.RequestConcern.Location.LocationCode,
-                        Location_Name = o.RequestConcern.Location.LocationName,
+                        Company_Code = o.RequestConcern.OneChargingMIS.company_code,
+                        Company_Name = o.RequestConcern.OneChargingMIS.company_name,
+                        BusinessUnit_Code = o.RequestConcern.OneChargingMIS.business_unit_code,
+                        BusinessUnit_Name = o.RequestConcern.OneChargingMIS.business_unit_name,
+                        Department_Code = o.RequestConcern.OneChargingMIS.department_code,
+                        Department_Name = o.RequestConcern.OneChargingMIS.department_name,
+                        Unit_Code = o.RequestConcern.OneChargingMIS.department_unit_code,
+                        Unit_Name = o.RequestConcern.OneChargingMIS.department_unit_name,
+                        SubUnit_Code = o.RequestConcern.OneChargingMIS.sub_unit_code,
+                        SubUnit_Name = o.RequestConcern.OneChargingMIS.sub_unit_name,
+                        Location_Code = o.RequestConcern.OneChargingMIS.location_code,
+                        Location_Name = o.RequestConcern.OneChargingMIS.location_name,
                         Personnel_Unit = o.User.UnitId,
                         Personnel_Id = o.UserId,
                         Personnel = o.User.Fullname,
@@ -60,20 +60,23 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                           .Select(x => x.Category.CategoryDescription)), 
                         TicketSubCategoryDescriptions = string.Join(", ", o.RequestConcern.TicketSubCategories
                            .Select(x => x.SubCategory.SubCategoryDescription)),
-                        Date_Needed = o.RequestConcern.DateNeeded,
+                        Date_Needed = o.RequestConcern.DateNeeded.Value.ToString("MM/dd/yyyy"),
                         Contact_Number = o.RequestConcern.ContactNumber,
                         Notes = o.RequestConcern.Notes,
-                        Transaction_Date = o.CreatedAt.Date,
-                        Target_Date = o.TargetDate.Value.Date,
+                        Transaction_Date = o.CreatedAt.ToString("MM/dd/yyyy hh:tt:mm"),
+                        Target_Date = o.TargetDate.Value.ToString("MM/dd/yyyy"),
                         Ticket_Status = "Open",
                         Remarks = o.Remarks,
                         Aging_Days = EF.Functions.DateDiffDay(o.DateApprovedAt.Value.Date, DateTime.Now.Date),
                         ChannelId = o.RequestConcern.ChannelId.Value,
-                        StartDate = o.DateApprovedAt,
-                        ClosedDate = o.Closed_At,
+                        StartDate = o.DateApprovedAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
                         ServiceProvider = o.RequestConcern.ServiceProviderId.Value,
                         AssignTo = o.RequestConcern.AssignToUser.Fullname,
-                        ServiceProviderName = o.RequestConcern.ServiceProvider.ServiceProviderName
+                        ServiceProviderName = o.RequestConcern.ServiceProvider.ServiceProviderName,
+                        Resolution = o.RequestConcern.Resolution,
+                        
+                        
+                        
                         
                     }).ToListAsync();
 
@@ -86,22 +89,22 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                     .Where(t => t.TransferAt.Value.Date >= request.Date_From.Value.Date && t.TransferAt.Value.Date <= request.Date_To.Value.Date)
                     .Select(ct => new AllTicketReportsResult
                     {
-                        TicketConcernId = ct.TicketConcernId,
+                        TicketConcernId = ct.TicketConcernId.ToString(),
                         Request_Type = ct.TicketConcern.RequestConcern.RequestType,
-                        BackJobId = ct.TicketConcern.RequestConcern.BackJobId,
+                        BackJobId = ct.TicketConcern.RequestConcern.BackJobId.ToString(),
                         Requestor_Name = ct.TicketConcern.RequestorByUser.Fullname,
-                        Company_Code = ct.TicketConcern.RequestConcern.Company.CompanyCode,
-                        Company_Name = ct.TicketConcern.RequestConcern.Company.CompanyName,
-                        BusinessUnit_Code = ct.TicketConcern.RequestConcern.BusinessUnit.BusinessCode,
-                        BusinessUnit_Name = ct.TicketConcern.RequestConcern.BusinessUnit.BusinessName,
-                        Department_Code = ct.TicketConcern.RequestConcern.Department.DepartmentCode,
-                        Department_Name = ct.TicketConcern.RequestConcern.Department.DepartmentName,
-                        Unit_Code = ct.TicketConcern.RequestConcern.Unit.UnitCode,
-                        Unit_Name = ct.TicketConcern.RequestConcern.Unit.UnitName,
-                        SubUnit_Code = ct.TicketConcern.RequestConcern.SubUnit.SubUnitCode,
-                        SubUnit_Name = ct.TicketConcern.RequestConcern.SubUnit.SubUnitName,
-                        Location_Code = ct.TicketConcern.RequestConcern.Location.LocationCode,
-                        Location_Name = ct.TicketConcern.RequestConcern.Location.LocationName,
+                        Company_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.company_code,
+                        Company_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.company_name,
+                        BusinessUnit_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.business_unit_code,
+                        BusinessUnit_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.business_unit_name,
+                        Department_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.department_code,
+                        Department_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.department_name,
+                        Unit_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.department_unit_code,
+                        Unit_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.department_unit_name,
+                        SubUnit_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_code,
+                        SubUnit_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_name,
+                        Location_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.location_code,
+                        Location_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.location_name,
                         Personnel_Unit = ct.TicketConcern.User.UnitId,
                         Personnel_Id = ct.TicketConcern.UserId,
                         Personnel = ct.TransferToUser.Fullname,
@@ -111,17 +114,16 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                           .Select(x => x.Category.CategoryDescription)),
                         TicketSubCategoryDescriptions = string.Join(", ", ct.TicketConcern.RequestConcern.TicketSubCategories
                                .Select(x => x.SubCategory.SubCategoryDescription)),
-                        Date_Needed = ct.TicketConcern.RequestConcern.DateNeeded,
+                        Date_Needed = ct.TicketConcern.RequestConcern.DateNeeded.Value.ToString("MM/dd/yyyy hh:tt:mm"),
                         Contact_Number = ct.TicketConcern.RequestConcern.ContactNumber,
                         Notes = ct.TicketConcern.RequestConcern.Notes,
-                        Transaction_Date = ct.TransferAt.Value.Date,
-                        Target_Date = ct.Current_Target_Date.Value.Date,
+                        Transaction_Date = ct.TransferAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
+                        Target_Date = ct.Current_Target_Date.Value.ToString("MM/dd/yyyy"),
                         Ticket_Status = "Transfer",
                         Remarks = ct.TransferRemarks,
                         Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.DateApprovedAt.Value.Date, DateTime.Now.Date),
                         ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
-                        StartDate = ct.TicketConcern.DateApprovedAt,
-                        ClosedDate = ct.TicketConcern.Closed_At,
+                        StartDate = ct.TicketConcern.DateApprovedAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.TransferToUser.Fullname,
                         ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
@@ -136,22 +138,22 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                     .Where(t => t.CreatedAt.Date >= request.Date_From.Value.Date && t.CreatedAt.Date <= request.Date_To.Value.Date)
                     .Select(ct => new AllTicketReportsResult
                     {
-                        TicketConcernId = ct.TicketConcernId,
+                        TicketConcernId = ct.TicketConcernId.ToString(),
                         Request_Type = ct.TicketConcern.RequestConcern.RequestType,
-                        BackJobId = ct.TicketConcern.RequestConcern.BackJobId,
+                        BackJobId = ct.TicketConcern.RequestConcern.BackJobId.ToString(),
                         Requestor_Name = ct.TicketConcern.RequestorByUser.Fullname,
-                        Company_Code = ct.TicketConcern.RequestConcern.Company.CompanyCode,
-                        Company_Name = ct.TicketConcern.RequestConcern.Company.CompanyName,
-                        BusinessUnit_Code = ct.TicketConcern.RequestConcern.BusinessUnit.BusinessCode,
-                        BusinessUnit_Name = ct.TicketConcern.RequestConcern.BusinessUnit.BusinessName,
-                        Department_Code = ct.TicketConcern.RequestConcern.Department.DepartmentCode,
-                        Department_Name = ct.TicketConcern.RequestConcern.Department.DepartmentName,
-                        Unit_Code = ct.TicketConcern.RequestConcern.Unit.UnitCode,
-                        Unit_Name = ct.TicketConcern.RequestConcern.Unit.UnitName,
-                        SubUnit_Code = ct.TicketConcern.RequestConcern.SubUnit.SubUnitCode,
-                        SubUnit_Name = ct.TicketConcern.RequestConcern.SubUnit.SubUnitName,
-                        Location_Code = ct.TicketConcern.RequestConcern.Location.LocationCode,
-                        Location_Name = ct.TicketConcern.RequestConcern.Location.LocationName,
+                        Company_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.company_code,
+                        Company_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.company_name,
+                        BusinessUnit_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.business_unit_code,
+                        BusinessUnit_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.business_unit_name,
+                        Department_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.department_code,
+                        Department_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.department_name,
+                        Unit_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.department_unit_code,
+                        Unit_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.department_unit_name,
+                        SubUnit_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_code,
+                        SubUnit_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_name,
+                        Location_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.location_code,
+                        Location_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.location_name,
                         Personnel_Unit = ct.TicketConcern.User.UnitId,
                         Personnel_Id = ct.TicketConcern.UserId,
                         Personnel = ct.TicketConcern.User.Fullname,
@@ -161,17 +163,16 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                           .Select(x => x.Category.CategoryDescription)),
                         TicketSubCategoryDescriptions = string.Join(", ", ct.TicketConcern.RequestConcern.TicketSubCategories
                                .Select(x => x.SubCategory.SubCategoryDescription)),
-                        Date_Needed = ct.TicketConcern.RequestConcern.DateNeeded,
+                        Date_Needed = ct.TicketConcern.RequestConcern.DateNeeded.Value.ToString("MM/dd/yyyy"),
                         Contact_Number = ct.TicketConcern.RequestConcern.ContactNumber,
                         Notes = ct.TicketConcern.RequestConcern.Notes,
-                        Transaction_Date = ct.CreatedAt.Date,
-                        Target_Date = ct.TicketConcern.TargetDate.Value.Date,
+                        Transaction_Date = ct.CreatedAt.ToString("MM/dd/yyyy hh:tt:mm"),
+                        Target_Date = ct.TicketConcern.TargetDate.Value.ToString("MM/dd/yyyy"),
                         Ticket_Status = "On-Hold",
                         Remarks = ct.OnHoldRemarks,
                         Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.DateApprovedAt.Value.Date, DateTime.Now.Date),
                         ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
-                        StartDate = ct.TicketConcern.DateApprovedAt,
-                        ClosedDate = ct.TicketConcern.Closed_At,
+                        StartDate = ct.TicketConcern.DateApprovedAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname,
                         ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName
@@ -183,26 +184,26 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                     .Include(c => c.TicketConcern)
                     .ThenInclude(c => c.RequestConcern)
                     .AsSplitQuery()
-                    .Where(x => x.IsClosing == true && x.IsActive == true)
-                    .Where(t => t.ClosingAt.Value.Date >= request.Date_From.Value.Date && t.ClosingAt.Value.Date <= request.Date_To.Value.Date)
+                    .Where(x => x.IsActive == true && x.IsClosing == true)
+                    .Where(t => t.ClosingAt.Value.Date >= request.Date_From.Value.Date && t.ClosingAt.Value.Date <= request.Date_To.Value.Date )
                     .Select(ct => new AllTicketReportsResult
                     {
-                        TicketConcernId = ct.TicketConcernId,
-                        Request_Type = ct.TicketConcern.RequestConcern.RequestType,
-                         BackJobId = ct.TicketConcern.RequestConcern.BackJobId,
-                        Requestor_Name = ct.TicketConcern.RequestorByUser.Fullname,
-                        Company_Code = ct.TicketConcern.RequestConcern.Company.CompanyCode,
-                        Company_Name = ct.TicketConcern.RequestConcern.Company.CompanyName,
-                        BusinessUnit_Code = ct.TicketConcern.RequestConcern.BusinessUnit.BusinessCode,
-                        BusinessUnit_Name = ct.TicketConcern.RequestConcern.BusinessUnit.BusinessName,
-                        Department_Code = ct.TicketConcern.RequestConcern.Department.DepartmentCode,
-                        Department_Name = ct.TicketConcern.RequestConcern.Department.DepartmentName,
-                        Unit_Code = ct.TicketConcern.RequestConcern.Unit.UnitCode,
-                        Unit_Name = ct.TicketConcern.RequestConcern.Unit.UnitName,
-                        SubUnit_Code = ct.TicketConcern.RequestConcern.SubUnit.SubUnitCode,
-                        SubUnit_Name = ct.TicketConcern.RequestConcern.SubUnit.SubUnitName,
-                        Location_Code = ct.TicketConcern.RequestConcern.Location.LocationCode,
-                        Location_Name = ct.TicketConcern.RequestConcern.Location.LocationName,
+                        TicketConcernId = ct.TicketConcernId.ToString(),
+                        Request_Type = ct.TicketConcern.RequestConcern.RequestType == null ? "" : ct.TicketConcern.RequestConcern.RequestType,
+                         BackJobId = ct.TicketConcern.RequestConcern.BackJobId.ToString() == null ? "" : ct.TicketConcern.RequestConcern.BackJobId.ToString(),
+                        Requestor_Name = ct.TicketConcern.RequestorByUser.Fullname == null ? "" : ct.TicketConcern.RequestorByUser.Fullname,
+                        Company_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.company_code == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.company_code,
+                        Company_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.company_name == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.company_name,
+                        BusinessUnit_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.business_unit_code == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.business_unit_code,
+                        BusinessUnit_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.business_unit_name == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.business_unit_name,
+                        Department_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.department_code == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.department_code,
+                        Department_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.department_name == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.department_name,
+                        Unit_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.department_unit_code == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.department_unit_code,
+                        Unit_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.department_unit_name == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.department_unit_name,
+                        SubUnit_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_code == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_code,
+                        SubUnit_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_name == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_name,
+                        Location_Code = ct.TicketConcern.RequestConcern.OneChargingMIS.location_code == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.location_code,
+                        Location_Name = ct.TicketConcern.RequestConcern.OneChargingMIS.location_name == null ? "" : ct.TicketConcern.RequestConcern.OneChargingMIS.location_name,
                         Personnel_Unit = ct.TicketConcern.User.UnitId,
                         Personnel_Id = ct.TicketConcern.UserId,
                         Personnel = ct.TicketConcern.User.Fullname,
@@ -211,79 +212,84 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         TicketCategoryDescriptions = string.Join(", ", ct.TicketConcern.RequestConcern.TicketCategories
                           .Select(x => x.Category.CategoryDescription)),
                         TicketSubCategoryDescriptions = string.Join(", ", ct.TicketConcern.RequestConcern.TicketSubCategories
-                               .Select(x => x.SubCategory.SubCategoryDescription)), 
-                        Date_Needed = ct.TicketConcern.RequestConcern.DateNeeded,
+                               .Select(x => x.SubCategory.SubCategoryDescription)),
+                        Date_Needed = ct.TicketConcern.RequestConcern.DateNeeded.Value.ToString("MM/dd/yyyy"),
                         Contact_Number = ct.TicketConcern.RequestConcern.ContactNumber,
-                         Notes = ct.Notes,
-                        Transaction_Date = ct.ClosingAt,
-                        Target_Date = ct.TicketConcern.TargetDate.Value.Date,
+                        Notes = ct.Notes,
+                        Transaction_Date = ct.ClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
+                        Target_Date = ct.TicketConcern.TargetDate.Value.ToString("MM/dd/yyyy"),
                         Ticket_Status = "Closed",
                         Remarks = ct.ClosingRemarks,
                         Aging_Days = EF.Functions.DateDiffDay(ct.TicketConcern.DateApprovedAt.Value.Date, ct.ClosingAt.Value.Date),
                         ChannelId = ct.TicketConcern.RequestConcern.ChannelId.Value,
-                        StartDate = ct.TicketConcern.DateApprovedAt,
-                        ClosedDate = ct.TicketConcern.Closed_At,
+                        StartDate = ct.TicketConcern.DateApprovedAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
+                        ClosedDate = ct.TicketConcern.Closed_At.Value.ToString("MM/dd/yyyy hh:tt:mm"),
+                        ForClosedDate = ct.ForClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
                         ServiceProvider = ct.TicketConcern.RequestConcern.ServiceProviderId.Value,
                         AssignTo = ct.TicketConcern.RequestConcern.AssignToUser.Fullname,
                         ServiceProviderName = ct.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
-                        ClosingStatus = ct.TicketConcern.TargetDate.Value.Date >= ct.TicketConcern.Closed_At.Value.Date ?  "On-Time"
-                        : "Delayed"
+                        ClosingStatus = ct.TicketConcern.TargetDate.Value.Date >= ct.TicketConcern.Closed_At.Value.Date ? "On-Time"
+                        : "Delayed",
+                        Resolution = ct.TicketConcern.RequestConcern.Resolution,
+                        Technicians = string.Join(", ", ct.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname)),
+                        CategoryConcern = ct.TicketConcern.RequestConcern.CategoryConcernName,
 
                     }).ToListAsync(); 
 
 
-                var closingTicketTechnicianQuery = await _context.TicketTechnicians
-                    .AsNoTrackingWithIdentityResolution()
-                    .Include(ct => ct.ClosingTicket)
-                    .ThenInclude(ct => ct.TicketConcern)
-                    .ThenInclude(ct => ct.RequestConcern)
-                    .Include(ct => ct.TechnicianByUser)
-                    .AsSplitQuery()
-                    .Where(ct => ct.ClosingTicket.IsClosing == true && ct.ClosingTicket.IsActive == true)
-                    .Where(t => t.ClosingTicket.ClosingAt.Value.Date >= request.Date_From.Value.Date && t.ClosingTicket.ClosingAt.Value.Date <= request.Date_To.Value.Date)
-                    .Select(ct => new AllTicketReportsResult
-                    {
-                        TicketConcernId = ct.ClosingTicket.TicketConcernId,
-                        Request_Type = ct.ClosingTicket.TicketConcern.RequestConcern.RequestType,
-                        BackJobId = ct.ClosingTicket.TicketConcern.RequestConcern.BackJobId,
-                        Requestor_Name = ct.ClosingTicket.TicketConcern.RequestorByUser.Fullname,
-                        Company_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Company.CompanyCode,
-                        Company_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Company.CompanyName,
-                        BusinessUnit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.BusinessUnit.BusinessCode,
-                        BusinessUnit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.BusinessUnit.BusinessName,
-                        Department_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Department.DepartmentCode,
-                        Department_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Department.DepartmentName,
-                        Unit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Unit.UnitCode,
-                        Unit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Unit.UnitName,
-                        SubUnit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.SubUnit.SubUnitCode,
-                        SubUnit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.SubUnit.SubUnitCode,
-                        Location_Code = ct.ClosingTicket.TicketConcern.RequestConcern.Location.LocationCode,
-                        Location_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Location.LocationName,
-                        Personnel_Unit = ct.TechnicianByUser.UnitId,
-                        Personnel_Id = ct.TechnicianBy,
-                        Personnel = ct.TechnicianByUser.Fullname,
-                        Concerns = ct.ClosingTicket.TicketConcern.RequestConcern.Concern,
-                        Channel_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
-                        TicketCategoryDescriptions = string.Join(", ",ct.ClosingTicket.TicketConcern.RequestConcern.TicketCategories
-                           .Select(x => x.Category.CategoryDescription)),
-                        TicketSubCategoryDescriptions = string.Join(", ", ct.ClosingTicket.TicketConcern.RequestConcern.TicketSubCategories
-                            .Select(x => x.SubCategory.SubCategoryDescription)), 
-                        Date_Needed = ct.ClosingTicket.TicketConcern.RequestConcern.DateNeeded,
-                        Contact_Number = ct.ClosingTicket.TicketConcern.RequestConcern.ContactNumber,
-                        Notes = ct.ClosingTicket.Notes,
-                        Transaction_Date = ct.ClosingTicket.ClosingAt.Value.Date,
-                        Target_Date = ct.ClosingTicket.TicketConcern.TargetDate.Value.Date,
-                        Ticket_Status = "Closed",
-                        Remarks = ct.ClosingTicket.ClosingRemarks,
-                        Aging_Days = EF.Functions.DateDiffDay(ct.ClosingTicket.TicketConcern.DateApprovedAt.Value.Date, ct.ClosingTicket.ClosingAt.Value.Date),
-                        ChannelId = ct.ClosingTicket.TicketConcern.RequestConcern.ChannelId.Value,
-                        StartDate = ct.ClosingTicket.TicketConcern.DateApprovedAt,
-                        ClosedDate = ct.ClosingTicket.TicketConcern.Closed_At,
-                        ServiceProvider = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId.Value,
-                        AssignTo = ct.ClosingTicket.TicketConcern.RequestConcern.AssignToUser.Fullname,
-                        ClosingStatus = ct.ClosingTicket.TicketConcern.TargetDate.Value.Date >= ct.ClosingTicket.TicketConcern.Closed_At.Value.Date ? "On-Time"
-                        : "Delayed"
-                    }).ToListAsync();
+                //var closingTicketTechnicianQuery = await _context.TicketTechnicians
+                //    .AsNoTrackingWithIdentityResolution()
+                //    .Include(ct => ct.ClosingTicket)
+                //    .ThenInclude(ct => ct.TicketConcern)
+                //    .ThenInclude(ct => ct.RequestConcern)
+                //    .Include(ct => ct.TechnicianByUser)
+                //    .AsSplitQuery()
+                //    .Where(ct => ct.ClosingTicket.IsClosing == true && ct.ClosingTicket.IsActive == true)
+                //    .Where(t => t.ClosingTicket.ClosingAt.Value.Date >= request.Date_From.Value.Date && t.ClosingTicket.ClosingAt.Value.Date <= request.Date_To.Value.Date)
+                //    .Select(ct => new AllTicketReportsResult
+                //    {
+                //        TicketConcernId = ct.ClosingTicket.TicketConcernId.ToString(),
+                //        Request_Type = ct.ClosingTicket.TicketConcern.RequestConcern.RequestType,
+                //        BackJobId = ct.ClosingTicket.TicketConcern.RequestConcern.BackJobId.ToString(),
+                //        Requestor_Name = ct.ClosingTicket.TicketConcern.RequestorByUser.Fullname,
+                //        Company_Code = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.company_code,
+                //        Company_Name = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.company_name,
+                //        BusinessUnit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.business_unit_code,
+                //        BusinessUnit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.business_unit_name,
+                //        Department_Code = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.department_code,
+                //        Department_Name = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.department_name,
+                //        Unit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.department_unit_code,
+                //        Unit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.department_unit_name,
+                //        SubUnit_Code = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_code,
+                //        SubUnit_Name = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.sub_unit_name,
+                //        Location_Code = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.location_code,
+                //        Location_Name = ct.ClosingTicket.TicketConcern.RequestConcern.OneChargingMIS.location_name,
+                //        Personnel_Unit = ct.TechnicianByUser.UnitId,
+                //        Personnel_Id = ct.TechnicianBy,
+                //        Personnel = ct.TechnicianByUser.Fullname,
+                //        Concerns = ct.ClosingTicket.TicketConcern.RequestConcern.Concern,
+                //        Channel_Name = ct.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
+                //        TicketCategoryDescriptions = string.Join(", ",ct.ClosingTicket.TicketConcern.RequestConcern.TicketCategories
+                //           .Select(x => x.Category.CategoryDescription)),
+                //        TicketSubCategoryDescriptions = string.Join(", ", ct.ClosingTicket.TicketConcern.RequestConcern.TicketSubCategories
+                //            .Select(x => x.SubCategory.SubCategoryDescription)), 
+                //        Date_Needed = ct.ClosingTicket.TicketConcern.RequestConcern.DateNeeded,
+                //        Contact_Number = ct.ClosingTicket.TicketConcern.RequestConcern.ContactNumber,
+                //        Notes = ct.ClosingTicket.Notes,
+                //        Transaction_Date = ct.ClosingTicket.ClosingAt.Value.Date,
+                //        Target_Date = ct.ClosingTicket.TicketConcern.TargetDate.Value.Date,
+                //        Ticket_Status = "Closed",
+                //        Remarks = ct.ClosingTicket.ClosingRemarks,
+                //        Aging_Days = EF.Functions.DateDiffDay(ct.ClosingTicket.TicketConcern.DateApprovedAt.Value.Date, ct.ClosingTicket.ClosingAt.Value.Date),
+                //        ChannelId = ct.ClosingTicket.TicketConcern.RequestConcern.ChannelId.Value,
+                //        StartDate = ct.ClosingTicket.TicketConcern.DateApprovedAt,
+                //        ClosedDate = ct.ClosingTicket.TicketConcern.Closed_At,
+                //        ServiceProvider = ct.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId.Value,
+                //        AssignTo = ct.ClosingTicket.TicketConcern.RequestConcern.AssignToUser.Fullname,
+                //        ClosingStatus = ct.ClosingTicket.TicketConcern.TargetDate.Value.Date >= ct.ClosingTicket.TicketConcern.Closed_At.Value.Date ? "On-Time"
+                //        : "Delayed",
+                //        Resolution = ct.ClosingTicket.TicketConcern.RequestConcern.Resolution,
+                //    }).ToListAsync();
 
                 if (request.ServiceProvider is not null)
                 {
@@ -303,9 +309,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                        .Where(x => x.ServiceProvider == request.ServiceProvider)
                        .ToList();
 
-                    closingTicketTechnicianQuery = closingTicketTechnicianQuery
-                       .Where(x => x.ServiceProvider == request.ServiceProvider)
-                       .ToList();
+                    //closingTicketTechnicianQuery = closingTicketTechnicianQuery
+                    //   .Where(x => x.ServiceProvider == request.ServiceProvider)
+                    //   .ToList();
 
                     if (request.Channel is not null)
                     {
@@ -325,9 +331,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                            .Where(x => x.ChannelId == request.Channel)
                            .ToList();
 
-                        closingTicketTechnicianQuery = closingTicketTechnicianQuery
-                           .Where(x => x.ChannelId == request.Channel)
-                           .ToList();
+                        //closingTicketTechnicianQuery = closingTicketTechnicianQuery
+                        //   .Where(x => x.ChannelId == request.Channel)
+                        //   .ToList();
 
 
 
@@ -349,122 +355,62 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                                     .Where(x => x.Personnel_Id == request.UserId)
                                 .ToList();
 
-                            closingTicketTechnicianQuery = closingTicketTechnicianQuery
-                                    .Where(x => x.Personnel_Id == request.UserId)
-                                .ToList();
+                            //closingTicketTechnicianQuery = closingTicketTechnicianQuery
+                            //        .Where(x => x.Personnel_Id == request.UserId)
+                            //    .ToList();
                         }
                     }
                 }
 
 
-                if (!string.IsNullOrEmpty(request.Search))
-                {
-                    var normalizedSearch = System.Text.RegularExpressions.Regex.Replace(request.Search.ToLower().Trim(), @"\s+", " ");
+                //if (!string.IsNullOrEmpty(request.Search))
+                //{
+                //    var normalizedSearch = System.Text.RegularExpressions.Regex.Replace(request.Search.ToLower().Trim(), @"\s+", " ");
 
-                    openTicketQuery = openTicketQuery
-                    .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
-                        || x.Personnel.ToLower().Contains(request.Search)
-                        || x.Request_Type.ToLower().Contains(request.Search)
-                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
-                        || x.Requestor_Name.ToLower().Contains(request.Search)
-                        || x.Company_Code.ToLower().Contains(request.Search)
-                        || x.Company_Name.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
-                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Department_Name.ToLower().Contains(request.Search)
-                        || x.Unit_Code.ToLower().Contains(request.Search)
-                        || x.Unit_Name.ToLower().Contains(request.Search)
-                        || x.SubUnit_Code.ToLower().Contains(request.Search)
-                        || x.SubUnit_Name.ToLower().Contains(request.Search)
-                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Location_Name.ToLower().Contains(request.Search)
-                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
-                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
+                //    openTicketQuery = openTicketQuery
+                //    .Where(x => x.TicketConcernId.Contains(request.Search)
+                //        || x.Personnel.ToLower().Contains(request.Search)
+                //        || x.Request_Type.ToLower().Contains(request.Search)
+                //        || x.BackJobId.Contains(request.Search)
+                //        || x.Requestor_Name.ToLower().Contains(request.Search)
+                //        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                //        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
 
-                    transferTicketQuery = transferTicketQuery
-                    .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
-                        || x.Personnel.ToLower().Contains(request.Search)
-                        || x.Request_Type.ToLower().Contains(request.Search)
-                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
-                        || x.Requestor_Name.ToLower().Contains(request.Search)
-                        || x.Company_Code.ToLower().Contains(request.Search)
-                        || x.Company_Name.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
-                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Department_Name.ToLower().Contains(request.Search)
-                        || x.Unit_Code.ToLower().Contains(request.Search)
-                        || x.Unit_Name.ToLower().Contains(request.Search)
-                        || x.SubUnit_Code.ToLower().Contains(request.Search)
-                        || x.SubUnit_Name.ToLower().Contains(request.Search)
-                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Location_Name.ToLower().Contains(request.Search)
-                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
-                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
+                //    transferTicketQuery = transferTicketQuery
+                //    .Where(x => x.TicketConcernId.Contains(request.Search)
+                //        || x.Personnel.ToLower().Contains(request.Search)
+                //        || x.Request_Type.ToLower().Contains(request.Search)
+                //        || x.BackJobId.Contains(request.Search)
+                //        || x.Requestor_Name.ToLower().Contains(request.Search)
+                //        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                //        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
 
-                    onHoldTicketQuery = onHoldTicketQuery
-                   .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
-                        || x.Personnel.ToLower().Contains(request.Search)
-                        || x.Request_Type.ToLower().Contains(request.Search)
-                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
-                        || x.Requestor_Name.ToLower().Contains(request.Search)
-                        || x.Company_Code.ToLower().Contains(request.Search)
-                        || x.Company_Name.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
-                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Department_Name.ToLower().Contains(request.Search)
-                        || x.Unit_Code.ToLower().Contains(request.Search)
-                        || x.Unit_Name.ToLower().Contains(request.Search)
-                        || x.SubUnit_Code.ToLower().Contains(request.Search)
-                        || x.SubUnit_Name.ToLower().Contains(request.Search)
-                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Location_Name.ToLower().Contains(request.Search)
-                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
-                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
-                    closingTicketQuery = closingTicketQuery
-                   .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
-                        || x.Personnel.ToLower().Contains(request.Search)
-                        || x.Request_Type.ToLower().Contains(request.Search)
-                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
-                        || x.Requestor_Name.ToLower().Contains(request.Search)
-                        || x.Company_Code.ToLower().Contains(request.Search)
-                        || x.Company_Name.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
-                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Department_Name.ToLower().Contains(request.Search)
-                        || x.Unit_Code.ToLower().Contains(request.Search)
-                        || x.Unit_Name.ToLower().Contains(request.Search)
-                        || x.SubUnit_Code.ToLower().Contains(request.Search)
-                        || x.SubUnit_Name.ToLower().Contains(request.Search)
-                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Location_Name.ToLower().Contains(request.Search)
-                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
-                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
+                //    onHoldTicketQuery = onHoldTicketQuery
+                //   .Where(x => x.TicketConcernId.Contains(request.Search)
+                //        || x.Personnel.ToLower().Contains(request.Search)
+                //        || x.Request_Type.ToLower().Contains(request.Search)
+                //        || x.BackJobId.Contains(request.Search)
+                //        || x.Requestor_Name.ToLower().Contains(request.Search)
+                //        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                //        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
+                //    closingTicketQuery = closingTicketQuery
+                //   .Where(x => x.TicketConcernId.Contains(request.Search)
+                //        || x.Personnel.ToLower().Contains(request.Search)
+                //        || x.Request_Type.ToLower().Contains(request.Search)
+                //        || x.BackJobId.Contains(request.Search)
+                //        || x.Requestor_Name.ToLower().Contains(request.Search)
+                //        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                //        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
 
-                    closingTicketTechnicianQuery = closingTicketTechnicianQuery
-                    .Where(x => x.TicketConcernId.ToString().ToLower().Contains(request.Search)
-                        || x.Personnel.ToLower().Contains(request.Search)
-                        || x.Request_Type.ToLower().Contains(request.Search)
-                        || x.BackJobId.ToString().ToLower().Contains(request.Search)
-                        || x.Requestor_Name.ToLower().Contains(request.Search)
-                        || x.Company_Code.ToLower().Contains(request.Search)
-                        || x.Company_Name.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Code.ToLower().Contains(request.Search)
-                        || x.BusinessUnit_Name.ToLower().Contains(request.Search)
-                        || x.Department_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Department_Name.ToLower().Contains(request.Search)
-                        || x.Unit_Code.ToLower().Contains(request.Search)
-                        || x.Unit_Name.ToLower().Contains(request.Search)
-                        || x.SubUnit_Code.ToLower().Contains(request.Search)
-                        || x.SubUnit_Name.ToLower().Contains(request.Search)
-                        || x.Location_Code.ToLower().ToString().Contains(request.Search)
-                        || x.Location_Name.ToLower().Contains(request.Search)
-                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
-                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
-                }
+                //    //closingTicketTechnicianQuery = closingTicketTechnicianQuery
+                //    //.Where(x => x.TicketConcernId.Contains(request.Search)
+                //    //    || x.Personnel.ToLower().Contains(request.Search)
+                //    //    || x.Request_Type.ToLower().Contains(request.Search)
+                //    //    || x.BackJobId.Contains(request.Search)
+                //    //    || x.Requestor_Name.ToLower().Contains(request.Search)
+                //    //    || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                //    //    || x.AssignTo.ToLower().Contains(request.Search)).ToList();
+                //}
 
                 foreach (var list in openTicketQuery)
                 {
@@ -485,13 +431,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                     combineTicketReports.Add(list);
                 }
 
-                foreach (var list in closingTicketTechnicianQuery)
-                {
-                    combineTicketReports.Add(list);
-                }
+                //foreach (var list in closingTicketTechnicianQuery)
+                //{
+                //    combineTicketReports.Add(list);
+                //}
                 
-                var results = combineTicketReports
-                    .OrderBy(x => x.Transaction_Date.Value.Date)
+                var results =  combineTicketReports
+                    .OrderBy(x => x.Transaction_Date)
                     .ThenBy(x => x.TicketConcernId)
                     .Select(r => new AllTicketReportsResult
                     {
@@ -530,11 +476,30 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport
                         AssignTo = r.AssignTo,
                         ServiceProvider = r.ServiceProvider,
                         ServiceProviderName = r.ServiceProviderName,
-                        ClosingStatus = r.ClosingStatus
+                        ClosingStatus = r.ClosingStatus,
+                        Resolution = r.Resolution,
+                        Technicians = r.Technicians,
+                        CategoryConcern = r.CategoryConcern,
+                        ForClosedDate = r.ForClosedDate,
+                       
 
-                    }).AsQueryable();
+                    }).ToList();
 
-                return PagedList<AllTicketReportsResult>.Create(results, request.PageNumber, request.PageSize);
+
+                if (!string.IsNullOrEmpty(request.Search))
+                {
+                    var normalizedSearch = System.Text.RegularExpressions.Regex.Replace(request.Search.ToLower().Trim(), @"\s+", " ");
+
+                    results = results
+                    .Where(x => x.TicketConcernId.Contains(request.Search)
+                        || x.Personnel.ToLower().Contains(request.Search)
+                        || x.Requestor_Name.ToLower().Contains(request.Search)
+                        || System.Text.RegularExpressions.Regex.Replace(x.Concerns.ToLower(), @"\s+", " ").Contains(normalizedSearch)
+                        || x.AssignTo.ToLower().Contains(request.Search)).ToList();
+
+                }
+
+                return PagedList<AllTicketReportsResult>.Create(results.AsQueryable(), request.PageNumber, request.PageSize);
 
 
             }

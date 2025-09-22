@@ -26,136 +26,131 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
             public async Task<PagedList<Reports>> Handle(TicketReportsQuery request, CancellationToken cancellationToken)
             {
 
-                IQueryable<TicketConcern> ticketQuery = _context.TicketConcerns
+
+
+                var closingTicket =  _context.ClosingTickets
                     .AsNoTrackingWithIdentityResolution()
-                    .Include(x => x.AddedByUser)
-                    .Include(x => x.ModifiedByUser)
-                    .Include(x => x.RequestorByUser)
-                    .Include(x => x.User)
-                    .Include(x => x.ClosingTickets)
-                    .ThenInclude(x => x.TicketAttachments)
-                    .Include(x => x.TransferTicketConcerns)
-                    .ThenInclude(x => x.TicketAttachments)
-                    .Include(x => x.RequestConcern)
-                    .Include(x => x.RequestConcern)
-                    .ThenInclude(x => x.Channel)
+                    .Include(c => c.TicketConcern)
+                    .ThenInclude(c => c.RequestConcern)
                     .AsSplitQuery()
-                    .Where(x => x.IsClosedApprove == true && x.ClosingTickets.FirstOrDefault(x => x.IsClosing == true).IsActive == true)
-                    .Where(x => x.Closed_At.Value.Date >= request.Date_From.Value.Date && x.Closed_At.Value.Date <= request.Date_To.Value.Date);
+                    .Where(x => x.IsActive == true && x.IsClosing == true)
+                    .Where(t => t.ClosingAt.Value.Date >= request.Date_From.Value.Date && t.ClosingAt.Value.Date <= request.Date_To.Value.Date)
+                    .Select(x => new Reports
+                    {
+                        Year = x.TicketConcern.TargetDate.Value.Year,
+                        Month = x.TicketConcern.TargetDate.Value.Month,
+                        Personnel = x.TicketConcern.User.Fullname,
+                        Ticket_Number = x.TicketConcernId,
+                        Description = x.TicketConcern.RequestConcern.Concern,
+                        Target_Date = x.TicketConcern.TargetDate.Value.ToString("MM/dd/yyyy"),
+                        Actual = x.ForClosingAt != null ? x.ForClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm") : x.ClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
+                        Varience = x.TicketConcern.TargetDate.Value.Date > x.ClosingAt.Value.Date ? EF.Functions.DateDiffDay(x.TicketConcern.TargetDate.Value.Date, x.ForClosingAt.Value.Date) : 0,
+                        Efficeincy = x.ForClosingAt.HasValue ? x.ForClosingAt.Value.Date <= x.TicketConcern.TargetDate.Value.Date ? "100 %" : "50 %"
+                        : x.ClosingAt.Value.Date <= x.TicketConcern.TargetDate.Value.Date ? "100 %" : "50 %",
+                        Status = TicketingConString.Closed,
+                        Remarks = x.ForClosingAt != null ? x.ForClosingAt.Value.Date  <= x.TicketConcern.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay 
+                        : x.ClosingAt.Value.Date <= x.TicketConcern.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
+                        Category = string.Join(", ", x.TicketConcern.RequestConcern.TicketCategories
+                          .Select(x => x.Category.CategoryDescription)),
+                        SubCategory = string.Join(", ", x.TicketConcern.RequestConcern.TicketSubCategories
+                          .Select(x => x.SubCategory.SubCategoryDescription)),
+                        Aging_Day = EF.Functions.DateDiffDay(x.TicketConcern.DateApprovedAt.Value.Date, x.ForClosingAt == null ? x.ClosingAt.Value.Date : x.ForClosingAt.Value.Date),
+                        StartDate = x.TicketConcern.DateApprovedAt.Value.ToString("MM/dd/yyyy"),
+                        ClosedDate = x.ClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
+                        ForClosedDate = x.ForClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm") ?? "",
+                        ServiceProviderId = x.TicketConcern.RequestConcern.ServiceProviderId,
+                        ChannelId = x.TicketConcern.RequestConcern.ChannelId,
+                        AssignTo = x.TicketConcern.AssignTo,
+                        ChannelName = x.TicketConcern.RequestConcern.Channel.ChannelName,
+                        Technician1 = x.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname).Skip(0).Take(1).FirstOrDefault(),
+                        Technician2 = x.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname).Skip(1).Take(1).FirstOrDefault(),
+                        Technician3 = x.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname).Skip(2).Take(1).FirstOrDefault(),
+                        IsStore = x.TicketConcern.RequestConcern.User.IsStore,
+                        Requestor = x.TicketConcern.RequestorByUser.Fullname,
+                        CategoryConcern = x.CategoryConcernName,
+                        Department = x.TicketConcern.RequestConcern.OneChargingMIS.department_name
 
-                var closingTicketTechnician = _context.TicketTechnicians
-                      .AsNoTrackingWithIdentityResolution()
-                      .Include(x => x.TechnicianByUser)
-                      .Include(x => x.ClosingTicket)
-                      .ThenInclude(x => x.TicketConcern)
-                      .AsSplitQuery()
-                      .Where(x => x.ClosingTicket.TicketConcern.IsClosedApprove == true && x.ClosingTicket.IsActive == true && x.ClosingTicket.IsClosing == true)
-                      .Where(x => x.ClosingTicket.TicketConcern.Closed_At.Value.Date >= request.Date_From.Value.Date && x.ClosingTicket.TicketConcern.Closed_At.Value.Date <= request.Date_To.Value.Date)
-                      .Select(x => new
-                      {
-                          x.ClosingTicket.TicketConcern.TargetDate.Value.Year,
-                          x.ClosingTicket.TicketConcern.TargetDate.Value.Month,
-                          x.ClosingTicket.TicketConcern.TargetDate,
-                          ClosedDate = x.ClosingTicket.TicketConcern.Closed_At,
-                          TechnicianName = x.TechnicianByUser.Fullname,
-                          TicketId = x.ClosingTicket.TicketConcernId,
-                          ConcernDescription = x.ClosingTicket.TicketConcern.RequestConcern.Concern,
-                          x.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
-                          StartDate = x.ClosingTicket.TicketConcern.DateApprovedAt,
-                          ServiceProviderId = x.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId,
-                          AssignTo = x.ClosingTicket.TicketConcern.AssignTo,
-                          ChannelId = x.ClosingTicket.TicketConcern.RequestConcern.ChannelId,
-                          ClosedAt = x.ClosingTicket.TicketConcern.Closed_At
-                      });
+                    });
 
-                
-
-                var closingTicket = ticketQuery
-                        .Select(x => new
-                        {
-                            x.TargetDate.Value.Year,
-                            x.TargetDate.Value.Month,
-                            x.TargetDate,
-                            ClosedDate = x.Closed_At,
-                            TechnicianName = x.User.Fullname,
-                            TicketId = x.Id,
-                            ConcernDescription = x.RequestConcern.Concern,
-                            x.RequestConcern.Channel.ChannelName,
-                            StartDate = x.DateApprovedAt,
-                            ServiceProviderId = x.RequestConcern.ServiceProviderId,
-                            AssignTo = x.AssignTo,
-                            ChannelId = x.RequestConcern.ChannelId,
-                            ClosedAt = x.Closed_At
-
-                        });
-
-                var combinedTickets = closingTicket
-                    .Concat(closingTicketTechnician);
+                //var combinedTickets = closingTicket
+                //    .Concat(closingTicketTechnician);
 
                 if (request.ServiceProvider is not null)
                 {
-                    combinedTickets = combinedTickets.Where(x => x.ServiceProviderId == request.ServiceProvider);
+                    closingTicket = closingTicket.Where(x => x.ServiceProviderId == request.ServiceProvider);
 
                     if (request.Channel is not null)
                     {
-                        combinedTickets = combinedTickets.Where(x => x.ChannelId == request.Channel);
+                        closingTicket = closingTicket.Where(x => x.ChannelId == request.Channel);
 
                         if (request.UserId is not null)
                         {
-                            combinedTickets = combinedTickets.Where(x => x.AssignTo == request.UserId);
+                            closingTicket = closingTicket.Where(x => x.AssignTo == request.UserId);
                         }
                     }
                 }
 
-                if (!string.IsNullOrEmpty(request.Remarks))
-                {
-                    switch (request.Remarks)
-                    {
-                        case TicketingConString.OnTime:
-                            combinedTickets = combinedTickets
-                                .Where(x => x.ClosedAt != null && x.TargetDate.Value.Date > x.ClosedAt.Value.Date);
+                //if (!string.IsNullOrEmpty(request.Remarks))
+                //{
+                //    switch (request.Remarks)
+                //    {
+                //        case TicketingConString.OnTime:
+                //            closingTicket = closingTicket
+                //                .Where(x => x.ClosedDate != null && x.ClosedDate > x.ClosedDate.Value.Date);
 
-                            break;
+                //            break;
 
-                        case TicketingConString.Delay:
-                            combinedTickets = combinedTickets
-                                .Where(x => x.ClosedAt != null && x.TargetDate.Value.Date < x.ClosedAt.Value.Date);
-                            break;
+                //        case TicketingConString.Delay:
+                //            closingTicket = closingTicket
+                //                .Where(x => x.ClosedDate != null && x.ClosedDate.Value.Date < x.ClosedDate.Value.Date);
+                //            break;
 
-                        default:
-                            return new PagedList<Reports>(new List<Reports>(), 0, request.PageNumber, request.PageSize);
+                //        default:
+                //            return new PagedList<Reports>(new List<Reports>(), 0, request.PageNumber, request.PageSize);
 
-                    }
-                }
+                //    }
+                //}
 
                 if (!string.IsNullOrEmpty(request.Search))
                 {
-                    ticketQuery = ticketQuery
-                        .Where(x => x.Id.ToString().Contains(request.Search)
-                        || x.User.Fullname.Contains(request.Search)
-                        || x.RequestConcern.Concern.Contains(request.Search)
-                        || x.RequestConcern.Channel.ChannelName.Contains(request.Search));
+                    closingTicket = closingTicket
+                        .Where(x => x.Ticket_Number.ToString().Contains(request.Search)
+                        || x.Personnel.Contains(request.Search)
+                        || x.Description.Contains(request.Search)
+                        || x.ChannelName.Contains(request.Search));
                 }
 
-                var results = combinedTickets.Select(x => new Reports
+                var results = closingTicket.Select(x => new Reports
                 {
-                    Year = x.Year.ToString(),
-                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(x.Month),
+                    Year = x.Year,
+                    Month = x.Month,
                     Start_Date = $"{x.Month}-01-{x.Year}",
                     End_Date = $"{x.Month}-{DateTime.DaysInMonth(x.Year, x.Month)}-{x.Year}",
-                    Personnel = x.TechnicianName,
-                    Ticket_Number = x.TicketId,
-                    Description = x.ConcernDescription,
-                    Target_Date = x.TargetDate.Value.ToString("MM-dd-yyyy"),
-                    Actual = x.ClosedDate.HasValue ? x.ClosedDate.Value.ToString("MM-dd-yyyy") : "N/A",
-                    Varience = EF.Functions.DateDiffDay(x.StartDate.Value.Date, x.ClosedDate.Value.Date),
-                    Efficeincy = x.ClosedDate.Value.Date <= x.TargetDate.Value.Date ? "100 %" : "50 %",
-                    Status = TicketingConString.Closed,
-                    Remarks = x.ClosedDate.Value.Date <= x.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
-                    Category = x.ChannelName,
-                    Aging_Day = EF.Functions.DateDiffDay(x.StartDate.Value.Date, x.ClosedDate.Value.Date),
+                    Personnel = x.Personnel,
+                    Ticket_Number = x.Ticket_Number,
+                    Description = x.Description,
+                    Target_Date = x.Target_Date,
+                    Actual = x.Actual,
+                    Varience = x.Varience,
+                    Efficeincy = x.Efficeincy,
+                    Status = x.Status,
+                    Remarks = x.Remarks,
+                    Category = x.Category,
+                    SubCategory = x.SubCategory,
+                    Aging_Day = x.Aging_Day,
                     StartDate = x.StartDate,
                     ClosedDate = x.ClosedDate,
+                    Technician1 = x.Technician1,
+                    Technician2 = x.Technician2,
+                    Technician3 = x.Technician3,
+                    Department = x.Department,
+                    AssignTo = x.AssignTo,
+                    IsStore = x.IsStore,
+                    CategoryConcern = x.CategoryConcern,
+                    ForClosedDate = x.ForClosedDate,
+
+
+
 
                 }).OrderBy(x => x.Ticket_Number); 
 

@@ -29,7 +29,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TransferTicket.
                     .AsNoTracking()
                     .Include(x => x.TicketConcern)
                     .ThenInclude(x => x.User)
-                    .ThenInclude(x => x.Department)
+                    .ThenInclude(x => x.OneChargingMIS)
                     .Include(x => x.TicketConcern)
                     .ThenInclude(x => x.RequestConcern)
                     .Include(x => x.AddedByUser)

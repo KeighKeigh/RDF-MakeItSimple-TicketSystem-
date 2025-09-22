@@ -4,7 +4,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.Models.Setup.BusinessUnitSetup;
 using MakeItSimple.WebApi.Models.Ticketing;
 using MediatR;
-using Microsoft.AspNetCore.SignalR;
+
 using Microsoft.EntityFrameworkCore;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConcern.ViewOpenTicket.GetOpenTicket;
 
@@ -34,10 +34,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
                     .Include(x => x.ClosedByUser)
                     .Include(x => x.TicketConcern)
                     .ThenInclude(x => x.User)
-                    .ThenInclude(x => x.Department)
+                    .ThenInclude(x => x.OneChargingMIS)
                     .Include(x => x.TicketConcern)
-                    .ThenInclude(x => x.User)
-                    .ThenInclude(x => x.SubUnit)
                     .Include(x => x.TicketConcern)
                     .Include(x => x.TicketConcern)
                     .ThenInclude(x => x.RequestConcern)
@@ -146,7 +144,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
                         Resolution = x.Resolution,
                         Notes = x.Notes,
                         DepartmentId = x.TicketConcern.User.DepartmentId,
-                        Department_Name = x.TicketConcern.User.Department.DepartmentName,
+                        Department_Name = x.TicketConcern.User.OneChargingMIS.department_name,
                         ChannelId = x.TicketConcern.RequestConcern.ChannelId,
                         Channel_Name = x.TicketConcern.RequestConcern.Channel.ChannelName,
                         UserId = x.TicketConcern.UserId,

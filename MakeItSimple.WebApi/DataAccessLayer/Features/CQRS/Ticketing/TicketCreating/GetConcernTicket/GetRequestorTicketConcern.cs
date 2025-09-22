@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.GetConcernTicket.GetRequestorTicketConcern.GetRequestorTicketConcernResult;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.GetConcernTicket
 {
@@ -26,8 +27,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                 var dateToday = DateTime.Now;
 
-                IQueryable<RequestConcern> requestConcernsQuery = _context.RequestConcerns
+                IQueryable<TicketConcern> requestConcernsQuery = _context.TicketConcerns
                      .AsNoTrackingWithIdentityResolution()
+                     .Include(x => x.RequestConcern)
                      .OrderBy(x => x.Id)
                      .AsSplitQuery();
                 
@@ -53,10 +55,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                     if (!string.IsNullOrEmpty(request.Search))
                     {
                         requestConcernsQuery = requestConcernsQuery
-                            .Where(x => x.User.Fullname
+                            .Where(x => x.RequestConcern.User.Fullname
                             .Contains(request.Search)
                             || x.Id.ToString().Contains(request.Search)
-                            || x.Concern.ToLower().Contains(request.Search.ToLower()));
+                            || x.RequestConcern.Concern.ToLower().Contains(request.Search.ToLower()));
                     }
 
                     if (request.Status != null)
@@ -64,19 +66,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         requestConcernsQuery = requestConcernsQuery
                             .Where(x => x.IsActive == request.Status);
                     }
-
+                    // ETO
                     if (request.Is_Approve != null)
                     {
-                        var ticketStatusList = await _context.TicketConcerns
-                            .AsNoTracking()
-                            .Where(x => x.IsApprove == request.Is_Approve)
-                            .Select(x => x.RequestConcernId)
-                            .ToListAsync();
 
                         requestConcernsQuery = requestConcernsQuery
-                           .Where(x => ticketStatusList.Contains(x.Id));
+                           .Where(x => x.IsApprove == request.Is_Approve);
                     }
-
+                    // ETO YON
                     if (request.Ascending is not null)
                     {
                         
@@ -87,6 +84,22 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             .OrderByDescending(x => x.Id);
                     }
 
+                    if (request.DepartmentId != null)
+                    {
+
+                        requestConcernsQuery = requestConcernsQuery
+                           .Where(x => x.RequestConcern.DepartmentId == request.DepartmentId);
+                    }
+
+                    if (request.LocationId != null)
+                    {
+
+                        requestConcernsQuery = requestConcernsQuery
+                           .Where(x => x.RequestConcern.LocationId == request.LocationId);
+                    }
+
+                    
+
                     if (request.Concern_Status is not null)
                     {
 
@@ -95,21 +108,21 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             case TicketingConString.Approval:
                                 
                                 requestConcernsQuery = requestConcernsQuery
-                                    .Where(x => x.ConcernStatus == TicketingConString.ForApprovalTicket);
+                                    .Where(x => x.RequestConcern.ConcernStatus == TicketingConString.ForApprovalTicket);
                                 break;
                             case TicketingConString.OnGoing:
                                 requestConcernsQuery = requestConcernsQuery
-                                    .Where(x => x.ConcernStatus == TicketingConString.CurrentlyFixing);
+                                    .Where(x => x.RequestConcern.ConcernStatus == TicketingConString.CurrentlyFixing);
                                 break;
 
                             case TicketingConString.NotConfirm:
                                 requestConcernsQuery = requestConcernsQuery
-                                    .Where(x => x.Is_Confirm == null && x.ConcernStatus == TicketingConString.NotConfirm);
+                                    .Where(x => x.RequestConcern.Is_Confirm == null && x.ConcernStatus == TicketingConString.NotConfirm);
                                 break;
 
                             case TicketingConString.Done:
                                 requestConcernsQuery = requestConcernsQuery
-                                    .Where(x => x.ConcernStatus == TicketingConString.Done && x.Is_Confirm == true);
+                                    .Where(x => x.RequestConcern.ConcernStatus == TicketingConString.Done && x.RequestConcern.Is_Confirm == true);
                                 break;
                             default:
                                 return new PagedList<GetRequestorTicketConcernResult>(new List<GetRequestorTicketConcernResult>(), 0, request.PageNumber, request.PageSize);
@@ -123,7 +136,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         {
                             if (requestorPermissionList.Any(x => x.Contains(request.Role)))
                             {
-                                requestConcernsQuery = requestConcernsQuery.Where(x => x.UserId == request.UserId);
+                                requestConcernsQuery = requestConcernsQuery.Where(x => x.RequestorBy == request.UserId);
                             }
                             else
                             {
@@ -146,15 +159,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                                     .Distinct()
                                     .ToListAsync();
 
-                                var allRelatedChannelIds = await _context.ServiceProviderChannels
-                                    .Where(spc => serviceProviderIds.Contains(spc.ServiceProviderId))
-                                    .Select(spc => spc.ChannelId)
-                                    .ToListAsync();
+                                
 
                                 requestConcernsQuery = requestConcernsQuery
                                     .Where(rc =>
-                                        (rc.ChannelId.HasValue && userChannelId.Contains(rc.ChannelId.Value)) && rc.AssignTo == null
-                                        || (!rc.ChannelId.HasValue && rc.ServiceProviderId != null && serviceProviderIds.Contains(rc.ServiceProviderId.Value) && rc.AssignTo == null)
+                                        (rc.RequestConcern.ChannelId.HasValue && userChannelId.Contains(rc.RequestConcern.ChannelId.Value)) && rc.AssignTo == null
+                                        || (!rc.RequestConcern.ChannelId.HasValue && rc.RequestConcern.ServiceProviderId != null && serviceProviderIds.Contains(rc.RequestConcern.ServiceProviderId.Value) && rc.AssignTo == null)
                                     );
                             }
                             else
@@ -163,7 +173,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             }
                         }
                     }
-                    
+
+                    if (request.DateFrom != null && request.DateTo != null)
+                    {
+                        requestConcernsQuery = requestConcernsQuery.Where(x => x.CreatedAt.Date >= request.DateFrom && x.CreatedAt.Date <= request.DateTo);
+                    }
+
+
 
                 }
 
@@ -171,38 +187,40 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                     .Select(g => new GetRequestorTicketConcernResult
                     {
 
-                        RequestConcernId = g.Id,
-                        Concern = g.Concern,
-                        Resolution = g.Resolution,
-                        CompanyId = g.CompanyId,
-                        Company_Code = g.Company.CompanyCode,
-                        Company_Name = g.Company.CompanyName,
-                        BusinessUnitId = g.BusinessUnitId,
-                        BusinessUnit_Code = g.BusinessUnit.BusinessCode,
-                        BusinessUnit_Name = g.BusinessUnit.BusinessName,
-                        DepartmentId = g.DepartmentId,
-                        Department_Code = g.Department.DepartmentCode,
-                        Department_Name = g.Department.DepartmentName,
-                        UnitId = g.ReqUnitId,
-                        Unit_Code = g.ReqUnit.UnitCode,
-                        Unit_Name = g.ReqUnit.UnitName,
-                        SubUnitId = g.ReqSubUnitId,
-                        SubUnit_Code = g.ReqSubUnit.SubUnitCode,
-                        SubUnit_Name = g.ReqSubUnit.SubUnitName,
-                        LocationId = g.LocationId,
-                        Location_Code = g.Location.LocationCode,
-                        Location_Name = g.Location.LocationName,
-                        RequestorId = g.UserId,
-                        FullName = g.User.Fullname,
-                        ChannelId = g.ChannelId,
-                        Channel_Name = g.Channel.ChannelName,
+                        RequestConcernId = g.RequestConcernId,
+                        Concern = g.RequestConcern.Concern,
+                        Resolution = g.RequestConcern.Resolution,
+                        CompanyId = g.RequestConcern.CompanyId,
+                        Company_Code = g.RequestConcern.OneChargingMIS.company_code,
+                        Company_Name = g.RequestConcern.OneChargingMIS.company_name,
+                        BusinessUnitId = g.RequestConcern.BusinessUnitId,
+                        BusinessUnit_Code = g.RequestConcern.OneChargingMIS.business_unit_code,
+                        BusinessUnit_Name = g.RequestConcern.OneChargingMIS.business_unit_name,
+                        DepartmentId = g.RequestConcern.DepartmentId,
+                        Department_Code = g.RequestConcern.OneChargingMIS.department_code,
+                        Department_Name = g.RequestConcern.OneChargingMIS.department_name,
+                        UnitId = g.RequestConcern.ReqUnitId,
+                        Unit_Code = g.RequestConcern.OneChargingMIS.department_unit_code,
+                        Unit_Name = g.RequestConcern.OneChargingMIS.department_unit_name,
+                        SubUnitId = g.RequestConcern.ReqSubUnitId,
+                        SubUnit_Code = g.RequestConcern.OneChargingMIS.sub_unit_code,
+                        SubUnit_Name = g.RequestConcern.OneChargingMIS.sub_unit_name,
+                        LocationId = g.RequestConcern.LocationId,
+                        Location_Code = g.RequestConcern.OneChargingMIS.location_code,
+                        Location_Name = g.RequestConcern.OneChargingMIS.location_name,
+                        RequestorId = g.RequestConcern.UserId,
+                        FullName = g.RequestConcern.User.Fullname,
+                        ChannelId = g.RequestConcern.ChannelId,
+                        Channel_Name = g.RequestConcern.Channel.ChannelName,
+                        OneCharginCode = g.RequestConcern.OneChargingCode,
+                        OneChargingName = g.RequestConcern.OneChargingName,
 
-                        TargetDate = g.TargetDate,
-                        AssignTo = g.AssignTo,
-                        AssignToName = _context.Users.Where(u => u.Id == g.AssignTo).Select(u => u.Fullname).FirstOrDefault(),
-                        ServiceProviderId = g.ServiceProviderId,
-                        ServiceProviderName = g.ServiceProvider.ServiceProviderName,
-                        GetRequestTicketCategories = g.TicketCategories
+                        TargetDate = g.RequestConcern.TargetDate,
+                        AssignTo = g.RequestConcern.AssignTo,
+                        AssignToName = _context.Users.Where(u => u.Id == g.RequestConcern.AssignTo).Select(u => u.Fullname).FirstOrDefault(),
+                        ServiceProviderId = g.RequestConcern.ServiceProviderId,
+                        ServiceProviderName = g.RequestConcern.ServiceProvider.ServiceProviderName,
+                        GetRequestTicketCategories = g.RequestConcern.TicketCategories
                         .Select(t => new GetRequestorTicketConcernResult.GetRequestTicketCategory
                         {
                             TicketCategoryId = t.Id,
@@ -211,7 +229,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
                         }).ToList(),
 
-                        GetRequestSubTicketCategories = g.TicketSubCategories
+                        GetRequestSubTicketCategories = g.RequestConcern.TicketSubCategories
                         .Select(t => new GetRequestorTicketConcernResult.GetRequestSubTicketCategory
                         {
                             TicketSubCategoryId = t.Id,
@@ -220,23 +238,23 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             SubCategory_Description = t.SubCategory.SubCategoryDescription,
                         }).ToList(),
 
-                        Concern_Status = g.ConcernStatus,
-                        Severity = g.Severity,
-                        Is_Done = g.IsDone,
-                        Remarks = g.Remarks,
-                        Notes = g.Notes,
-                        Contact_Number = g.ContactNumber,
-                        Request_Type = g.RequestType,
-                        BackJobId = g.BackJobId,
-                        Back_Job_Concern = g.BackJob.Concern,
-                        Added_By = g.AddedByUser.Fullname,
-                        Date_Needed = g.DateNeeded,
-                        Created_At = g.CreatedAt,
-                        Modified_By = g.ModifiedByUser.Fullname,
-                        updated_At = g.UpdatedAt,
-                        Is_Confirmed = g.Is_Confirm,
-                        Confirmed_At = g.Confirm_At,
-                        TicketRequestConcerns = g.TicketConcerns
+                        Concern_Status = g.RequestConcern.ConcernStatus,
+                        Severity = g.RequestConcern.Severity,
+                        Is_Done = g.RequestConcern.IsDone,
+                        Remarks = g.RequestConcern.Remarks,
+                        Notes = g.RequestConcern.Notes,
+                        Contact_Number = g.RequestConcern.ContactNumber,
+                        Request_Type = g.RequestConcern.RequestType,
+                        BackJobId = g.RequestConcern.BackJobId,
+                        Back_Job_Concern = g.RequestConcern.BackJob.Concern,
+                        Added_By = g.RequestConcern.AddedByUser.Fullname,
+                        Date_Needed = g.RequestConcern.DateNeeded,
+                        Created_At = g.RequestConcern.CreatedAt,
+                        Modified_By = g.RequestConcern.ModifiedByUser.Fullname,
+                        updated_At = g.RequestConcern.UpdatedAt,
+                        Is_Confirmed = g.RequestConcern.Is_Confirm,
+                        Confirmed_At = g.RequestConcern.Confirm_At,
+                        TicketRequestConcerns = g.RequestConcern.TicketConcerns
                             .Select(tc => new TicketRequestConcern
                             {
                                 TicketConcernId = /*g.ConcernStatus == "For Approval" ? null :*/ tc.Id,

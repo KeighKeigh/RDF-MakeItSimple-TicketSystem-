@@ -1,6 +1,7 @@
 ﻿using MakeItSimple.WebApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Data.UserManagement
 {
@@ -28,6 +29,13 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Data.UserManagement
            .WithMany()
            .HasForeignKey(u => u.ModifiedBy)
             .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.HasOne(u => u.OneChargingMIS)
+            .WithMany()
+            .HasForeignKey(u => u.OneChargingCode)
+            .HasPrincipalKey(o => o.code) 
+            .OnDelete(DeleteBehavior.SetNull); 
 
         }
     }

@@ -10,12 +10,12 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using MakeItSimple.WebApi.Common.Cloudinary;
-using Microsoft.AspNetCore.Http.Connections;
-using MakeItSimple.WebApi.Common.SignalR;
+//using MakeItSimple.WebApi.Common.Cloudinary;
+//using Microsoft.AspNetCore.Http.Connections;
+//using MakeItSimple.WebApi.Common.SignalR;
 using System.Data;
 using Microsoft.Data.SqlClient;
-using MakeItSimple.WebApi.Common.Caching;
+//using MakeItSimple.WebApi.Common.Caching;
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MakeItSimple.WebApi.DataAccessLayer.Unit_Of_Work;
 //using MakeItSimple.WebApi.Hubs;
@@ -63,9 +63,9 @@ builder.Services.AddControllers( options =>
 
 builder.Services.AddScoped<ValidatorHandler>();
 builder.Services.AddScoped<TokenGenerator>();
-builder.Services.AddScoped<TransformUrl>();
+//builder.Services.AddScoped<TransformUrl>();
 builder.Services.AddScoped<ContentType>();
-builder.Services.AddScoped<TimerControl>();
+//builder.Services.AddScoped<TimerControl>();
 //builder.Services.AddScoped<IHubCaller, HubCaller>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -139,15 +139,15 @@ builder.Services.AddAuthentication(authOptions =>
 
 
 
-builder.Services.AddScoped<ICacheService, CacheService>();
-builder.Services.AddMemoryCache();
-builder.Services.AddLazyCache();
+//builder.Services.AddScoped<ICacheService, CacheService>();
+//builder.Services.AddMemoryCache();
+//builder.Services.AddLazyCache();
 builder.Services.AddHttpClient();
 //builder.Services.AddSignalR();
 
 
 
-builder.Services.Configure<CloudinaryOption>(config.GetSection("Cloudinary"));
+//builder.Services.Configure<CloudinaryOption>(config.GetSection("Cloudinary"));
 
 const string clientPermission = "_clientPermission";
 
@@ -189,7 +189,7 @@ app.UseCors(clientPermission);
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseWebSockets();
+//app.UseWebSockets();
 
 app.UseEndpoints(endpoints =>
 {

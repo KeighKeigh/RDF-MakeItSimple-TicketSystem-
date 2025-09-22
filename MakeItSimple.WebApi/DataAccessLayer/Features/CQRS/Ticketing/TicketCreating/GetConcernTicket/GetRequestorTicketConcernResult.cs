@@ -52,6 +52,8 @@
             public string AssignToName { get; set; }
             public int? ServiceProviderId { get; set; }
             public string ServiceProviderName { get; set; }
+            public string OneCharginCode { get; set; }
+            public string OneChargingName { get; set; }
 
             public List<GetRequestTicketCategory> GetRequestTicketCategories {  get; set; }
 

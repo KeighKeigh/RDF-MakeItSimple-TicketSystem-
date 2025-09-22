@@ -23,6 +23,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                 var result = await _context.TicketTransactionNotifications
                     .Include(x => x.AddedByUser)
                     .Include(x => x.ReceiveByUser)
+                    .AsSplitQuery()
                     .Where(x => x.ReceiveBy == request.UserId && x.IsChecked == false)
                     .Select(x => new TicketTransactionResult
                     {

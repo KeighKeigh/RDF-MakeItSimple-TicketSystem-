@@ -57,7 +57,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     .AsNoTracking()
                     .Select(x => new
                     {
-                        x.Id,
+                        //x.Id,
                         x.UserRoleName,
                         x.Permissions
 
@@ -65,7 +65,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                 var requestorPermissionList = allUserList
                     .Where(x => x.Permissions
-                    .Contains(TicketingConString.Generate))
+                    .Contains(TicketingConString.Requestor))
                     .Select(x => x.UserRoleName)
                     .ToList();
 
@@ -83,7 +83,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                 var requestConcernsQuery = await _context.RequestConcerns
                     .AsNoTracking()
-                    .Where(x => x.IsActive == true)
+                    .Where(x => x.IsActive == true )
                     .Select(x => new
                     {
                         x.Id,
@@ -91,15 +91,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                         x.UserId,
                         x.ConcernStatus,
                         x.Is_Confirm,
-                        x.IsActive,
-                        x.IsDone,
-                        x.AssignTo
+                        //x.IsActive,
+                        //x.IsDone,
+                        //x.AssignTo
 
                     }).ToListAsync();
 
                 var ticketConcernQuery = await _context.TicketConcerns
                     .AsNoTrackingWithIdentityResolution()
-                    .Where(x => x.IsActive)
+                    .Where(x => x.IsActive && x.AssignTo == request.UserId)
                     .AsSplitQuery()
                     .Select(x => new
                     {
@@ -109,19 +109,19 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                             x.RequestConcern.Is_Confirm,
                             x.RequestConcern.ConcernStatus
                         },
-                        x.RequestConcernId,
-                        x.User,
-                        x.UserId,
-                        x.IsActive,
-                        x.IsDone,
+                        //x.RequestConcernId,
+                        //x.User,
+                        //x.UserId,
+                        //x.IsActive,
+                        //x.IsDone,
                         x.IsApprove,
                         x.IsClosedApprove,
                         x.IsTransfer,
                         x.Closed_At,
                         x.OnHold,
-                        x.AssignTo,
+                        //x.AssignTo,
                         x.IsDateApproved,
-                        x.DateApprovedAt,
+                        //x.DateApprovedAt,
                         x.ConcernStatus,
                         
                         
@@ -136,26 +136,25 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                    {
                        x.Id,
                        x.TicketApprover,
-                       x.TicketConcernId,
+                       //x.TicketConcernId,
 
                    }).ToListAsync();
 
                 var transferQuery = await _context.TransferTicketConcerns
                 .AsNoTrackingWithIdentityResolution()
                 .AsSplitQuery()
-                .Where(x => x.IsActive == true)
-                .Where(x => x.IsTransfer == false)
+                .Where(x => x.IsActive == true && x.IsTransfer == false)
                 .Select(x => new
                 {
                     x.Id,
-                    TicketConcern = new
-                    {
-                        x.TicketConcern.OnHold,
-                    },
-                    x.TicketConcernId,
+                    //TicketConcern = new
+                    //{
+                    //    x.TicketConcern.OnHold,
+                    //},
+                    //x.TicketConcernId,
                     x.TicketApprover,
                     x.TransferBy,
-                    x.TransferTo,
+                    //x.TransferTo,
 
                 }).ToListAsync();
 
@@ -167,7 +166,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                     .Select(x => new
                     {
                         x.Id,
-                        x.IsClosing,
+                        //x.IsClosing,
                         x.TicketApprover
 
                     }).ToListAsync();
@@ -175,29 +174,17 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                 var dateApproval = await _context.ApproverDates
                     .AsNoTracking()
-                    .Where(x => x.IsActive)
-                    .Where(x => x.IsApproved == false)
-                    .Where(x => x.IsRejectDate == false)
+                    .Where(x => x.IsActive && x.IsApproved == false && x.IsRejectDate == false)
                     
                     .Select(x => new
                     {
                         x.Id,
-                        x.IsApproved,
-                        x.TicketApprover
+                        //x.IsApproved,
+                        //x.TicketApprover
 
                     }).ToListAsync();
 
-                //var openTicketApprover = from concern in _context.RequestConcerns
-                //                         join approver in _context.Approvers
-                //                         on concern.SubUnitId equals approver.SubUnitId into concernApprover
-                //                         from conApp in concernApprover.DefaultIfEmpty()
-                //                         where 
-                //                         select new
-                //                         {
-                //                             Id = concern.Id,
-                //                             TicketApprover = conApp.UserId
-                //                         };
-                                         
+
 
 
                 if (requestorPermissionList.Any(x => x.Contains(request.Role)))
@@ -232,9 +219,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                         .Where(x => x.ConcernStatus == TicketingConString.Done && x.Is_Confirm == true)
                         .Count();
 
-                    ticketConcernQuery = ticketConcernQuery
-                        .Where(x =>  x.AssignTo == request.UserId /*|| transferApprovalList.Contains(x.Id)*/ && ticketConcernQuery.Any())
-                        .ToList();
+                    //ticketConcernQuery = ticketConcernQuery
+                    //    .Where(x => x.AssignTo == request.UserId /*|| transferApprovalList.Contains(x.Id)*/ && ticketConcernQuery.Any())
+                    //    .ToList();
 
                     allTicketNotif = ticketConcernQuery.Count();
 
@@ -245,7 +232,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                     ApprovedDateNotif = ticketConcernQuery
                          .Where(x => x.IsDateApproved == false 
-                         && x.OnHold == null && x.ConcernStatus != TicketingConString.DateRejected)
+                         && x.OnHold != true && x.ConcernStatus == TicketingConString.ForApprovalTicket)
                          .Count();
 
                     dateRejectedNotif = ticketConcernQuery
@@ -513,6 +500,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
 
                     }).ToListAsync();
 
+                if (ticketConcernList == null)
+                {
+                    return Result.Success(notification);
+                }
+
                 foreach (var confirm in ticketConcernList)
                 {
 
@@ -575,93 +567,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                 }
 
 
-                // Get filtered data from database
-                //var ticketConcernList = await _context.TicketConcerns
-                //    .AsNoTrackingWithIdentityResolution()
-                //    .Where(x => x.RequestConcern.Is_Confirm == null
-                //                && x.RequestConcern.ConcernStatus == TicketingConString.NotConfirm
-                //                && x.AssignTo == request.UserId)
-                //    .Select(x => new
-                //    {
-                //        x.Id,
-                //        x.RequestConcernId,
-                //        x.User,
-                //        x.UserId,
-                //        x.IsActive,
-                //        x.Closed_At,
-                //    })
-                //    .ToListAsync();
-
-                //// Pre-calculate values and check if it's a weekday
-                //var now = DateTime.Now;
-                //var today = DateTime.Today;
-                //var isWeekday = now.DayOfWeek != DayOfWeek.Saturday && now.DayOfWeek != DayOfWeek.Sunday;
-
-                //if (!isWeekday)
-                //{
-                //    return Result.Success(); // Exit early if it's weekend
-                //}
-
-                //// Filter records that need updating based on 24-hour rule
-                //var recordsToUpdate = ticketConcernList
-                //    .Where(x => x.Closed_At.HasValue && (now - x.Closed_At.Value).TotalHours >= 24)
-                //    .ToList();
-
-                //if (!recordsToUpdate.Any())
-                //{
-                //    return Result.Success(); // Exit early if no records need updating
-                //}
-
-                //// Get all RequestConcerns that need updating in one query
-                //var requestConcernIds = recordsToUpdate.Select(x => x.RequestConcernId).ToList();
-                //var requestConcerns = await _context.RequestConcerns
-                //    .Where(x => requestConcernIds.Contains(x.Id))
-                //    .ToListAsync();
-
-                //// Update RequestConcerns
-                //foreach (var requestConcern in requestConcerns)
-                //{
-                //    requestConcern.Is_Confirm = true;
-                //    requestConcern.Confirm_At = today;
-                //    requestConcern.ConcernStatus = TicketingConString.Done;
-                //}
-
-                //// Get all TicketHistories that need updating in one query
-                //var ticketIds = recordsToUpdate.Select(x => x.Id).ToList();
-                //var ticketHistories = await _context.TicketHistories
-                //    .Where(x => ticketIds.Contains(x.TicketConcernId.Value)
-                //                && x.IsApprove == null
-                //                && x.Request.Contains(TicketingConString.NotConfirm))
-                //    .ToListAsync();
-
-                //// Update TicketHistories
-                //foreach (var ticketHistory in ticketHistories)
-                //{
-                //    ticketHistory.TransactedBy = request.UserId;
-                //    ticketHistory.TransactionDate = now;
-                //    ticketHistory.Request = TicketingConString.Confirm;
-                //    ticketHistory.Status = TicketingConString.CloseConfirm;
-                //}
-
-                //// Create notifications for all records that need them
-                //var notifications = recordsToUpdate
-                //    .Where(x => x.UserId.HasValue)
-                //    .Select(x => new TicketTransactionNotification
-                //    {
-                //        Message = $"Ticket number {x.Id} has been closed",
-                //        AddedBy = request.UserId,
-                //        Created_At = now,
-                //        ReceiveBy = x.UserId.Value,
-                //        Modules = PathConString.IssueHandlerConcerns,
-                //        Modules_Parameter = PathConString.Closed,
-                //    })
-                //    .ToList();
-
-                //// Add all notifications at once
-                //if (notifications.Any())
-                //{
-                //    await _context.TicketTransactionNotifications.AddRangeAsync(notifications);
-                //}
 
 
 

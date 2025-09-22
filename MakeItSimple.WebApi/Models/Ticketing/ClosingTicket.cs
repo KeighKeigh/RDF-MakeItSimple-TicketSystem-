@@ -42,11 +42,16 @@ namespace MakeItSimple.WebApi.Models.Ticketing
         public string Resolution { get; set; }
         public string Notes { get; set; }
 
+        public int? CategoryConcernId { get; set; }
+        public string CategoryConcernName { get; set; }
+
         public int? CategoryId { get; set; }
         public virtual Category Category { get; set; }
 
         public int? SubCategoryId { get; set; }
         public virtual SubCategory SubCategory { get; set; }
+
+        public DateTime? ForClosingAt { get; set; }
 
         public ICollection<TicketAttachment> TicketAttachments { get; set; }
         public ICollection<ApproverTicketing> ApproverTickets { get; set; }

@@ -2,6 +2,7 @@
 using MakeItSimple.WebApi.DataAccessLayer.Data.DataContext;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.Phase_One.GetDepartmentSetup.GetCherryPickDepartment;
 
 namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.ChannelSetup
 {
@@ -42,13 +43,22 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.ChannelSetup
 
                 var selectedChannelUsers = channelUsers.Select(x => x.UserId);
 
-                var departmentList = await _context.Departments.ToListAsync();
+                var departmentList = await _context.OneChargings.ToListAsync();
 
-                if (request.DepartmentId.Count() > 0 && departmentList != null)
+                var result = departmentList
+                    .Select(g => new GetCherryPickDepartmentResult
+                    {
+                        Id = g.department_id,
+                        DepartmentCode = g.department_code,
+                        DepartmentName = g.department_name,
+
+                    }).Distinct();
+
+                if (request.DepartmentId.Count() > 0 && result != null)
                 {
-                    departmentList = await _context.Departments.Where(x => request.DepartmentId.Contains(x.Id)).ToListAsync();
+                    result = result.Where(x => request.DepartmentId.Contains(x.Id.Value)).ToList();
                 }
-                var departmentSelect = departmentList.Select(x => x.Id).ToList();
+                var departmentSelect = result.Select(x => x.Id).ToList();
 
                 var results = await _context.Users
                     .Where(x => !selectedChannelUsers.Contains(x.Id) && x.IsActive == true)

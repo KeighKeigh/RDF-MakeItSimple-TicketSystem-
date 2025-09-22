@@ -18,6 +18,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.ChannelSetup
             public string Channel_Name { get; set; }
             public Guid? Added_By { get; set; }
             public Guid? Modified_By { get; set; }
+            public bool? Request { get; set; }
 
             public List<ChannelUserById> ChannelUserByIds { get; set; }
             public class ChannelUserById
@@ -67,6 +68,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.ChannelSetup
                         hasChange = true;
                     }
 
+                    if (channelId.Request != command.Request)
+                    {
+                        channelId.Request = command.Request;
+                        hasChange = true;
+                    }
 
                     if (hasChange)
                     {
@@ -95,6 +101,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.ChannelSetup
                     {
                         ChannelName = command.Channel_Name,
                         AddedBy = command.Added_By,
+                        Request = command.Request
 
                     };
 

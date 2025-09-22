@@ -13,6 +13,8 @@ using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.OneCharging.GetOn
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.OneCharging.GetOneLocation;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.OneCharging.GetOneSubUnit;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.OneCharging.GetOneUnit;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.Phase_One.GetDepartmentSetup.GetCherryPickDepartment;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.Phase_One.GetLocationSetup.GetCherryPickLocation;
 
 
 namespace MakeItSimple.WebApi.Controllers.OneCharging
@@ -281,6 +283,87 @@ namespace MakeItSimple.WebApi.Controllers.OneCharging
 
         [HttpGet("page_unit")]
         public async Task<IActionResult> GetOneUnit([FromQuery] GetOneUnitQuery query)
+        {
+            try
+            {
+
+                var onecharging = await _mediator.Send(query);
+
+                Response.AddPaginationHeader(
+
+                onecharging.CurrentPage,
+                onecharging.PageSize,
+                onecharging.TotalCount,
+                onecharging.TotalPages,
+                onecharging.HasPreviousPage,
+                onecharging.HasNextPage
+
+                );
+
+                var result = new
+                {
+                    onecharging,
+                    onecharging.CurrentPage,
+                    onecharging.PageSize,
+                    onecharging.TotalCount,
+                    onecharging.TotalPages,
+                    onecharging.HasPreviousPage,
+                    onecharging.HasNextPage
+                };
+
+                var successResult = Result.Success(result);
+                return Ok(successResult);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+        }
+
+
+        [HttpGet("cherrypick_department")]
+        public async Task<IActionResult> GetCherryPickDepartment([FromQuery] GetCherryPickDepartmentQuery query)
+        {
+            try
+            {
+
+                var onecharging = await _mediator.Send(query);
+
+                Response.AddPaginationHeader(
+
+                onecharging.CurrentPage,
+                onecharging.PageSize,
+                onecharging.TotalCount,
+                onecharging.TotalPages,
+                onecharging.HasPreviousPage,
+                onecharging.HasNextPage
+
+                );
+
+                var result = new
+                {
+                    onecharging,
+                    onecharging.CurrentPage,
+                    onecharging.PageSize,
+                    onecharging.TotalCount,
+                    onecharging.TotalPages,
+                    onecharging.HasPreviousPage,
+                    onecharging.HasNextPage
+                };
+
+                var successResult = Result.Success(result);
+                return Ok(successResult);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+        }
+
+
+
+        [HttpGet("cherrypick_location")]
+        public async Task<IActionResult> GetCherryPickLocationQuery([FromQuery] GetCherryPickLocationQuery query)
         {
             try
             {

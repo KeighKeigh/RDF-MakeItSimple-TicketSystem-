@@ -22,7 +22,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Overview.Overview_An
             {
                 var query = await context.TicketConcerns
                     .Include(x => x.User)
-                    .ThenInclude(x => x.Department)
+                    .ThenInclude(x => x.OneChargingMIS)
                     .Where(x => x.UserId != null && x.IsApprove == true)
                     .ToListAsync();
 
@@ -36,7 +36,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Overview.Overview_An
                     .GroupBy(x => x.User.DepartmentId)
                     .Select(x => new OverviewAnalyticsResult
                     {
-                        Department = x.First().User.Department.DepartmentName,
+                        Department = x.First().User.OneChargingMIS.department_name,
                         TotalTicket = totalTickets,
                         TotalDelay = totalDelay,
                         OverviewAnalyticsDetails = x.GroupBy(x => x.UserId)

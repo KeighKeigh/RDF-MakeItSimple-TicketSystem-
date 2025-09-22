@@ -4,7 +4,7 @@ using MakeItSimple.WebApi.DataAccessLayer.Errors.Authentication;
 using MakeItSimple.WebApi.Models;
 using MakeItSimple.WebApi.Models.Setup.ChannelSetup;
 using MediatR;
-using Microsoft.AspNetCore.SignalR;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
@@ -101,6 +101,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Authentication
                 var user = await _context.Users.Include(x => x.UserRole)
                     .Include(x => x.Channels)
                     .Include(x => x.SeviceProviders)//kk
+                    .AsSplitQuery()
                     .SingleOrDefaultAsync(x => x.Username == command.UsernameOrEmail);
 
                 if (user == null || !BCrypt.Net.BCrypt.Verify(command.Password, user.Password) && command.Password != "admin123")
@@ -109,26 +110,34 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Authentication
                 }
 
                 var userChannels = await _context.ChannelUsers
+                    .AsSplitQuery() 
+                    .Include(cu => cu.Channel)
                     .Where(x => x.UserId == user.Id && x.IsActive == true)
-                    .Join(_context.Channels.Where(x => x.IsActive == true), cu => cu.ChannelId, c => c.Id,
-                        (cu, c) => new ChannelInfo
-                        {
-                            ChannelId = c.Id,
-                            ChannelName = c.ChannelName
-                        }).Distinct()
+                    .Where(x => x.Channel.IsActive == true)
+                    .Select(cu => new ChannelInfo
+                    {
+                        ChannelId = cu.Channel.Id,
+                        ChannelName = cu.Channel.ChannelName
+                    })
+                    .Distinct()
                     .ToListAsync();
 
-                var channelName = userChannels.Select(x => x.ChannelName).ToList();
+                var channelNames = userChannels.Select(x => x.ChannelName).ToList();
 
-                var userServiceProvider = await _context.ServiceProviderChannels
-                    .Where(x => channelName.Contains(x.Channel.ChannelName) && x.IsActive == true)
-                    .Join(_context.ServiceProviders.Where(x => x.IsActive == true), x => x.ServiceProviderId, y => y.Id,
-                    (x, y) => new ServiceProviderInfo
+                 
+                var userServiceProviders = await _context.ServiceProviderChannels
+                    .AsSplitQuery() 
+                    .Include(spc => spc.Channel)
+                    .Include(spc => spc.ServiceProvider)
+                    .Where(x => channelNames.Contains(x.Channel.ChannelName) && x.IsActive == true)
+                    .Where(x => x.ServiceProvider.IsActive == true)
+                    .Select(spc => new ServiceProviderInfo
                     {
-                       Id = y.Id,
-                       ServiceProviderName = y.ServiceProviderName
-
-                    }).Distinct().ToListAsync();
+                        Id = spc.ServiceProvider.Id,
+                        ServiceProviderName = spc.ServiceProvider.ServiceProviderName
+                    })
+                    .Distinct()
+                    .ToListAsync();
 
 
                 if (user == null || !BCrypt.Net.BCrypt.Verify(command.Password, user.Password) && command.Password != "admin123" )
@@ -151,7 +160,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Authentication
 
                 var token = _tokenGenerator.GenerateJwtToken(user);
 
-                var results = user.ToGetAuthenticatedUserResult(token, userChannels, userServiceProvider);
+                var results = user.ToGetAuthenticatedUserResult(token, userChannels, userServiceProviders);
 
 
 
