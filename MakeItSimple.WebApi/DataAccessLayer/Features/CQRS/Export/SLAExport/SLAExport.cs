@@ -30,6 +30,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
             public string Description { get; set; }
             public DateTime? OpenDate { get; set; }
             public DateTime? TargetDate { get; set; }
+            public DateTime? ForClosingDate { get; set; }
             public DateTime? ClosedDate { get; set; }
             public string Solution { get; set; }
             public string RequestType { get; set; }
@@ -124,6 +125,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                         ServiceProviderId = ct.TicketConcern.RequestConcern.ServiceProviderId,
                         ChannelId = ct.TicketConcern.RequestConcern.ChannelId,
                         AssignTo = ct.TicketConcern.AssignTo,
+                        ForClosingDate = ct.ForClosingAt,
                     }).ToListAsync();
 
 
@@ -222,6 +224,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                         Description = r.Description,
                         OpenDate = r.OpenDate,
                         TargetDate  = r.TargetDate,
+                        ForClosingDate = r.ForClosingDate,
                         ClosedDate = r.ClosedDate,
                         Solution = r.Solution,
                         RequestType = r.RequestType,

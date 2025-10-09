@@ -24,96 +24,52 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
             public async Task<Unit> Handle(ClosingTicketExportCommand request, CancellationToken cancellationToken)
             {
 
-                var closingTicketTechnician = _context.TicketTechnicians
-                        .AsNoTrackingWithIdentityResolution()
-                        .Include(x => x.TechnicianByUser)
-                        .Include(x => x.ClosingTicket)
-                        .ThenInclude(x => x.TicketConcern)
-                        .AsSplitQuery()
-                        .Where(x => x.ClosingTicket.TicketConcern.IsClosedApprove == true && x.ClosingTicket.IsActive == true && x.ClosingTicket.IsClosing == true)
-                        .Where(x => x.ClosingTicket.TicketConcern.Closed_At.Value.Date >= request.Date_From.Value.Date && x.ClosingTicket.TicketConcern.Closed_At.Value.Date <= request.Date_To.Value.Date)
-                        .Select(x => new
-                        {
-                           Unit = x.TechnicianByUser.UnitId,
-                           UserId =  x.TechnicianBy,
-                            x.ClosingTicket.TicketConcern.TargetDate.Value.Year,
-                            x.ClosingTicket.TicketConcern.TargetDate.Value.Month,
-                            x.ClosingTicket.TicketConcern.TargetDate,
-                            ClosedAt = x.ClosingTicket.ClosingAt,
-                            TechnicianName = x.TechnicianByUser.Fullname,
-                            TicketId = x.ClosingTicket.TicketConcernId,
-                            ConcernDescription = x.ClosingTicket.TicketConcern.RequestConcern.Concern,
-                            x.ClosingTicket.TicketConcern.RequestConcern.ChannelId,
-                            x.ClosingTicket.TicketConcern.RequestConcern.Channel.ChannelName,
-                            x.ClosingTicket.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
-                            x.ClosingTicket.TicketConcern.RequestConcern.ServiceProviderId,
-                            x.ClosingTicket.TicketConcern.DateApprovedAt,
-                            ForClosedAt = x.ClosingTicket.ForClosingAt
-
-                        });
-
-                var closingTicket =  _context.ClosingTickets
+                var closing =  await _context.ClosingTickets
                     .AsNoTrackingWithIdentityResolution()
-                    .Include(x => x.AddedByUser)
-                    .Include(x => x.ModifiedByUser)
-                    .Include(x => x.TicketConcern)
-                    .ThenInclude(x => x.RequestConcern)
-                    //.ThenInclude(x => x.TicketAttachments)
+                    .Include(c => c.TicketConcern)
+                    .ThenInclude(c => c.RequestConcern)
                     .AsSplitQuery()
-                    .Where(x => x.TicketConcern.IsClosedApprove == true && x.IsClosing == true && x.IsActive == true)
-                    .Where(x => x.ClosingAt.Value.Date >= request.Date_From.Value.Date && x.ClosingAt.Value.Date <= request.Date_To.Value.Date)
-                    .Select(x => new
-                    {
-                        Unit = x.TicketConcern.User.UnitId,
-                        x.TicketConcern.UserId,
-                        x.TicketConcern.TargetDate.Value.Year,
-                        x.TicketConcern.TargetDate.Value.Month,
-                        x.TicketConcern.TargetDate,
-                        ClosedAt = x.ClosingAt,
-                        TechnicianName = x.TicketConcern.User.Fullname,
-                        TicketId = x.Id,
-                        ConcernDescription = x.TicketConcern.RequestConcern.Concern,
-                        x.TicketConcern.RequestConcern.ChannelId,
-                        x.TicketConcern.RequestConcern.Channel.ChannelName,
-                        x.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
-                        x.TicketConcern.RequestConcern.ServiceProviderId,
-                        x.TicketConcern.DateApprovedAt,
-                        ForClosedAt = x.ForClosingAt,
-                    });
-
-                var combineTicket = closingTicket
-                    .Concat(closingTicketTechnician);
-
-                var closing = await combineTicket
+                    .Where(x => x.IsActive == true && x.IsClosing == true)
+                    .Where(t => t.ClosingAt.Value.Date >= request.Date_From.Value.Date && t.ClosingAt.Value.Date <= request.Date_To.Value.Date)
                     .Select(x => new ClosingTicketExportResult
                     {
-                        Unit = x.Unit,
-                        UserId = x.UserId,
-                        Year = x.Year.ToString(),
-                        Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(x.Month),
-                        Start_Date = $"{x.Month}-01-{x.Year}",
-                        End_Date = $"{x.Month}-{DateTime.DaysInMonth(x.Year, x.Month)}-{x.Year}",
-                        Personnel = x.TechnicianName,
-                        Ticket_Number = x.TicketId,
-                        Description = x.ConcernDescription,
-                        Target_Date = x.TargetDate.Value.ToString("MM-dd-yyyy"),
-                        Actual = x.ClosedAt.ToString(),
-                        Varience = x.TargetDate.Value.Date > x.ClosedAt.Value.Date ? EF.Functions.DateDiffDay(x.TargetDate.Value.Date, x.ClosedAt.Value.Date) : 0,
-                        Efficeincy = x.ClosedAt.Value.Date <= x.TargetDate.Value.Date ? "100 %" : "50 %",
+                        Year = x.TicketConcern.TargetDate.Value.Year.ToString(),
+                        Month = x.TicketConcern.TargetDate.Value.Month.ToString(),
+                        Personnel = x.TicketConcern.User.Fullname,
+                        Ticket_Number = x.TicketConcernId,
+                        Description = x.TicketConcern.RequestConcern.Concern,
+                        Target_Date = x.TicketConcern.TargetDate.Value.ToString("MM/dd/yyyy"),
+                        Actual =  x.ClosingAt.Value.ToString("MM/dd/yyyy hh:mm:tt"),
+                        Varience = x.ClosingAt.Value.Date > x.TicketConcern.TargetDate.Value.Date  ? EF.Functions.DateDiffDay(x.TicketConcern.TargetDate.Value.Date, x.ClosingAt.Value.Date) : 0,
+                        Efficeincy = x.ClosingAt.Value.Date <= x.TicketConcern.TargetDate.Value.Date ? "100 %" : "50 %",
                         Status = TicketingConString.Closed,
-                        Remarks = x.ClosedAt.Value.Date <= x.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
-                        ChannelName = x.ChannelName,
-                        ServiceProvider = x.ServiceProviderId,
-                        ServiceProviderName = x.ServiceProviderName,
-                        ChannelId = x.ChannelId,
-                        ForClosedDate = x.ForClosedAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
-                        OpenDate = x.DateApprovedAt.Value.ToString("MM/dd/yyyy hh:tt:mm")
+                        Remarks = x.ClosingAt.Value.Date  <= x.TicketConcern.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
+                        Category = string.Join(", ", x.TicketConcern.RequestConcern.TicketCategories
+                          .Select(x => x.Category.CategoryDescription)),
+                        SubCategory = string.Join(", ", x.TicketConcern.RequestConcern.TicketSubCategories
+                          .Select(x => x.SubCategory.SubCategoryDescription)),
+                        Aging_Days = EF.Functions.DateDiffDay(x.TicketConcern.DateApprovedAt.Value.Date, x.ClosingAt.Value.Date),
+                        Start_Date = x.TicketConcern.DateApprovedAt.Value.ToString("MM/dd/yyyy"),
+                        ForClosedDate = x.ForClosingAt.Value.ToString("MM/dd/yyyy hh:mm:tt") ?? "",
+                        ServiceProvider = x.TicketConcern.RequestConcern.ServiceProviderId,
+                        ChannelId = x.TicketConcern.RequestConcern.ChannelId,
+                        ServiceProviderName = x.TicketConcern.RequestConcern.ServiceProvider.ServiceProviderName,
+                        ChannelName = x.TicketConcern.RequestConcern.Channel.ChannelName,
+                        UserId = x.TicketConcern.AssignTo,
+                        CreatedAt = x.TicketConcern.CreatedAt.ToString("MM/dd/yyyy hh:mm:tt"),
+                        ConfirmedAt = x.TicketConcern.RequestConcern.Confirm_At.Value.ToString("MM/dd/yyyy hh:mm:tt"),
+                        OpenDate = x.TicketConcern.DateApprovedAt.Value.ToString("MM/dd/yyyy hh:mm:tt"),
+                        //Technician1 = x.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname).Skip(0).Take(1).FirstOrDefault(),
+                        //Technician2 = x.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname).Skip(1).Take(1).FirstOrDefault(),
+                        //Technician3 = x.ticketTechnicians.Select(t => t.TechnicianByUser.Fullname).Skip(2).Take(1).FirstOrDefault(),
 
-
-
-
+                        //Requestor = x.TicketConcern.RequestorByUser.Fullname,
+                        //CategoryConcern = x.CategoryConcernName,
+                        //Department = x.TicketConcern.RequestConcern.OneChargingMIS.department_name,
+                        Notes =x.Notes
 
                     }).ToListAsync();
+
 
                 if (request.ServiceProvider is not null)
                 {
@@ -173,15 +129,20 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         "Personnel",
                         "Ticket Number",
                         "Description",
+                        "Category",
+                        "Sub Category",
+                        "Requested Date",
                         "Open Date",
                         "Target Date",
-                        "Actual",
+                        "For Closing Date",
+                        "Approved Date",
+                        "Confirmed Date",
                         "Variance",
                         "Efficiency",
                         "Remarks",
                         "Channel Name",
                         "Service Provider",
-                        "For Closed At"
+                        
 
                     };
 
@@ -207,15 +168,22 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
                         row.Cell(5).Value = closing[index - 1].Personnel;
                         row.Cell(6).Value = closing[index - 1].Ticket_Number;
                         row.Cell(7).Value = closing[index - 1].Description;
-                        row.Cell(8).Value = closing[index - 1].OpenDate;
-                        row.Cell(9).Value = closing[index - 1].Target_Date;
-                        row.Cell(10).Value = closing[index - 1].Actual;
-                        row.Cell(11).Value = closing[index - 1].Varience;
-                        row.Cell(12).Value = closing[index - 1].Efficeincy;
-                        row.Cell(13).Value = closing[index - 1].Remarks;
-                        row.Cell(14).Value = closing[index - 1].ChannelName;
-                        row.Cell(15).Value = closing[index - 1].ServiceProviderName;
-                        row.Cell(16).Value = closing[index - 1].ForClosedDate;
+                        row.Cell(8).Value = closing[index - 1].Category;
+                        row.Cell(9).Value = closing[index - 1].SubCategory;
+                        row.Cell(10).Value = closing[index - 1].CreatedAt;
+                        row.Cell(11).Value = closing[index - 1].OpenDate;
+                        row.Cell(12).Value = closing[index - 1].Target_Date;
+                        row.Cell(13).Value = closing[index - 1].ForClosedDate;
+                        row.Cell(14).Value = closing[index - 1].Actual;
+                        row.Cell(15).Value = closing[index - 1].ConfirmedAt;
+                        row.Cell(16).Value = closing[index - 1].Varience;
+                        row.Cell(17).Value = closing[index - 1].Efficeincy;
+                        row.Cell(18).Value = closing[index - 1].Remarks;
+                        row.Cell(19).Value = closing[index - 1].Remarks;
+                        row.Cell(20).Value = closing[index - 1].ChannelName;
+                        row.Cell(21).Value = closing[index - 1].ServiceProviderName;
+
+                        
 
 
                     }

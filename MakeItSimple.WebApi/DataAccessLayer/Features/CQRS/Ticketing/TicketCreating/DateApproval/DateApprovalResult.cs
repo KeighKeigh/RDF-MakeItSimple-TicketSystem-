@@ -16,6 +16,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
             public bool IsActive { get; set; }
             public string ConcernStatus { get; set; }
+            public string Reason { get; set; }
 
             public List<GetApproveDateTicketCategory> GetApproveDateTicketCategories { get; set; }
 

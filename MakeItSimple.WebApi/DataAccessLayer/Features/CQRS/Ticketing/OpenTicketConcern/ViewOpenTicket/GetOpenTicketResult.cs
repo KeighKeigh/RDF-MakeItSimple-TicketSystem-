@@ -96,7 +96,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
             public bool? Is_Closed { get; set; }
             public DateTime? Closed_At { get; set; }
 
-            public string Closed_Status { get; set; }
+            
 
             public DateTime? Transaction_Date { get; set; }
 
@@ -117,6 +117,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                 public int? CategoryConcernId { get; set; }
                 public string CategoryConcernName { get; set; }
                 public string Notes { get; set; }
+                public string Closed_Status { get; set; }
                 public IEnumerable<ForClosingTicketTechnician> ForClosingTicketTechnicians { get; set; }
                 public class ForClosingTicketTechnician
                 {

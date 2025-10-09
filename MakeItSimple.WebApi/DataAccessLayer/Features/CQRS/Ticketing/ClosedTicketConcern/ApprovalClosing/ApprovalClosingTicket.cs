@@ -106,6 +106,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.ClosedTicketCon
 
                             await unitOfWork.ClosingTicket.ApprovedClosingTicket(approvedClosingTicket,cancellationToken);
 
+
+
                             var approvedTicketByClosingTicket = new TicketConcern
                             {
                                 Id = closingTicketExist.TicketConcernId,

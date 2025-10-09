@@ -20,14 +20,14 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Overview.Overview_An
 
             public async Task<Result> Handle(OverviewAnalyticsQuery request, CancellationToken cancellationToken)
             {
-                var query = await context.TicketConcerns
+                var query = await context.TicketConcerns.AsNoTrackingWithIdentityResolution()
                     .Include(x => x.User)
                     .ThenInclude(x => x.OneChargingMIS)
-                    .Where(x => x.UserId != null && x.IsApprove == true)
+                    .Where(x => x.UserId != null && x.IsDateApproved == true)
                     .ToListAsync();
 
                 var totalTickets = query.Count();
-                var totalDelay = query.Count(x => x.IsClosedApprove == true && (x.Closed_At > x.TargetDate.Value.Date || x.TargetDate.Value.Date < DateTime.Now.Date));
+                var totalDelay = query.Count(x => x.IsClosedApprove == true && x.Closed_At > x.TargetDate.Value.Date );
 
                 if(request.DateFrom is not null && request.DateTo is not null) 
                     query = query.Where(x => x.CreatedAt.Date <= request.DateFrom.Value.Date && x.CreatedAt >= request.DateTo.Value.Date).ToList();
@@ -46,8 +46,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Overview.Overview_An
                             FullName = x.First().User.Fullname,
                             NumberOfTicket = x.Count(),
                             PercentageTicket =Math.Round(((decimal)x.Count() / totalTickets) * 100,2),
-                            NumberOfDelay = x.Count(x => x.IsClosedApprove == true && (x.Closed_At > x.TargetDate.Value.Date || x.TargetDate.Value.Date < DateTime.Now.Date)),
-                            DelayTicketPercentage = Math.Round(((decimal)x.Count(x => x.IsClosedApprove == true && (x.Closed_At > x.TargetDate.Value.Date || x.TargetDate.Value.Date < DateTime.Now.Date)) / totalDelay) * 100,2),
+                            NumberOfDelay = x.Count(x => x.IsClosedApprove == true && x.Closed_At.Value.Date > x.TargetDate.Value.Date),
+                            DelayTicketPercentage = Math.Round(((decimal)x.Count(x => x.IsClosedApprove == true && x.Closed_At.Value.Date > x.TargetDate.Value.Date) / x.Count()) * 100,2),
 
                         }).OrderByDescending(x => x.PercentageTicket).ToList(),
                     });

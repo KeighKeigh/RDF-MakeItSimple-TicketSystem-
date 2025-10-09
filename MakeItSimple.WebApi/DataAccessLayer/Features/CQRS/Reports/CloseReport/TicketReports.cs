@@ -43,21 +43,19 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                         Ticket_Number = x.TicketConcernId,
                         Description = x.TicketConcern.RequestConcern.Concern,
                         Target_Date = x.TicketConcern.TargetDate.Value.ToString("MM/dd/yyyy"),
-                        Actual = x.ForClosingAt != null ? x.ForClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm") : x.ClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
-                        Varience = x.TicketConcern.TargetDate.Value.Date > x.ClosingAt.Value.Date ? EF.Functions.DateDiffDay(x.TicketConcern.TargetDate.Value.Date, x.ForClosingAt.Value.Date) : 0,
-                        Efficeincy = x.ForClosingAt.HasValue ? x.ForClosingAt.Value.Date <= x.TicketConcern.TargetDate.Value.Date ? "100 %" : "50 %"
-                        : x.ClosingAt.Value.Date <= x.TicketConcern.TargetDate.Value.Date ? "100 %" : "50 %",
+                        Actual =  x.ClosingAt.Value.ToString("MM/dd/yyyy hh:mm:tt"),
+                        Varience = x.ClosingAt.Value.Date > x.TicketConcern.TargetDate.Value.Date  ? EF.Functions.DateDiffDay(x.TicketConcern.TargetDate.Value.Date, x.ClosingAt.Value.Date) : 0,
+                        Efficeincy = x.ClosingAt.Value.Date <= x.TicketConcern.TargetDate.Value.Date ? "100 %" : "50 %",
                         Status = TicketingConString.Closed,
-                        Remarks = x.ForClosingAt != null ? x.ForClosingAt.Value.Date  <= x.TicketConcern.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay 
-                        : x.ClosingAt.Value.Date <= x.TicketConcern.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
+                        Remarks = x.ClosingAt.Value.Date  <= x.TicketConcern.TargetDate.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
                         Category = string.Join(", ", x.TicketConcern.RequestConcern.TicketCategories
                           .Select(x => x.Category.CategoryDescription)),
                         SubCategory = string.Join(", ", x.TicketConcern.RequestConcern.TicketSubCategories
                           .Select(x => x.SubCategory.SubCategoryDescription)),
-                        Aging_Day = EF.Functions.DateDiffDay(x.TicketConcern.DateApprovedAt.Value.Date, x.ForClosingAt == null ? x.ClosingAt.Value.Date : x.ForClosingAt.Value.Date),
+                        Aging_Day = EF.Functions.DateDiffDay(x.TicketConcern.DateApprovedAt.Value.Date, x.ClosingAt.Value.Date),
                         StartDate = x.TicketConcern.DateApprovedAt.Value.ToString("MM/dd/yyyy"),
-                        ClosedDate = x.ClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm"),
-                        ForClosedDate = x.ForClosingAt.Value.ToString("MM/dd/yyyy hh:tt:mm") ?? "",
+                        ClosedDate = x.ClosingAt.Value.ToString("MM/dd/yyyy hh:mm:tt"),
+                        ForClosedDate = x.ForClosingAt.Value.ToString("MM/dd/yyyy hh:mm:tt") ?? "",
                         ServiceProviderId = x.TicketConcern.RequestConcern.ServiceProviderId,
                         ChannelId = x.TicketConcern.RequestConcern.ChannelId,
                         AssignTo = x.TicketConcern.AssignTo,
@@ -68,12 +66,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                         IsStore = x.TicketConcern.RequestConcern.User.IsStore,
                         Requestor = x.TicketConcern.RequestorByUser.Fullname,
                         CategoryConcern = x.CategoryConcernName,
-                        Department = x.TicketConcern.RequestConcern.OneChargingMIS.department_name
+                        Department = x.TicketConcern.RequestConcern.OneChargingMIS.department_name,
+                        Notes =x.Notes
 
                     });
 
-                //var combinedTickets = closingTicket
-                //    .Concat(closingTicketTechnician);
 
                 if (request.ServiceProvider is not null)
                 {
@@ -90,26 +87,6 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                     }
                 }
 
-                //if (!string.IsNullOrEmpty(request.Remarks))
-                //{
-                //    switch (request.Remarks)
-                //    {
-                //        case TicketingConString.OnTime:
-                //            closingTicket = closingTicket
-                //                .Where(x => x.ClosedDate != null && x.ClosedDate > x.ClosedDate.Value.Date);
-
-                //            break;
-
-                //        case TicketingConString.Delay:
-                //            closingTicket = closingTicket
-                //                .Where(x => x.ClosedDate != null && x.ClosedDate.Value.Date < x.ClosedDate.Value.Date);
-                //            break;
-
-                //        default:
-                //            return new PagedList<Reports>(new List<Reports>(), 0, request.PageNumber, request.PageSize);
-
-                //    }
-                //}
 
                 if (!string.IsNullOrEmpty(request.Search))
                 {
@@ -148,6 +125,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport
                     IsStore = x.IsStore,
                     CategoryConcern = x.CategoryConcern,
                     ForClosedDate = x.ForClosedDate,
+                    Notes = x.Notes,
 
 
 

@@ -98,7 +98,16 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                            .Where(x => x.RequestConcern.LocationId == request.LocationId);
                     }
 
-                    
+                    if (request.CategoryId != null)
+                    {
+
+                        requestConcernsQuery = requestConcernsQuery
+                           .Where(x => x.RequestConcern.TicketCategories.Any(c => c.CategoryId == request.CategoryId));
+                    }
+
+
+
+
 
                     if (request.Concern_Status is not null)
                     {
@@ -286,6 +295,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                             }).ToList()
 
                     }) ;
+
+                
 
                 return await PagedList<GetRequestorTicketConcernResult>.CreateAsync(results, request.PageNumber, request.PageSize);
             }

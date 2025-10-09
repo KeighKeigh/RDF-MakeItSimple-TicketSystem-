@@ -27,6 +27,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
 
             public DateTime? TargetDate { get; set; }
             public Guid? AssignTo { get; set; }
+            public string Reason { get; set; }
 
         }
 
@@ -119,6 +120,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                                 IsDateApproved = command.TargetDate.Value.Date <= approvedDate.Date ? true : false,
                                 DateApprovedAt = command.TargetDate.Value.Date <= approvedDate.Date ? dateToday : null,
                                 ApprovedDateBy = command.TargetDate.Value.Date <= approvedDate.Date ? handlerIds.ApproverId : null,
+                                Reason = command.Reason,
                             };
 
                             await unitOfWork.RequestTicket.UpdateTicketConcerns(updateTicketConcern, cancellationToken);

@@ -1,16 +1,18 @@
-﻿using MakeItSimple.WebApi.Common.Extension;
-using MakeItSimple.WebApi.Common;
+﻿using MakeItSimple.WebApi.Common;
+using MakeItSimple.WebApi.Common.Extension;
+using MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport.SLAReport;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Reports.FinanceReports.FinanceReport;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Reports.SADSLAReport.SADSLAReport;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport.AllTicketReports;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.CloseReport.TicketReports;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OnHoldReport.OnHoldTicketReport;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OpenReport.OpenTicketReports;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.TransferReport.TransferTicketReports;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.OnHoldReport.OnHoldTicketReport;
-using MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.Reports.AllTicketReport.AllTicketReports;
-using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport.SLAReport;
 
 namespace MakeItSimple.WebApi.Controllers.Report
 {
@@ -274,6 +276,88 @@ namespace MakeItSimple.WebApi.Controllers.Report
 
 
 
+        [HttpGet("finance-report")]
+        public async Task<IActionResult> FinanceReports([FromQuery] FinanceReportQuery query)
+        {
+            try
+            {
+
+                var reports = await _mediator.Send(query);
+
+                Response.AddPaginationHeader(
+
+                reports.CurrentPage,
+                reports.PageSize,
+                reports.TotalCount,
+                reports.TotalPages,
+                reports.HasPreviousPage,
+                reports.HasNextPage
+
+                );
+
+                var result = new
+                {
+                    reports,
+                    reports.CurrentPage,
+                    reports.PageSize,
+                    reports.TotalCount,
+                    reports.TotalPages,
+                    reports.HasPreviousPage,
+                    reports.HasNextPage
+                };
+
+                var successResult = Result.Success(result);
+
+                return Ok(successResult);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+
+        }
+
+
+        [HttpGet("sad-sla-report")]
+        public async Task<IActionResult> SADSLAReports([FromQuery] SADSLAReportQuery query)
+        {
+            try
+            {
+
+                var reports = await _mediator.Send(query);
+
+                Response.AddPaginationHeader(
+
+                reports.CurrentPage,
+                reports.PageSize,
+                reports.TotalCount,
+                reports.TotalPages,
+                reports.HasPreviousPage,
+                reports.HasNextPage
+
+                );
+
+                var result = new
+                {
+                    reports,
+                    reports.CurrentPage,
+                    reports.PageSize,
+                    reports.TotalCount,
+                    reports.TotalPages,
+                    reports.HasPreviousPage,
+                    reports.HasNextPage
+                };
+
+                var successResult = Result.Success(result);
+
+                return Ok(successResult);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+
+        }
 
     }
 }
