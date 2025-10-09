@@ -23,6 +23,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
             public int? LocationId { get; set; }
             public int? DepartmentId { get; set; }
+            public int? CategoryId { get; set; }
 
             public DateTime? DateFrom { get; set; }
             public DateTime? DateTo { get; set; }

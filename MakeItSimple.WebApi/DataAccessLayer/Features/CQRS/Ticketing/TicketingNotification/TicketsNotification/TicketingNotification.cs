@@ -508,24 +508,24 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketingNotifi
                 foreach (var confirm in ticketConcernList)
                 {
 
-                    int hoursDifference = 24;
+                    //int hoursDifference = 24;
+                    //int hourConvert = 0;
+                    TimeSpan daysClose = DateTime.Now - confirm.Closed_At.Value;
 
-                    var daysClose = confirm.Closed_At.Value.Day - DateTime.Now.Day;
+                    double totalHours = Math.Abs(daysClose.TotalHours);
 
-                    daysClose = Math.Abs(daysClose) * 1;
+                    //if (daysClose >= 1)
+                    //{
+                    //    daysClose = daysClose * hoursDifference;
+                    //}
 
-                    if (daysClose >= 1)
-                    {
-                        daysClose = daysClose * hoursDifference;
-                    }
-
-                    var hourConvert = daysClose + confirm.Closed_At.Value.Hour - DateTime.Now.Hour;
+                    // var hourConvert = (daysClose - confirm.Closed_At.Value.Hour) + DateTime.Now.Hour;
 
                     DayOfWeek todayWeek = DateTime.Now.DayOfWeek;
-                    DayOfWeek exceptSat = DayOfWeek.Saturday;
-                    DayOfWeek exceptSun = DayOfWeek.Sunday;
+                    //DayOfWeek exceptSat = DayOfWeek.Saturday;
+                    //DayOfWeek exceptSun = DayOfWeek.Sunday;
 
-                    if (hourConvert >= hoursDifference && todayWeek != exceptSat && todayWeek != exceptSun)
+                    if (totalHours >= 24 && todayWeek != DayOfWeek.Saturday && todayWeek != DayOfWeek.Sunday)
                     {
                         var requestConcern = await _context.RequestConcerns
                             .FirstOrDefaultAsync(x => x.Id == confirm.RequestConcernId);

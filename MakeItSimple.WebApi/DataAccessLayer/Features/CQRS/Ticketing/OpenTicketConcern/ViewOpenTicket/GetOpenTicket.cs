@@ -2125,11 +2125,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                     .AsNoTracking()
                     .Select(x => new GetOpenTicketResult
                     {
-                        Closed_Status = x.RequestConcern.Is_Confirm == null ? null :
-                           x.IsClosedApprove == true ?
-                           x.TargetDate.Value.Date >= x.Closed_At.Value.Date ?
-                           TicketingConString.OnTime :
-                          TicketingConString.Delay : null,
+                       
                         TicketConcernId = x.Id,
                         RequestConcernId = x.RequestConcernId,
                         Severity = x.RequestConcern.Severity,
@@ -2218,6 +2214,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.OpenTicketConce
                           Resolution = x.Resolution,
                           CategoryConcernId = x.CategoryConcernId,
                           CategoryConcernName = x.CategoryConcernName,
+
+                          Closed_Status = x.ForClosingAt != null ? x.TicketConcern.TargetDate.Value.Date >= x.ForClosingAt.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay 
+                          : x.TicketConcern.TargetDate.Value.Date >= x.ClosingAt.Value.Date ? TicketingConString.OnTime : TicketingConString.Delay,
+
                           ForClosingTicketTechnicians = x.ticketTechnicians.
                           Select(t => new GetOpenTicketResult.GetForClosingTicket.ForClosingTicketTechnician
                           {

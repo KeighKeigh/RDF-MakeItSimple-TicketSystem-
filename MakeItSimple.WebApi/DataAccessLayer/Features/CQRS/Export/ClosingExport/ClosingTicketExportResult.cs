@@ -1,4 +1,6 @@
-﻿namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
+﻿using DocumentFormat.OpenXml.ExtendedProperties;
+
+namespace MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport
 {
     public partial class ClosingTicketExport
     {
@@ -28,6 +30,12 @@
             public string ServiceProviderName { get; set; }
             public string OpenDate { get; set; }
             public string ForClosedDate { get; set; }
+            public string Category { get; set; }
+            public string SubCategory { get; set; }
+            public string Notes { get; set; }
+            public string CreatedAt { get; set; }
+            public string ConfirmedAt { get; set; }
+
         }
     }
 }

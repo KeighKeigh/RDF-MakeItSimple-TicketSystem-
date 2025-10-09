@@ -30,6 +30,8 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
             public string TicketConcernId { get; set; }
             public string RequestorName { get; set; }
             public string RequestorDepartment { get; set; }
+            public string ChannelName { get; set; }
+            public string Concern { get; set; }
         }
         public class Handler : IRequestHandler<AddRequestConcernCommand, Result>
         {
@@ -46,7 +48,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
 
             public async Task<Result> Handle(AddRequestConcernCommand command, CancellationToken cancellationToken)
             {
-
+                var oneTicket = 0;
                 var requestorData = new returnRequest();
                 if (command.AssignTo == null)
                 {
@@ -153,16 +155,19 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Ticketing.TicketCreating.
                         await unitOfWork.SaveChangesAsync(cancellationToken);
 
 
-                        
-                        requestorData = new returnRequest
+                        if (oneTicket == 0)
                         {
-                            TicketConcernId = addTicketConcern.Id.ToString(),
-                            RequestorName = addTicketConcern.RequestorByUser.Fullname,
-                            RequestorDepartment = userDepartment.department_name,
-
-                        };
-
-
+                            var channelName = await context.Channels.Where(x => x.Id == addRequestConcern.ChannelId).Select(x => x.ChannelName).FirstOrDefaultAsync();
+                            requestorData = new returnRequest
+                            {
+                                TicketConcernId = addTicketConcern.Id.ToString(),
+                                RequestorName = addTicketConcern.RequestorByUser.Fullname,
+                                RequestorDepartment = userDepartment.department_name,
+                                ChannelName = channelName,
+                                Concern = addRequestConcern.Concern
+                            };
+                            oneTicket = 1;
+                        }
 
                         ticketConcernId = addTicketConcern.Id;
 

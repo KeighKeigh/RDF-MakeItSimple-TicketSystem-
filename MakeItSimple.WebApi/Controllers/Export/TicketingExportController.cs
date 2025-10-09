@@ -5,6 +5,8 @@ using MakeItSimple.WebApi.DataAccessLayer.Features.Export.TransferExport;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.AllTicketExport.AllTicketExport;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.FinanceReportExport.FinanceReportExport;
+using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SADSLAExport.SADSLATicketExport;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport.SLATicketExport;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Export.ClosingExport.ClosingTicketExport;
 using static MakeItSimple.WebApi.DataAccessLayer.Features.Export.OnHoldExport.OnHoldTicketExport;
@@ -191,6 +193,61 @@ namespace MakeItSimple.WebApi.Controllers.Export
         }
 
 
+
+
+        [HttpGet("finance-report-export")]
+        public async Task<IActionResult> FinanceReportExport([FromQuery] FinanceReportExportCommand command)
+        {
+            var filePath = $"FinanceReport {command.Date_From:MM-dd-yyyy} - {command.Date_To:MM-dd-yyyy}.xlsx";
+
+            try
+            {
+                await _mediator.Send(command);
+                var memory = new MemoryStream();
+                await using (var stream = new FileStream(filePath, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+                var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    filePath);
+                System.IO.File.Delete(filePath);
+                return result;
+
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
+
+        }
+
+        [HttpGet("sad-sla-export")]
+        public async Task<IActionResult> SADSLATicketExport([FromQuery] SADSLATicketExportCommand command)
+        {
+            var filePath = $"SADSLATicketReports {command.Date_From:MM-dd-yyyy} - {command.Date_To:MM-dd-yyyy}.xlsx";
+
+            try
+            {
+                await _mediator.Send(command);
+                var memory = new MemoryStream();
+                await using (var stream = new FileStream(filePath, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+                var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    filePath);
+                System.IO.File.Delete(filePath);
+                return result;
+
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
+
+        }
 
     }
 }

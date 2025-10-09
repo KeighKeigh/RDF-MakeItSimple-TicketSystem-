@@ -59,6 +59,7 @@ namespace MakeItSimple.WebApi.Models.Ticketing
         public Guid? ApprovedDateBy { get; set; }
         public virtual User ApprovedDateByUser { get; set; }
         public bool? IsDateApproved { get; set; }
+        public string Reason { get; set; }
         //public DateTime? ForClosingDate { get; set; }
 
         public ICollection<TicketAttachment> TicketAttachments { get; set; }    

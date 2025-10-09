@@ -34,9 +34,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
             public string Assign { get; set; }
             public string Store { get; set; }
             public string Description { get; set; }
-            public DateTime? OpenDate { get; set; }
+            public string OpenDate { get; set; }
+            public string ForClosingDate { get; set; }
             public DateTime? TargetDate { get; set; }
-            public DateTime? ClosedDate { get; set; }
+            public string ClosedDate { get; set; }
             public string Solution { get; set; }
             public string RequestType { get; set; }
             public string Status { get; set; }
@@ -62,7 +63,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
 
             public async Task<Unit> Handle(SLATicketExportCommand command, CancellationToken cancellationToken)
             {
-                var combineTicketReports = new List<SLAReportResult>();
+                var combineTicketReports = new List<SLATicketExportResult>();
                 var dateToday = DateTime.Now;
 
                 var openTicketQuery = await _context.TicketConcerns
@@ -71,7 +72,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                     .AsSplitQuery()
                 .Where(t => t.IsApprove == true && t.IsTransfer != true && t.IsClosedApprove != true && t.OnHold != true && t.IsDone != true)
                 .Where(t => t.DateApprovedAt.Value.Date >= command.Date_From.Value.Date && t.DateApprovedAt.Value.Date <= command.Date_To.Value.Date)
-                    .Select(o => new SLAReportResult
+                    .Select(o => new SLATicketExportResult
                     {
 
 
@@ -81,9 +82,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                         Assign = o.User.Fullname,
                         Store = o.RequestorByUser.Fullname,
                         Description = o.RequestConcern.Concern,
-                        OpenDate = o.DateApprovedAt,
+                        OpenDate = o.DateApprovedAt.Value.ToString("MM/dd/yyyy hh:mm:tt"),
                         TargetDate = o.TargetDate,
-                        ClosedDate = o.Closed_At,
+                        ClosedDate = o.Closed_At.Value.ToString("MM/dd/yyyy hh:mm:tt"),
                         Solution = o.RequestConcern.Resolution,
                         RequestType = o.RequestConcern.RequestType,
                         Status = o.RequestConcern.ConcernStatus,
@@ -108,7 +109,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                 .AsSplitQuery()
                 .Where(x => x.IsClosing == true && x.IsActive == true)
                 .Where(t => t.ClosingAt.Value.Date >= command.Date_From.Value.Date && t.ClosingAt.Value.Date <= command.Date_To.Value.Date)
-                    .Select(ct => new SLAReportResult
+                    .Select(ct => new SLATicketExportResult
                     {
                         Year = ct.TicketConcern.DateApprovedAt.Value.ToString("yyyy"),
                         Month = ct.TicketConcern.DateApprovedAt.Value.ToString("MMMM"),
@@ -116,9 +117,10 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                         Assign = ct.TicketConcern.User.Fullname,
                         Store = ct.TicketConcern.RequestorByUser.Fullname,
                         Description = ct.TicketConcern.RequestConcern.Concern,
-                        OpenDate = ct.TicketConcern.DateApprovedAt,
+                        OpenDate = ct.TicketConcern.DateApprovedAt.Value.ToString("MM/dd/yyyy hh:mm:tt"),
                         TargetDate = ct.TicketConcern.TargetDate,
-                        ClosedDate = ct.TicketConcern.Closed_At,
+                        ForClosingDate = ct.ForClosingAt.Value.ToString("MM/dd/yyyy hh:mm:tt"),
+                        ClosedDate = ct.TicketConcern.Closed_At.Value.ToString("MM/dd/yyyy hh:mm:tt"),
                         Solution = ct.TicketConcern.RequestConcern.Resolution,
                         RequestType = ct.TicketConcern.RequestConcern.RequestType,
                         Status = ct.TicketConcern.RequestConcern.ConcernStatus,
@@ -186,9 +188,9 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                 }
 
                 var results = combineTicketReports
-                    .OrderBy(x => x.OpenDate.Value.Date)
+                    .OrderBy(x => x.OpenDate)
                     .ThenBy(x => x.TicketNo)
-                    .Select(r => new SLAReportResult
+                    .Select(r => new SLATicketExportResult
                     {
                         Year = r.Year,
                         Month = r.Month,
@@ -198,6 +200,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                         Description = r.Description,
                         OpenDate = r.OpenDate,
                         TargetDate = r.TargetDate,
+                        ForClosingDate = r.ForClosingDate,
                         ClosedDate = r.ClosedDate,
                         Solution = r.Solution,
                         RequestType = r.RequestType,
@@ -209,27 +212,27 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                     }).ToList();
 
 
-                if (!string.IsNullOrEmpty(command.Remarks))
-                {
-                    switch (command.Remarks)
-                    {
-                        case TicketingConString.OnTime:
-                            results = results
-                                .Where(x => x.TargetDate > x.ClosedDate)
-                            .ToList();
-                            break;
+                //if (!string.IsNullOrEmpty(command.Remarks))
+                //{
+                //    switch (command.Remarks)
+                //    {
+                //        case TicketingConString.OnTime:
+                //            results = results
+                //                .Where(x => x.TargetDate > x.ClosedDate)
+                //            .ToList();
+                //            break;
 
-                        case TicketingConString.Delay:
-                            results = results
-                                .Where(x => x.TargetDate < x.ClosedDate)
-                                .ToList();
-                            break;
+                //        case TicketingConString.Delay:
+                //            results = results
+                //                .Where(x => x.TargetDate < x.ClosedDate)
+                //                .ToList();
+                //            break;
 
-                        default:
-                            return Unit.Value;
+                //        default:
+                //            return Unit.Value;
 
-                    }
-                }
+                //    }
+                //}
 
                 if (!string.IsNullOrEmpty(command.Search))
                 {
@@ -262,6 +265,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                         "Description",
                         "Open Date",
                         "Target Date",
+                        "For Closing Date",
                         "Closed Date",
                         "Solution",
                         "Request Type",
@@ -297,14 +301,15 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Export.SLAExport
                         row.Cell(6).Value = results[index - 1].Description;
                         row.Cell(7).Value = results[index - 1].OpenDate;
                         row.Cell(8).Value = results[index - 1].TargetDate;
-                        row.Cell(9).Value = results[index - 1].ClosedDate;
-                        row.Cell(10).Value = results[index - 1].Solution;
-                        row.Cell(11).Value = results[index - 1].RequestType;
-                        row.Cell(12).Value = results[index - 1].Status;
-                        row.Cell(13).Value = results[index - 1].Rating;
-                        row.Cell(14).Value = results[index - 1].Category;
-                        row.Cell(15).Value = results[index - 1].SubCategory;
-                        row.Cell(16).Value = results[index - 1].Position;
+                        row.Cell(9).Value = results[index - 1].ForClosingDate;
+                        row.Cell(10).Value = results[index - 1].ClosedDate;
+                        row.Cell(11).Value = results[index - 1].Solution;
+                        row.Cell(12).Value = results[index - 1].RequestType;
+                        row.Cell(13).Value = results[index - 1].Status;
+                        row.Cell(14).Value = results[index - 1].Rating;
+                        row.Cell(15).Value = results[index - 1].Category;
+                        row.Cell(16).Value = results[index - 1].SubCategory;
+                        row.Cell(17).Value = results[index - 1].Position;
 
                     }
 

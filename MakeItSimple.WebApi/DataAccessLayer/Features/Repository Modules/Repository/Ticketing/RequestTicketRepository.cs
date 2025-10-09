@@ -136,6 +136,11 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.Repository_Modules.Reposi
                 update.ApprovedDateBy = ticketConcern.ApprovedDateBy;
             }
 
+            if (update.Reason != ticketConcern.Reason && ticketConcern.Reason is not null)
+            {
+                update.Reason = ticketConcern.Reason;
+            }
+
             await context.SaveChangesAsync();
         }
         public async Task UpdateRequestConcern(RequestConcern requestConcern, CancellationToken cancellationToken)

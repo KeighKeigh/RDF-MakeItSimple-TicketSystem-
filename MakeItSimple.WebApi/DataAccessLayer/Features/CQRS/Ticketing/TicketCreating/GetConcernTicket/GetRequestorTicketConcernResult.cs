@@ -7,7 +7,6 @@
 
             public int? RequestConcernId { get; set; }
             public string Concern { get; set; }
-
             public string Resolution { get; set; }
 
             public int? CompanyId { get; set; }

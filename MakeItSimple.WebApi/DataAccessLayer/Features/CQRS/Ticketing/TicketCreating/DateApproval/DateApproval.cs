@@ -135,6 +135,7 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Ticketing.TicketCrea
                        Fullname = x.TicketConcern.User.Fullname,
                        ConcernStatus = x.TicketConcern.ConcernStatus,
                        IsActive = x.TicketConcern.IsActive,
+                       Reason = x.TicketConcern.Reason,
                        
 
                        GetApproveDateTicketCategories = x.TicketConcern.RequestConcern.TicketCategories

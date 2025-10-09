@@ -34,6 +34,7 @@
             public Guid? AssignTo { get; set; }
             public string Requestor { get; set; }
             public string CategoryConcern { get; set; }
+            public string Notes { get; set; }
 
         }
 

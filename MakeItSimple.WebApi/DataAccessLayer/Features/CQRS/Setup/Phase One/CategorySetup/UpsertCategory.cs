@@ -58,12 +58,12 @@ namespace MakeItSimple.WebApi.DataAccessLayer.Features.CQRS.Setup.CategorySetup
                         return Result.Failure(CategoryError.CategoryNochanges());
                     }
 
-                    var categoryIsUse = await _context.SubCategories.AnyAsync(x => x.CategoryId == command.Id && x.IsActive == true, cancellationToken);
+                    //var categoryIsUse = await _context.SubCategories.AnyAsync(x => x.CategoryId == command.Id && x.IsActive == true, cancellationToken);
 
-                    if (categoryIsUse == true)
-                    {
-                        return Result.Failure(CategoryError.CategoryIsUse(category.CategoryDescription));
-                    }
+                    //if (categoryIsUse == true)
+                    //{
+                    //    return Result.Failure(CategoryError.CategoryIsUse(category.CategoryDescription));
+                    //}
 
                     category.CategoryDescription = command.Category_Description;
                     category.ModifiedBy = command.Modified_By;
